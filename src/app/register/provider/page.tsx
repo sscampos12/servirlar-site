@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { MarketingLayout } from '@/components/marketing-layout';
 import { ProviderContract } from '@/components/contracts/provider-contract';
-import { FileSignature, CheckCircle2 } from 'lucide-react';
+import { FileSignature, CheckCircle2, Upload } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 export default function ProviderRegistrationPage() {
@@ -33,6 +33,15 @@ export default function ProviderRegistrationPage() {
     });
     // Here you would typically send data to a server
   };
+
+  const FileUploadField = ({ id, label }: { id: string, label: string }) => (
+    <div className="space-y-2">
+      <Label htmlFor={id}>{label}</Label>
+      <div className="flex items-center gap-2">
+        <Input id={id} type="file" required className="cursor-pointer" />
+      </div>
+    </div>
+  );
 
   return (
     <MarketingLayout>
@@ -65,14 +74,39 @@ export default function ProviderRegistrationPage() {
                     <Input id="cpf" placeholder="000.000.000-00" required />
                   </div>
                 </div>
-                 <div className="space-y-2">
+                 <div className="grid md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="birthdate">Data de Nascimento</Label>
+                        <Input id="birthdate" type="date" required />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="phone">Telefone</Label>
+                        <Input id="phone" type="tel" placeholder="(00) 90000-0000" required />
+                    </div>
+                </div>
+                <div className="space-y-2">
                     <Label htmlFor="email">Email</Label>
                     <Input id="email" type="email" placeholder="seu@email.com" required />
-                  </div>
+                </div>
+                
                 <div className="space-y-2">
-                    <Label htmlFor="phone">Telefone</Label>
-                    <Input id="phone" type="tel" placeholder="(00) 90000-0000" required />
-                  </div>
+                    <h4 className="font-medium">Referências Bancárias</h4>
+                    <div className="grid md:grid-cols-3 gap-4">
+                        <Input id="bankRef1" placeholder="Referência Bancária 1" required />
+                        <Input id="bankRef2" placeholder="Referência Bancária 2" required />
+                        <Input id="bankRef3" placeholder="Referência Bancária 3" required />
+                    </div>
+                </div>
+
+                <div className="space-y-4 pt-4">
+                    <h3 className="font-headline text-xl font-semibold text-center">Documentação</h3>
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <FileUploadField id="docCriminal" label="Antecedentes Criminais" />
+                        <FileUploadField id="docRG" label="Foto do RG" />
+                        <FileUploadField id="docResidence" label="Comprovante de Residência" />
+                    </div>
+                </div>
+                
                 <div className="space-y-2">
                     <Label htmlFor="references">Referências Profissionais (opcional)</Label>
                     <Input id="references" placeholder="Contato de referências" />
