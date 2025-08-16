@@ -1,3 +1,4 @@
+
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -40,7 +41,7 @@ export default function LoginPage() {
                 <Input id="password" type="password" required />
               </div>
               <Button type="submit" className="w-full" asChild>
-                <Link href="/dashboard/schedule">Entrar</Link>
+                <Link href="/schedule">Entrar</Link>
               </Button>
             </div>
             <div className="mt-4 text-center text-sm">
