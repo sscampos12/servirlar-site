@@ -45,8 +45,8 @@ export default function Home() {
         {/* Hero Section */}
         <section className="w-full py-12 md:py-24 lg:py-32 xl:py-40 bg-gradient-to-r from-secondary to-background">
           <div className="container mx-auto px-4 md:px-6">
-            <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 xl:gap-24">
-              <div className="flex flex-col justify-center space-y-4">
+            <div className="grid gap-6 lg:grid-cols-1 lg:gap-12 xl:gap-24">
+              <div className="flex flex-col justify-center space-y-4 text-center items-center">
                 <div className="space-y-2">
                   <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none">
                     A ajuda que seu lar precisa, com a confiança que você merece.
@@ -63,16 +63,6 @@ export default function Home() {
                     <Link href="/register/provider">Seja um Profissional</Link>
                   </Button>
                 </div>
-              </div>
-              <div className="flex justify-center items-center">
-                 <Image
-                    src="https://placehold.co/600x400.png"
-                    data-ai-hint="professional cleaner person"
-                    alt="Hero"
-                    width={600}
-                    height={400}
-                    className="mx-auto aspect-video overflow-hidden rounded-xl object-cover sm:w-full lg:order-last"
-                  />
               </div>
             </div>
           </div>
