@@ -5,7 +5,7 @@
  *
  * - analyzeUserReviews - A function that analyzes user reviews and provides feedback.
  * - AnalyzeUserReviewsInput - The input type for the analyzeUserReviews function.
- * - AnalyzeUserReviewsOutput - The return type for the analyzeUserReviews function.
+ * - AnalyzeUserReviewsOutput - The return type for the analyzeUserreviews function.
  */
 
 import {ai} from '@/ai/genkit';
@@ -34,17 +34,11 @@ const prompt = ai.definePrompt({
 
   Analyze the following reviews for {{serviceProviderName}}:
 
-  {% each reviews %}
+  {{#each reviews}}
   - {{{this}}}
-  {% endeach %}
+  {{/each}}
 
   Based on these reviews, provide specific and actionable feedback to {{serviceProviderName}} on areas where they can improve their services. Focus on common themes and recurring issues mentioned in the reviews. Be direct and honest, while encouraging them to improve.
-  Ensure that you return the answer in the following format:
-  ```json
-  {
-    "feedback": "Feedback for the service provider"
-  }
-  ```
   `,
 });
 
