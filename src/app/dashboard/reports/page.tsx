@@ -94,7 +94,7 @@ const DetailRow = ({ icon: Icon, label, value }: { icon: React.ElementType, labe
         </div>
         <div>
             <p className="text-sm text-muted-foreground">{label}</p>
-            <p className="font-medium">{value}</p>
+            <div className="font-medium">{value}</div>
         </div>
     </div>
 );
