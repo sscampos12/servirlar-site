@@ -14,7 +14,7 @@ export default function LoginPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { toast } = useToast();
-  const redirectUrl = searchParams.get('redirect') || '/schedule';
+  const redirectUrl = searchParams.get('redirect') || '/dashboard/clients';
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,7 +22,7 @@ export default function LoginPage() {
     // For the prototype, we'll just show a success message and redirect.
     toast({
       title: "Login bem-sucedido!",
-      description: "Redirecionando para a página de confirmação...",
+      description: "Redirecionando...",
     });
     router.push(redirectUrl);
   };
@@ -34,7 +34,7 @@ export default function LoginPage() {
           <CardHeader>
             <CardTitle className="font-headline text-2xl">Acesso do Cliente</CardTitle>
             <CardDescription>
-              Acesse sua conta para confirmar e pagar seu agendamento.
+              Acesse sua conta para agendar serviços ou ver seu histórico.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -61,7 +61,7 @@ export default function LoginPage() {
                 <Input id="password" type="password" required />
               </div>
               <Button type="submit" className="w-full">
-                Entrar e Pagar
+                Entrar
               </Button>
             </form>
             <div className="mt-4 text-center text-sm">
