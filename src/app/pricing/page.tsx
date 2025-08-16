@@ -141,7 +141,7 @@ export default function PricingPage() {
                 </p>
               )}
               <Button asChild size="lg" className="w-full mt-6 bg-accent hover:bg-accent/90 text-accent-foreground">
-                <Link href="/dashboard/schedule">Agendar Agora</Link>
+                <Link href="/schedule">Agendar Agora</Link>
               </Button>
             </div>
           </CardContent>
@@ -220,3 +220,5 @@ const Label = React.forwardRef<
   />
 ));
 Label.displayName = "Label";
+
+    

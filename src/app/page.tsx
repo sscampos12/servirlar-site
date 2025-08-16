@@ -47,7 +47,7 @@ export default function Home() {
             <div className="grid gap-6 lg:grid-cols-1 lg:gap-12 xl:gap-24">
               <div className="flex flex-col justify-center space-y-4 text-center items-center">
                 <div className="space-y-2">
-                  <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none font-headline">
+                  <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none font-headline text-foreground">
                     A ajuda que seu lar precisa, com a confiança que você merece.
                   </h1>
                   <p className="max-w-[600px] text-muted-foreground md:text-xl mx-auto">
