@@ -8,16 +8,26 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft, Download, ThumbsDown, ThumbsUp, User, Video, Banknote, FileText, MessageCircle } from "lucide-react"
+import { ArrowLeft, Download, ThumbsDown, ThumbsUp, User, Video, Banknote, FileText, MessageCircle, Calendar, DollarSign } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { useToast } from "@/hooks/use-toast"
 import { notFound } from "next/navigation"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Separator } from "@/components/ui/separator"
 
 const mockProviders = [
     { id: 1, name: "Maria Aparecida", cpf: "123.456.789-00", status: "Aprovado", date: "15/07/2024", email: "maria.aparecida@example.com", phone: "(11) 98765-4321", birthdate: "10/05/1985", pixKey: "maria.pix@banco.com", bankRefs: ["Gerente João - Banco A", "Gerente Ana - Banco B", "Contato Silva - Banco C"], videoUrl: "https://youtu.be/exemplo" },
     { id: 2, name: "João da Silva", cpf: "987.654.321-00", status: "Pendente", date: "14/07/2024", email: "joao.silva@example.com", phone: "(21) 91234-5678", birthdate: "22/08/1990", pixKey: "joao.da.silva@email.com", bankRefs: ["Referência 1", "Referência 2", "Referência 3"] },
     { id: 3, name: "Ana Paula", cpf: "111.222.333-44", status: "Aprovado", date: "13/07/2024", email: "ana.paula@example.com", phone: "(31) 99999-8888", birthdate: "03/11/1992", pixKey: "11122233344", bankRefs: ["Banco X", "Banco Y", "Banco Z"] },
     { id: 4, name: "Carlos de Souza", cpf: "444.555.666-77", status: "Rejeitado", date: "12/07/2024", email: "carlos.souza@example.com", phone: "(41) 98877-6655", birthdate: "15/02/1980", pixKey: "carlos.souza@email.com.br", bankRefs: ["Ref A", "Ref B", "Ref C"] },
+];
+
+const mockAppointments = [
+    { id: 1, client: "Carlos Mendes", service: "Faxina Padrão", date: "2024-07-10", status: "Finalizado", professional: "Maria Aparecida", value: 140.00 },
+    { id: 2, client: "Ana Silva", service: "Passadoria", date: "2024-07-12", status: "Confirmado", professional: "João da Silva", value: 74.00 },
+    { id: 3, client: "Pedro Souza", service: "Cozinheira", date: "2024-07-11", status: "Finalizado", professional: "Maria Aparecida", value: 228.00 },
+    { id: 4, client: "Juliana Costa", service: "Faxina Padrão", date: "2024-07-08", status: "Finalizado", professional: "Ana Paula", value: 240.00 },
+    { id: 5, client: "Fernanda Lima", service: "Faxina Padrão", date: "2024-07-15", status: "Confirmado", professional: "Maria Aparecida", value: 198.00 },
 ];
 
 const InfoField = ({ label, value }: { label: string, value: string | undefined }) => (
@@ -27,8 +37,8 @@ const InfoField = ({ label, value }: { label: string, value: string | undefined 
     </div>
 )
 
-const DetailSection = ({ title, icon, children }: { title: string, icon: React.ReactNode, children: React.ReactNode }) => (
-    <Card>
+const DetailSection = ({ title, icon, children, className }: { title: string, icon: React.ReactNode, children: React.ReactNode, className?: string }) => (
+    <Card className={className}>
         <CardHeader className="flex flex-row items-center gap-2 space-y-0 pb-2">
            {icon}
            <CardTitle className="text-base font-semibold">{title}</CardTitle>
@@ -46,12 +56,18 @@ export default function ProviderDetailPage({ params }: { params: { id: string } 
     if (!provider) {
         return notFound();
     }
+
+    const providerAppointments = mockAppointments.filter(app => app.professional === provider.name);
+    const totalAppointments = providerAppointments.length;
+    const totalBilled = providerAppointments.reduce((sum, app) => sum + app.value, 0);
     
     const getStatusVariant = (status: string) => {
         switch (status) {
             case "Aprovado": return "default";
             case "Pendente": return "secondary";
             case "Rejeitado": return "destructive";
+            case "Finalizado": return "default";
+            case "Confirmado": return "secondary";
             default: return "outline";
         }
     }
@@ -127,6 +143,67 @@ export default function ProviderDetailPage({ params }: { params: { id: string } 
                     </div>
                 </DetailSection>
             </div>
+            
+            <DetailSection 
+                title="Histórico de Serviços Prestados" 
+                icon={<Calendar className="h-5 w-5 text-primary"/>}
+                className="col-span-1 xl:col-span-3"
+            >
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+                    <div>
+                        <h4 className="font-semibold text-foreground">Métricas Gerais</h4>
+                        <div className="flex items-center gap-3 mt-2">
+                            <div className="flex items-center justify-center bg-muted rounded-md h-8 w-8">
+                                <Calendar className="h-4 w-4 text-muted-foreground" />
+                            </div>
+                            <div>
+                                <div className="text-sm text-muted-foreground">Serviços Realizados</div>
+                                <div className="font-medium">{totalAppointments}</div>
+                            </div>
+                        </div>
+                         <div className="flex items-center gap-3 mt-2">
+                            <div className="flex items-center justify-center bg-muted rounded-md h-8 w-8">
+                                <DollarSign className="h-4 w-4 text-muted-foreground" />
+                            </div>
+                            <div>
+                                <div className="text-sm text-muted-foreground">Total Faturado</div>
+                                <div className="font-medium">R$ {totalBilled.toFixed(2).replace('.', ',')}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <Separator className="my-4"/>
+                <div className="max-h-80 overflow-y-auto">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Cliente</TableHead>
+                                <TableHead>Serviço</TableHead>
+                                <TableHead>Data</TableHead>
+                                <TableHead>Status</TableHead>
+                                <TableHead className="text-right">Valor (R$)</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {providerAppointments.length > 0 ? providerAppointments.map((app) => (
+                                <TableRow key={app.id}>
+                                    <TableCell className="font-medium">{app.client}</TableCell>
+                                    <TableCell>{app.service}</TableCell>
+                                    <TableCell>{new Date(app.date).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}</TableCell>
+                                    <TableCell>
+                                        <Badge variant={getStatusVariant(app.status) as any}>{app.status}</Badge>
+                                    </TableCell>
+                                    <TableCell className="text-right font-mono">{app.value.toFixed(2).replace('.', ',')}</TableCell>
+                                </TableRow>
+                            )) : (
+                                <TableRow>
+                                    <TableCell colSpan={5} className="text-center h-24">Nenhum serviço encontrado.</TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+                </div>
+            </DetailSection>
 
              <Card>
                 <CardHeader>
