@@ -1,3 +1,4 @@
+
 import Link from "next/link";
 import { Button } from "./ui/button";
 import { Logo } from "./logo";
@@ -18,8 +19,11 @@ export function LandingHeader() {
           </nav>
         </div>
         <div className="flex flex-1 items-center justify-end space-x-4">
-          <Button asChild>
+           <Button asChild variant="ghost">
             <Link href="/login">Entrar</Link>
+          </Button>
+          <Button asChild>
+            <Link href="/register/client">Cadastre-se</Link>
           </Button>
         </div>
       </div>

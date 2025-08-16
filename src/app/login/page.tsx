@@ -1,12 +1,25 @@
 
+"use client";
+
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { MarketingLayout } from "@/components/marketing-layout"
+import { useSearchParams, useRouter } from "next/navigation"
 
 export default function LoginPage() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const redirectUrl = searchParams.get('redirect') || '/schedule';
+
+  const handleLogin = () => {
+    // In a real app, you'd perform authentication here.
+    // For the prototype, we'll just redirect.
+    router.push(redirectUrl);
+  };
+
   return (
     <MarketingLayout>
       <div className="flex items-center justify-center py-12 px-4">
@@ -40,8 +53,8 @@ export default function LoginPage() {
                 </div>
                 <Input id="password" type="password" required />
               </div>
-              <Button type="submit" className="w-full" asChild>
-                <Link href="/schedule">Entrar</Link>
+              <Button onClick={handleLogin} type="submit" className="w-full">
+                Entrar
               </Button>
             </div>
             <div className="mt-4 text-center text-sm">

@@ -20,18 +20,7 @@ import { Calendar as CalendarIcon, Clock, Home, Info, DollarSign, Shirt, Soup, U
 import { cn } from "@/lib/utils"
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { useToast } from '@/hooks/use-toast';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
+import Link from 'next/link';
 
 const services = [
   { id: 'faxina', name: 'Faxina Padrão', icon: Home },
@@ -51,16 +40,7 @@ export default function SchedulePage() {
   const [address, setAddress] = useState('Rua das Flores, 123 - Centro');
   const [observations, setObservations] = useState('');
 
-  const { toast } = useToast();
-
   const isFormComplete = selectedService && date && selectedTime && selectedDuration && address;
-
-  const handleSubmit = () => {
-    toast({
-      title: "Agendamento Confirmado!",
-      description: "Seu serviço foi agendado com sucesso. Verifique os detalhes em 'Meus Agendamentos'.",
-    });
-  }
 
   const ServiceIcon = selectedService ? services.find(s => s.id === selectedService)?.icon : Info;
 
@@ -228,29 +208,9 @@ export default function SchedulePage() {
           </CardContent>
         </Card>
         
-        <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <Button size="lg" className="w-full" disabled={!isFormComplete}>
-              Confirmar e Pagar
-            </Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Confirmação de Pagamento</AlertDialogTitle>
-              <AlertDialogDescription>
-                Você será redirecionado para um ambiente seguro para finalizar o pagamento.
-                Seu agendamento será confirmado após a aprovação.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancelar</AlertDialogCancel>
-              <AlertDialogAction onClick={handleSubmit}>
-                Prosseguir para Pagamento
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-
+        <Button size="lg" className="w-full" disabled={!isFormComplete} asChild>
+            <Link href="/login?redirect=/schedule/confirm">Confirmar e Pagar</Link>
+        </Button>
 
         <p className="text-xs text-muted-foreground text-center">
             Ao continuar, você concorda com nossos <a href="/legal" className="underline">Termos de Serviço</a>.
@@ -259,4 +219,3 @@ export default function SchedulePage() {
     </div>
   );
 }
-
