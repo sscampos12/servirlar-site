@@ -4,15 +4,48 @@ import React from "react";
 export function Logo({ className, ...props }: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
+      width="150"
+      height="35"
+      viewBox="0 0 150 35"
+      fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 256 256"
       className={cn("text-primary", className)}
       {...props}
     >
-      <g fill="currentColor">
-        <path d="M222.8,83.27,144,24.18a24,24,0,0,0-28.16,0L37.19,83.27A24,24,0,0,0,24,103.82V200a24,24,0,0,0,24,24H208a24,24,0,0,0,24-24V103.82A24,24,0,0,0,222.8,83.27ZM208,200H48V103.82L128,44.73l80,59.09Z" />
-        <path d="M111.44,168.56a8,8,0,0,1-11.32-11.32l32-32a8,8,0,0,1,11.32,0l48,48a8,8,0,0,1-11.32,11.32L128,141.32Z" />
-      </g>
+      <path
+        d="M29.9521 7.1527C31.5451 5.91836 33.6849 5.86804 35.3283 7.02613L45.8392 14.6468C46.8837 15.3942 47.5 16.5843 47.5 17.8597V30.5C47.5 32.7091 45.7091 34.5 43.5 34.5H9.5C7.29086 34.5 5.5 32.7091 5.5 30.5V17.8597C5.5 16.5843 6.11631 15.3942 7.16082 14.6468L17.6717 7.02613C19.3151 5.86804 21.4549 5.91836 23.0479 7.1527L26.5 10.0244"
+        stroke="#468499"
+        strokeWidth="3"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M17.5 22.5L22.5 27.5L32.5 17.5"
+        stroke="#468499"
+        strokeWidth="3"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <text
+        x="55"
+        y="25"
+        fontFamily="Poppins, sans-serif"
+        fontSize="18"
+        fontWeight="bold"
+        fill="#003366"
+      >
+        Ajuda
+      </text>
+      <text
+        x="100"
+        y="25"
+        fontFamily="Poppins, sans-serif"
+        fontSize="18"
+        fontWeight="bold"
+        fill="#468499"
+      >
+        em Casa
+      </text>
     </svg>
   );
 }

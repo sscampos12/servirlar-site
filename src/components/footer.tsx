@@ -8,8 +8,7 @@ export function Footer() {
         <div className="flex flex-wrap justify-between gap-6">
           <div>
             <Link href="/" className="flex items-center space-x-2 mb-4">
-              <Logo className="h-6 w-6 text-primary" />
-              <span className="font-bold text-lg">Ajuda em Casa</span>
+              <Logo className="h-8 w-auto" />
             </Link>
             <p className="text-muted-foreground text-sm max-w-xs">
               Profissionais de confiança, na hora que você precisa. Seu lar em boas mãos.

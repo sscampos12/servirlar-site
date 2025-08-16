@@ -1,4 +1,3 @@
-
 import Link from "next/link";
 import { Button } from "./ui/button";
 import { Logo } from "./logo";
@@ -9,8 +8,7 @@ export function LandingHeader() {
       <div className="container flex h-14 items-center">
         <div className="mr-4 flex items-center">
           <Link href="/" className="mr-6 flex items-center space-x-2">
-            <Logo className="h-6 w-6 text-primary" />
-            <span className="font-bold">Ajuda em Casa</span>
+            <Logo className="h-8 w-auto" />
           </Link>
           <nav className="hidden space-x-6 text-sm font-medium md:flex">
             <Link href="/pricing" className="transition-colors hover:text-foreground/80 text-foreground/60">Preços e Serviços</Link>
@@ -28,5 +26,3 @@ export function LandingHeader() {
     </header>
   );
 }
-
-    

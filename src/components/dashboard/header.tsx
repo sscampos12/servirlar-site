@@ -33,8 +33,7 @@ export function DashboardHeader() {
               href="/"
               className="flex items-center gap-2 font-semibold"
             >
-              <Logo className="h-6 w-6" />
-              <span className="">Ajuda em Casa</span>
+              <Logo className="h-8 w-auto" />
             </Link>
           </div>
           <div className="flex-1 overflow-y-auto">
