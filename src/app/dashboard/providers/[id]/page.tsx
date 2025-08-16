@@ -8,7 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft, Check, Download, ThumbsDown, ThumbsUp, User, Video, X, Banknote, FileText, MessageCircle } from "lucide-react"
+import { ArrowLeft, Download, ThumbsDown, ThumbsUp, User, Video, Banknote, FileText, MessageCircle } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { useToast } from "@/hooks/use-toast"
 import { notFound } from "next/navigation"
@@ -23,7 +23,7 @@ const mockProviders = [
 const InfoField = ({ label, value }: { label: string, value: string | undefined }) => (
     <div className="flex flex-col">
         <span className="text-sm text-muted-foreground">{label}</span>
-        <span className="font-medium">{value || "Não informado"}</span>
+        <span className="font-medium break-words">{value || "Não informado"}</span>
     </div>
 )
 
@@ -82,9 +82,9 @@ export default function ProviderDetailPage({ params }: { params: { id: string } 
                 <Badge variant={getStatusVariant(provider.status) as "default" | "secondary" | "destructive" | "outline"} className="ml-auto text-base px-4 py-1">{provider.status}</Badge>
             </div>
             
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
                 <DetailSection title="Informações Pessoais" icon={<User className="h-5 w-5 text-primary"/>}>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <InfoField label="Nome Completo" value={provider.name} />
                         <InfoField label="CPF" value={provider.cpf} />
                         <InfoField label="Data de Nascimento" value={provider.birthdate} />
@@ -99,7 +99,7 @@ export default function ProviderDetailPage({ params }: { params: { id: string } 
                         <InfoField label="Chave PIX" value={provider.pixKey} />
                          <div>
                             <span className="text-sm text-muted-foreground">Referências Bancárias</span>
-                            <ul className="list-disc list-inside font-medium">
+                            <ul className="list-disc list-inside font-medium space-y-1">
                                 {provider.bankRefs.map((ref, i) => <li key={i}>{ref}</li>)}
                             </ul>
                         </div>
