@@ -43,7 +43,7 @@ export default function Home() {
       <div className="flex flex-col">
         {/* Hero Section */}
         <section className="text-center py-20 px-4 bg-card">
-          <h1 className="font-headline text-4xl md:text-5xl font-bold text-primary mb-4">
+          <h1 className="font-headline text-4xl md:text-5xl font-bold text-secondary mb-4">
             Seu lar em boas mãos.
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
@@ -53,7 +53,7 @@ export default function Home() {
             <Button asChild size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground">
               <Link href="/pricing">Contratar um Profissional</Link>
             </Button>
-            <Button asChild size="lg" variant="outline">
+            <Button asChild size="lg" variant="secondary">
               <Link href="/register/provider">Seja um Profissional</Link>
             </Button>
           </div>
@@ -135,5 +135,3 @@ export default function Home() {
     </MarketingLayout>
   );
 }
-
-    

@@ -68,7 +68,7 @@ export default function PricingPage() {
       <div className="container mx-auto py-12 px-4">
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto mb-12">
-          <h1 className="font-headline text-4xl md:text-5xl font-bold text-primary mb-4">
+          <h1 className="font-headline text-4xl md:text-5xl font-bold text-secondary mb-4">
             Serviços de confiança para um lar mais feliz.
           </h1>
           <p className="text-lg text-muted-foreground">
@@ -87,7 +87,7 @@ export default function PricingPage() {
                   {Object.entries(pricingData.servicos).map(([key, service]) => (
                     <Button 
                       key={key} 
-                      variant={selectedService === key ? "default" : "outline"}
+                      variant={selectedService === key ? "secondary" : "outline"}
                       onClick={() => setSelectedService(key as ServiceKey)}
                       className="h-auto py-3 flex flex-col gap-2"
                     >
@@ -104,7 +104,7 @@ export default function PricingPage() {
                   {Object.keys(pricingData.servicos.faxina.precos).map(duration => (
                     <Button 
                       key={duration}
-                      variant={selectedDuration === duration ? "default" : "outline"}
+                      variant={selectedDuration === duration ? "secondary" : "outline"}
                       onClick={() => setSelectedDuration(duration as DurationKey)}
                       className="flex-1"
                     >
@@ -131,7 +131,7 @@ export default function PricingPage() {
             {/* Right side: Price Display */}
             <div className="bg-muted/50 rounded-lg p-6 text-center flex flex-col justify-center items-center h-full">
               <p className="text-muted-foreground font-semibold">Valor Total:</p>
-              <p className="font-headline text-5xl font-bold text-primary my-2">
+              <p className="font-headline text-5xl font-bold text-secondary my-2">
                 R$ {total.toFixed(2).replace('.', ',')}
               </p>
               {total > 0 && (
@@ -139,7 +139,7 @@ export default function PricingPage() {
                   (Equivalente a R$ {pricePerHour.toFixed(2).replace('.', ',')}/hora)
                 </p>
               )}
-              <Button asChild size="lg" className="w-full mt-6">
+              <Button asChild size="lg" className="w-full mt-6 bg-accent hover:bg-accent/90 text-accent-foreground">
                 <Link href="/dashboard/schedule">Agendar Agora</Link>
               </Button>
             </div>
@@ -219,5 +219,3 @@ const Label = React.forwardRef<
   />
 ));
 Label.displayName = "Label";
-
-    
