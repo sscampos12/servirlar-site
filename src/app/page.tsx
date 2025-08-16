@@ -2,7 +2,7 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Shield, Star, CheckCircle, Soup, Shirt, HomeIcon } from 'lucide-react';
+import { Shield, Star, Award, Zap, CreditCard, Calendar } from 'lucide-react';
 import Link from 'next/link';
 import { MarketingLayout } from '@/components/marketing-layout';
 import Image from 'next/image';
@@ -12,17 +12,17 @@ export default function Home() {
     {
       title: 'Profissionais Verificados',
       description: 'Todos os prestadores passam por uma rigorosa verificação de antecedentes e referências.',
-      icon: <CheckCircle className="h-8 w-8 text-primary" />,
+      icon: <Shield className="h-8 w-8 text-primary" />,
     },
     {
       title: 'Agendamento Flexível',
       description: 'Escolha o melhor dia e horário para o serviço, com total conveniência.',
-      icon: <Star className="h-8 w-8 text-primary" />,
+      icon: <Calendar className="h-8 w-8 text-primary" />,
     },
     {
       title: 'Pagamento Seguro',
       description: 'Pague online com segurança através de nossa plataforma integrada.',
-      icon: <Shield className="h-8 w-8 text-primary" />,
+      icon: <CreditCard className="h-8 w-8 text-primary" />,
     },
   ];
 
@@ -43,118 +43,107 @@ export default function Home() {
     <MarketingLayout>
       <div className="flex flex-col">
         {/* Hero Section */}
-        <section className="w-full py-12 md:py-24 lg:py-32 xl:py-40 bg-background relative">
-            <div className="absolute inset-0 z-0 opacity-10">
-                 <Image 
-                    src="https://placehold.co/1920x1080.png" 
-                    data-ai-hint="living room background"
-                    alt="background" 
-                    layout="fill"
-                    objectFit="cover"
-                 />
-            </div>
-          <div className="container mx-auto px-4 md:px-6 z-10 relative">
+        <section className="w-full py-12 md:py-24 lg:py-32 xl:py-40 bg-gradient-to-r from-secondary to-background">
+          <div className="container mx-auto px-4 md:px-6">
             <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 xl:gap-24">
-              <div className="flex justify-center items-center">
-                  <div className="relative">
-                     <Image
-                        src="https://placehold.co/500x500.png"
-                        data-ai-hint="professional cleaner person"
-                        alt="Hero"
-                        width={500}
-                        height={500}
-                        className="rounded-full object-cover shadow-2xl"
-                    />
-                    <div className="absolute -bottom-4 -left-12 flex gap-4">
-                        <div className="bg-card p-3 rounded-full shadow-lg border border-border"><HomeIcon className="h-8 w-8 text-primary" /></div>
-                        <div className="bg-card p-3 rounded-full shadow-lg border border-border"><Soup className="h-8 w-8 text-primary" /></div>
-                        <div className="bg-card p-3 rounded-full shadow-lg border border-border"><Shirt className="h-8 w-8 text-primary" /></div>
-                    </div>
-                  </div>
-              </div>
-              <div className="flex flex-col justify-center space-y-6">
-                <div className="space-y-4">
-                  <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none font-headline text-secondary">
-                    Conectando você com as melhores profissionais do lar.
+              <div className="flex flex-col justify-center space-y-4">
+                <div className="space-y-2">
+                  <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none">
+                    A ajuda que seu lar precisa, com a confiança que você merece.
                   </h1>
                   <p className="max-w-[600px] text-muted-foreground md:text-xl">
-                    Sua casa limpa, suas roupas passadas e suas refeições preparadas com o carinho e a confiança que você merece.
+                    Encontre diaristas, passadeiras e cozinheiras qualificadas em poucos cliques. Simples, rápido e seguro.
                   </p>
                 </div>
                 <div className="flex flex-col gap-2 min-[400px]:flex-row">
                   <Button asChild size="lg">
-                    <Link href="/dashboard/schedule">Agende Agora</Link>
+                    <Link href="/dashboard/schedule">Agendar um Serviço</Link>
+                  </Button>
+                  <Button asChild variant="outline" size="lg">
+                    <Link href="/register/provider">Seja um Profissional</Link>
                   </Button>
                 </div>
+              </div>
+              <div className="flex justify-center items-center">
+                 <Image
+                    src="https://placehold.co/600x400.png"
+                    data-ai-hint="professional cleaner person"
+                    alt="Hero"
+                    width={600}
+                    height={400}
+                    className="mx-auto aspect-video overflow-hidden rounded-xl object-cover sm:w-full lg:order-last"
+                  />
               </div>
             </div>
           </div>
         </section>
 
         {/* How it works */}
-        <section className="py-16 px-4">
+        <section className="py-16 bg-background px-4">
           <div className="container mx-auto text-center">
-            <h2 className="font-headline text-3xl font-bold mb-2">Como Funciona?</h2>
-            <p className="text-muted-foreground mb-12">Simples, rápido e seguro.</p>
+            <h2 className="text-3xl font-bold mb-2">Como Funciona?</h2>
+            <p className="text-muted-foreground mb-12">Em três passos simples, seu lar está cuidado.</p>
             <div className="grid md:grid-cols-3 gap-8">
-              <div className="flex flex-col items-center">
-                <div className="bg-primary text-primary-foreground rounded-full w-16 h-16 flex items-center justify-center text-2xl font-bold mb-4">1</div>
-                <h3 className="font-headline text-xl font-semibold mb-2">Busque o Serviço</h3>
-                <p className="text-muted-foreground">Escolha o serviço que você precisa e veja os perfis dos profissionais.</p>
-              </div>
-              <div className="flex flex-col items-center">
-                <div className="bg-primary text-primary-foreground rounded-full w-16 h-16 flex items-center justify-center text-2xl font-bold mb-4">2</div>
-                <h3 className="font-headline text-xl font-semibold mb-2">Agende e Pague</h3>
-                <p className="text-muted-foreground">Selecione a data, horário e pague com segurança pela plataforma.</p>
-              </div>
-              <div className="flex flex-col items-center">
-                <div className="bg-primary text-primary-foreground rounded-full w-16 h-16 flex items-center justify-center text-2xl font-bold mb-4">3</div>
-                <h3 className="font-headline text-xl font-semibold mb-2">Receba o Serviço</h3>
-                <p className="text-muted-foreground">Um profissional qualificado irá até você para realizar o serviço.</p>
-              </div>
+              <Card>
+                <CardHeader>
+                  <CardTitle>1. Busque</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p>Escolha o serviço que você precisa e veja os perfis dos profissionais disponíveis na sua região.</p>
+                </CardContent>
+              </Card>
+               <Card>
+                <CardHeader>
+                  <CardTitle>2. Agende</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p>Selecione a melhor data e horário, e pague com total segurança diretamente pela plataforma.</p>
+                </CardContent>
+              </Card>
+               <Card>
+                <CardHeader>
+                  <CardTitle>3. Relaxe</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p>Uma profissional qualificada e verificada chegará no horário combinado para realizar o serviço.</p>
+                </CardContent>
+              </Card>
             </div>
           </div>
         </section>
 
         {/* Features Section */}
-        <section className="py-16 px-4 bg-card">
+        <section className="py-16 bg-muted px-4">
           <div className="container mx-auto text-center" id="features">
-            <h2 className="font-headline text-3xl font-bold mb-12">Por que escolher a Ajuda em Casa?</h2>
+            <h2 className="text-3xl font-bold mb-12">Por que escolher a Ajuda em Casa?</h2>
             <div className="grid md:grid-cols-3 gap-8">
               {features.map((feature, index) => (
-                <Card key={index} className="text-center p-6 border-none shadow-lg hover:shadow-xl transition-shadow">
-                  <div className="flex justify-center mb-4">{feature.icon}</div>
-                  <h3 className="font-headline text-xl font-semibold mb-2">{feature.title}</h3>
+                <div key={index} className="flex flex-col items-center">
+                  <div className="p-4 bg-primary rounded-full mb-4">
+                    {feature.icon}
+                  </div>
+                  <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
                   <p className="text-muted-foreground">{feature.description}</p>
-                </Card>
+                </div>
               ))}
             </div>
           </div>
         </section>
 
         {/* Testimonials Section */}
-        <section className="py-16 px-4">
+        <section className="py-16 bg-background px-4">
           <div className="container mx-auto text-center">
-            <h2 className="font-headline text-3xl font-bold mb-12">O que nossos clientes dizem</h2>
+            <h2 className="text-3xl font-bold mb-12">O que nossos clientes dizem</h2>
             <div className="grid md:grid-cols-2 gap-8">
               {testimonials.map((testimonial, index) => (
-                <Card key={index} className="bg-card p-6 text-left">
-                  <CardContent className="p-0">
+                <Card key={index} className="bg-card p-6">
+                  <CardContent>
                     <div className="flex items-center mb-4">
                       <Avatar className="h-12 w-12 mr-4">
-                        <AvatarImage src={`https://placehold.co/100x100.png`} data-ai-hint="person" />
+                        <AvatarImage src={`https://placehold.co/100x100.png?text=${testimonial.avatar}`} data-ai-hint="person" />
                         <AvatarFallback>{testimonial.avatar}</AvatarFallback>
                       </Avatar>
-                      <div>
-                        <p className="font-semibold">{testimonial.name}</p>
-                        <div className="flex text-accent">
-                          <Star className="w-4 h-4 fill-current" />
-                          <Star className="w-4 h-4 fill-current" />
-                          <Star className="w-4 h-4 fill-current" />
-                          <Star className="w-4 h-4 fill-current" />
-                          <Star className="w-4 h-4 fill-current" />
-                        </div>
-                      </div>
+                      <p className="font-semibold">{testimonial.name}</p>
                     </div>
                     <p className="text-muted-foreground italic">"{testimonial.quote}"</p>
                   </CardContent>
