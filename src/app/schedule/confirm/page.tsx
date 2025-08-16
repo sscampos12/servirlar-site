@@ -45,11 +45,20 @@ export default function ConfirmationPage() {
   const [paymentMethod, setPaymentMethod] = useState("card");
 
   const handlePayment = () => {
+    // TODO: Inserir aqui a lógica de integração com a API de pagamento (EFI)
+    // Ex: Chamar a API para gerar a cobrança do cartão ou o QR Code do PIX.
+    
+    // Simula o redirecionamento para o ambiente de pagamento do banco.
     toast({
-        title: "Pagamento Confirmado!",
-        description: "Seu agendamento está confirmado. Obrigado!",
+        title: "Redirecionando para o pagamento...",
+        description: "Você será levado para um ambiente seguro para finalizar a compra.",
     });
-    router.push('/'); // Redirect to a "my-appointments" page in a real app
+
+    // Em um cenário real, a API de pagamento retornaria uma URL de redirecionamento.
+    // Para o protótipo, vamos redirecionar para a home após um tempo.
+    setTimeout(() => {
+        router.push('/'); 
+    }, 2000);
   }
   
   return (
@@ -155,7 +164,7 @@ export default function ConfirmationPage() {
                             )}
 
                             <Button onClick={handlePayment} size="lg" className="w-full">
-                            Pagar R$ 140,00 e Confirmar
+                              Ir para o Pagamento Seguro
                             </Button>
                         </CardContent>
                     </Card>
