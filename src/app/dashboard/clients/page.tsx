@@ -19,7 +19,9 @@ import {
 } from "@/components/ui/table"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog"
-import { User, Mail, Phone, Calendar, DollarSign } from "lucide-react";
+import { User, Mail, Phone, Calendar, DollarSign, Briefcase, Clock, CheckCircle } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 
 const mockClients = [
     { id: 1, name: "Carlos Mendes", email: "carlos.mendes@example.com", phone: "(11) 91234-5678", appointments: 5, totalSpent: 750.00 },
@@ -28,6 +30,15 @@ const mockClients = [
     { id: 4, name: "Juliana Costa", email: "juliana.costa@example.com", phone: "(41) 98877-6655", appointments: 1, totalSpent: 150.00 },
     { id: 5, name: "Fernanda Lima", email: "fernanda.lima@example.com", phone: "(51) 97766-5544", appointments: 12, totalSpent: 1800.00 },
 ];
+
+const mockAppointments = [
+    { id: 1, clientId: 1, service: "Faxina Padrão", date: "2024-07-10", status: "Finalizado", value: 140.00 },
+    { id: 2, clientId: 1, service: "Passadoria", date: "2024-06-25", status: "Finalizado", value: 74.00 },
+    { id: 5, clientId: 2, service: "Faxina Padrão", date: "2024-07-12", status: "Confirmado", value: 198.00 },
+    { id: 6, clientId: 3, service: "Cozinheira", date: "2024-07-11", status: "Finalizado", value: 228.00 },
+    { id: 7, clientId: 3, service: "Faxina Padrão", date: "2024-07-01", status: "Finalizado", value: 240.00 },
+    { id: 8, clientId: 5, service: "Faxina Padrão", date: "2024-07-15", status: "Confirmado", value: 198.00 },
+]
 
 type Client = typeof mockClients[0];
 
@@ -46,6 +57,8 @@ const DetailRow = ({ icon: Icon, label, value }: { icon: React.ElementType, labe
 
 export default function ClientsPage() {
     const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+
+    const clientAppointments = selectedClient ? mockAppointments.filter(app => app.clientId === selectedClient.id) : [];
 
     return (
         <div className="flex flex-col">
@@ -99,19 +112,49 @@ export default function ClientsPage() {
                     </CardContent>
                 </Card>
                 {selectedClient && (
-                    <DialogContent className="sm:max-w-[425px]">
+                    <DialogContent className="sm:max-w-2xl">
                         <DialogHeader>
-                            <DialogTitle>Detalhes do Cliente</DialogTitle>
+                            <DialogTitle>Detalhes do Cliente: {selectedClient.name}</DialogTitle>
                             <DialogDescription>
-                                Informações completas sobre {selectedClient.name}.
+                                Informações completas e histórico de agendamentos.
                             </DialogDescription>
                         </DialogHeader>
-                        <div className="grid gap-4 py-4">
-                            <DetailRow icon={User} label="Nome do Cliente" value={selectedClient.name} />
-                            <DetailRow icon={Mail} label="Email" value={selectedClient.email} />
-                            <DetailRow icon={Phone} label="Telefone" value={selectedClient.phone} />
-                            <DetailRow icon={Calendar} label="Total de Agendamentos" value={`${selectedClient.appointments} serviços`} />
-                            <DetailRow icon={DollarSign} label="Valor Total Gasto" value={`R$ ${selectedClient.totalSpent.toFixed(2).replace('.', ',')}`} />
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
+                            <div className="space-y-4">
+                                <h4 className="font-semibold text-foreground">Informações de Contato</h4>
+                                <DetailRow icon={User} label="Nome do Cliente" value={selectedClient.name} />
+                                <DetailRow icon={Mail} label="Email" value={selectedClient.email} />
+                                <DetailRow icon={Phone} label="Telefone" value={selectedClient.phone} />
+                                <Separator />
+                                <h4 className="font-semibold text-foreground">Métricas</h4>
+                                <DetailRow icon={Calendar} label="Total de Agendamentos" value={`${selectedClient.appointments} serviços`} />
+                                <DetailRow icon={DollarSign} label="Valor Total Gasto" value={`R$ ${selectedClient.totalSpent.toFixed(2).replace('.', ',')}`} />
+                            </div>
+                            <div className="space-y-4">
+                                <h4 className="font-semibold text-foreground">Histórico de Agendamentos</h4>
+                                <div className="border rounded-md max-h-60 overflow-y-auto">
+                                    {clientAppointments.length > 0 ? (
+                                        <ul className="divide-y">
+                                            {clientAppointments.map(app => (
+                                                <li key={app.id} className="p-3 text-sm">
+                                                    <div className="flex justify-between items-center">
+                                                        <span className="font-medium">{app.service}</span>
+                                                        <span className="font-mono">R$ {app.value.toFixed(2).replace('.', ',')}</span>
+                                                    </div>
+                                                    <div className="flex justify-between items-center text-muted-foreground mt-1">
+                                                        <span>{new Date(app.date).toLocaleDateString('pt-BR', {timeZone: 'UTC'})}</span>
+                                                         <Badge variant={app.status === 'Finalizado' ? 'default' : 'secondary'}>{app.status}</Badge>
+                                                    </div>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    ) : (
+                                        <div className="text-center text-muted-foreground p-8">
+                                            Nenhum agendamento encontrado.
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
                         </div>
                     </DialogContent>
                 )}
