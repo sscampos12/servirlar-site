@@ -1,5 +1,7 @@
+
 "use client"
 
+import { useState } from 'react';
 import {
   Card,
   CardContent,
@@ -14,6 +16,16 @@ import {
 } from "@/components/ui/chart"
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Line, LineChart as RechartsLineChart } from "recharts"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Calendar as CalendarIcon, Filter } from "lucide-react"
+import { Calendar } from "@/components/ui/calendar"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Button } from "@/components/ui/button"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Badge } from "@/components/ui/badge"
+import { cn } from "@/lib/utils"
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
 const dailyData = [
   { date: "Seg", revenue: 250, appointments: 5 },
@@ -51,31 +63,142 @@ const chartConfig = {
   },
 }
 
+const mockAppointments = [
+    { id: 1, client: "Carlos Mendes", service: "Faxina Padrão", date: new Date(), time: "09:00", duration: "4 horas", address: "Rua das Flores, 123", status: "Confirmado", professional: "Maria Aparecida" },
+    { id: 2, client: "Ana Silva", service: "Passadoria", date: new Date(), time: "14:00", duration: "2 horas", address: "Av. Principal, 456", status: "Confirmado", professional: "João da Silva" },
+    { id: 3, client: "Pedro Souza", service: "Cozinheira", date: new Date(new Date().setDate(new Date().getDate() + 1)), time: "10:00", duration: "6 horas", address: "Praça Central, 789", status: "Pendente", professional: "Maria Aparecida" },
+    { id: 4, client: "Juliana Costa", service: "Faxina Padrão", date: new Date(), time: "08:00", duration: "8 horas", address: "Rua das Palmeiras, 321", status: "Finalizado", professional: "Ana Paula" },
+]
+
+const mockProfessionals = ["Maria Aparecida", "João da Silva", "Ana Paula", "Carlos de Souza"];
+
+
 export default function ReportsPage() {
+    const [date, setDate] = useState<Date | undefined>(new Date());
+    const [selectedProfessional, setSelectedProfessional] = useState<string>("todos");
+
+    const filteredAppointments = mockAppointments.filter(app => {
+        const isSameDay = format(app.date, 'yyyy-MM-dd') === (date ? format(date, 'yyyy-MM-dd') : '');
+        const isSameProfessional = selectedProfessional === 'todos' || app.professional === selectedProfessional;
+        return isSameDay && isSameProfessional;
+    });
+    
   return (
-    <div className="flex flex-col">
-      <div className="flex items-center mb-4">
-        <h1 className="font-headline text-lg font-semibold md:text-2xl">
+    <div className="flex flex-col gap-8">
+      <div>
+        <h1 className="font-headline text-lg font-semibold md:text-2xl mb-4">
           Relatórios Gerenciais
         </h1>
+        <Tabs defaultValue="weekly">
+            <TabsList className="mb-4">
+            <TabsTrigger value="daily">Diário</TabsTrigger>
+            <TabsTrigger value="weekly">Semanal</TabsTrigger>
+            <TabsTrigger value="monthly">Mensal</TabsTrigger>
+            </TabsList>
+            <TabsContent value="daily">
+            <ReportChart title="Relatório Diário" data={dailyData} dataKey="date" />
+            </TabsContent>
+            <TabsContent value="weekly">
+            <ReportChart title="Relatório Semanal" data={weeklyData} dataKey="week" />
+            </TabsContent>
+            <TabsContent value="monthly">
+            <ReportChart title="Relatório Mensal" data={monthlyData} dataKey="month" />
+            </TabsContent>
+        </Tabs>
       </div>
 
-      <Tabs defaultValue="weekly">
-        <TabsList className="mb-4">
-          <TabsTrigger value="daily">Diário</TabsTrigger>
-          <TabsTrigger value="weekly">Semanal</TabsTrigger>
-          <TabsTrigger value="monthly">Mensal</TabsTrigger>
-        </TabsList>
-        <TabsContent value="daily">
-          <ReportChart title="Relatório Diário" data={dailyData} dataKey="date" />
-        </TabsContent>
-        <TabsContent value="weekly">
-          <ReportChart title="Relatório Semanal" data={weeklyData} dataKey="week" />
-        </TabsContent>
-        <TabsContent value="monthly">
-          <ReportChart title="Relatório Mensal" data={monthlyData} dataKey="month" />
-        </TabsContent>
-      </Tabs>
+      <div>
+        <h1 className="font-headline text-lg font-semibold md:text-2xl mb-4">
+          Relatório de Agendamentos
+        </h1>
+        <Card>
+            <CardHeader>
+                <CardTitle className="font-headline">Filtros do Relatório</CardTitle>
+                <CardDescription>Selecione a data e o profissional para visualizar os agendamentos.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <div className="flex flex-col md:flex-row gap-4 mb-6">
+                    <Popover>
+                        <PopoverTrigger asChild>
+                        <Button
+                            variant={"outline"}
+                            className={cn(
+                            "w-full md:w-[280px] justify-start text-left font-normal",
+                            !date && "text-muted-foreground"
+                            )}
+                        >
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {date ? format(date, "PPP", { locale: ptBR }) : <span>Escolha uma data</span>}
+                        </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0">
+                        <Calendar
+                            mode="single"
+                            selected={date}
+                            onSelect={setDate}
+                            initialFocus
+                        />
+                        </PopoverContent>
+                    </Popover>
+                    <Select value={selectedProfessional} onValueChange={setSelectedProfessional}>
+                        <SelectTrigger className="w-full md:w-[280px]">
+                            <Filter className="mr-2 h-4 w-4" />
+                            <SelectValue placeholder="Filtrar por profissional..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="todos">Todos os Profissionais</SelectItem>
+                            {mockProfessionals.map(prof => (
+                                <SelectItem key={prof} value={prof}>{prof}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+
+                <div className="border rounded-md">
+                     <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Cliente</TableHead>
+                                <TableHead>Serviço</TableHead>
+                                <TableHead>Profissional</TableHead>
+                                <TableHead>Horário</TableHead>
+                                <TableHead>Endereço</TableHead>
+                                <TableHead className="text-right">Status</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {filteredAppointments.length > 0 ? (
+                                filteredAppointments.map((app) => (
+                                    <TableRow key={app.id}>
+                                        <TableCell className="font-medium">{app.client}</TableCell>
+                                        <TableCell>
+                                            <div>{app.service}</div>
+                                            <div className="text-xs text-muted-foreground">{app.duration}</div>
+                                        </TableCell>
+                                        <TableCell>{app.professional}</TableCell>
+                                        <TableCell>{app.time}</TableCell>
+                                        <TableCell>{app.address}</TableCell>
+                                        <TableCell className="text-right">
+                                            <Badge variant={app.status === 'Confirmado' ? 'default' : app.status === 'Pendente' ? 'secondary' : 'outline'}>
+                                                {app.status}
+                                            </Badge>
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            ) : (
+                                <TableRow>
+                                    <TableCell colSpan={6} className="text-center h-24">
+                                        Nenhum agendamento encontrado para os filtros selecionados.
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+                </div>
+            </CardContent>
+        </Card>
+      </div>
+
     </div>
   )
 }
