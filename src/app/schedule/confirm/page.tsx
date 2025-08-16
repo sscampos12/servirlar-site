@@ -16,15 +16,17 @@ import {
   Calendar,
   Clock,
   CreditCard,
-  Landmark
+  Landmark,
+  ShieldCheck
 } from "lucide-react"
 import { Separator } from "@/components/ui/separator"
 import { useToast } from "@/hooks/use-toast"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import { Input } from '@/components/ui/input';
 import { ScheduleLayout } from '@/app/schedule/layout';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const DetailRow = ({ icon: Icon, label, value }: { icon: React.ElementType, label: string, value: string }) => (
     <div className="flex items-center justify-between">
@@ -53,6 +55,14 @@ export default function ConfirmationPage() {
   return (
     <ScheduleLayout>
         <div className="max-w-4xl mx-auto">
+            <Alert className="mb-6 border-primary bg-primary/5">
+              <ShieldCheck className="h-4 w-4" />
+              <AlertTitle className="font-headline text-primary">Ambiente Seguro</AlertTitle>
+              <AlertDescription>
+                Seus dados de pagamento são processados com segurança.
+              </AlertDescription>
+            </Alert>
+
             <h1 className="font-headline text-2xl font-semibold mb-6 text-center">Finalizar Agendamento</h1>
             <div className="grid gap-8 md:grid-cols-2">
                 
@@ -89,7 +99,7 @@ export default function ConfirmationPage() {
                 <div>
                     <Card>
                         <CardHeader>
-                            <CardTitle className="font-headline">Pagamento Seguro</CardTitle>
+                            <CardTitle className="font-headline">Pagamento</CardTitle>
                             <CardDescription>Escolha sua forma de pagamento preferida.</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-6">
@@ -145,7 +155,7 @@ export default function ConfirmationPage() {
                             )}
 
                             <Button onClick={handlePayment} size="lg" className="w-full">
-                            Pagar R$ 140,00
+                            Pagar R$ 140,00 e Confirmar
                             </Button>
                         </CardContent>
                     </Card>

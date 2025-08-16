@@ -22,7 +22,7 @@ export default function LoginPage() {
     // For the prototype, we'll just show a success message and redirect.
     toast({
       title: "Login bem-sucedido!",
-      description: "Redirecionando...",
+      description: "Redirecionando para a página de confirmação...",
     });
     router.push(redirectUrl);
   };
@@ -32,9 +32,9 @@ export default function LoginPage() {
       <div className="flex items-center justify-center py-12 px-4">
         <Card className="w-full max-w-sm">
           <CardHeader>
-            <CardTitle className="font-headline text-2xl">Login</CardTitle>
+            <CardTitle className="font-headline text-2xl">Acesso do Cliente</CardTitle>
             <CardDescription>
-              Acesse sua conta para gerenciar seus serviços.
+              Acesse sua conta para confirmar e pagar seu agendamento.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -61,17 +61,13 @@ export default function LoginPage() {
                 <Input id="password" type="password" required />
               </div>
               <Button type="submit" className="w-full">
-                Entrar
+                Entrar e Pagar
               </Button>
             </form>
             <div className="mt-4 text-center text-sm">
               Não tem uma conta?{" "}
               <Link href="/register/client" className="underline">
                 Cadastre-se como Cliente
-              </Link>
-              {" ou "}
-               <Link href="/register/provider" className="underline">
-                Profissional
               </Link>
             </div>
           </CardContent>
