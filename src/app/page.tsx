@@ -47,7 +47,7 @@ export default function Home() {
             <div className="grid gap-6 lg:grid-cols-1 lg:gap-12 xl:gap-24">
               <div className="flex flex-col justify-center space-y-4 text-center items-center">
                 <div className="space-y-2">
-                  <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none">
+                  <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none font-headline">
                     A ajuda que seu lar precisa, com a confiança que você merece.
                   </h1>
                   <p className="max-w-[600px] text-muted-foreground md:text-xl">
@@ -58,7 +58,7 @@ export default function Home() {
                   <Button asChild size="lg">
                     <Link href="/dashboard/schedule">Agendar um Serviço</Link>
                   </Button>
-                  <Button asChild variant="outline" size="lg">
+                  <Button asChild variant="secondary" size="lg" className="bg-accent text-accent-foreground hover:bg-accent/90">
                     <Link href="/register/provider">Seja um Profissional</Link>
                   </Button>
                 </div>
@@ -70,12 +70,12 @@ export default function Home() {
         {/* How it works */}
         <section className="py-16 bg-background px-4">
           <div className="container mx-auto text-center">
-            <h2 className="text-3xl font-bold mb-2">Como Funciona?</h2>
+            <h2 className="text-3xl font-bold mb-2 font-headline">Como Funciona?</h2>
             <p className="text-muted-foreground mb-12">Em três passos simples, seu lar está cuidado.</p>
             <div className="grid md:grid-cols-3 gap-8">
               <Card>
                 <CardHeader>
-                  <CardTitle>1. Busque</CardTitle>
+                  <CardTitle className="font-headline">1. Busque</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p>Escolha o serviço que você precisa e veja os perfis dos profissionais disponíveis na sua região.</p>
@@ -83,7 +83,7 @@ export default function Home() {
               </Card>
                <Card>
                 <CardHeader>
-                  <CardTitle>2. Agende</CardTitle>
+                  <CardTitle className="font-headline">2. Agende</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p>Selecione a melhor data e horário, e pague com total segurança diretamente pela plataforma.</p>
@@ -91,7 +91,7 @@ export default function Home() {
               </Card>
                <Card>
                 <CardHeader>
-                  <CardTitle>3. Relaxe</CardTitle>
+                  <CardTitle className="font-headline">3. Relaxe</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p>Uma profissional qualificada e verificada chegará no horário combinado para realizar o serviço.</p>
@@ -104,14 +104,14 @@ export default function Home() {
         {/* Features Section */}
         <section className="py-16 bg-muted px-4">
           <div className="container mx-auto text-center" id="features">
-            <h2 className="text-3xl font-bold mb-12">Por que escolher a Ajuda em Casa?</h2>
+            <h2 className="text-3xl font-bold mb-12 font-headline">Por que escolher a Ajuda em Casa?</h2>
             <div className="grid md:grid-cols-3 gap-8">
               {features.map((feature, index) => (
                 <div key={index} className="flex flex-col items-center p-4">
                   <div className="p-4 bg-primary/10 rounded-full mb-4">
                     {feature.icon}
                   </div>
-                  <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
+                  <h3 className="text-xl font-semibold mb-2 font-headline">{feature.title}</h3>
                   <p className="text-muted-foreground">{feature.description}</p>
                 </div>
               ))}
@@ -122,7 +122,7 @@ export default function Home() {
         {/* Testimonials Section */}
         <section className="py-16 bg-background px-4">
           <div className="container mx-auto text-center">
-            <h2 className="text-3xl font-bold mb-12">O que nossos clientes dizem</h2>
+            <h2 className="text-3xl font-bold mb-12 font-headline">O que nossos clientes dizem</h2>
             <div className="grid md:grid-cols-2 gap-8">
               {testimonials.map((testimonial, index) => (
                 <Card key={index} className="bg-card p-6">
