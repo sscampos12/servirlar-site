@@ -8,15 +8,22 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { MarketingLayout } from "@/components/marketing-layout"
 import { useSearchParams, useRouter } from "next/navigation"
+import { useToast } from "@/hooks/use-toast";
 
 export default function LoginPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { toast } = useToast();
   const redirectUrl = searchParams.get('redirect') || '/schedule';
 
-  const handleLogin = () => {
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
     // In a real app, you'd perform authentication here.
-    // For the prototype, we'll just redirect.
+    // For the prototype, we'll just show a success message and redirect.
+    toast({
+      title: "Login bem-sucedido!",
+      description: "Redirecionando para a confirmação do agendamento.",
+    });
     router.push(redirectUrl);
   };
 
@@ -31,7 +38,7 @@ export default function LoginPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid gap-4">
+            <form onSubmit={handleLogin} className="grid gap-4">
               <div className="grid gap-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
@@ -53,10 +60,10 @@ export default function LoginPage() {
                 </div>
                 <Input id="password" type="password" required />
               </div>
-              <Button onClick={handleLogin} type="submit" className="w-full">
+              <Button type="submit" className="w-full">
                 Entrar
               </Button>
-            </div>
+            </form>
             <div className="mt-4 text-center text-sm">
               Não tem uma conta?{" "}
               <Link href="/register/client" className="underline">
