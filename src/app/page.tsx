@@ -56,7 +56,7 @@ export default function Home() {
                 </div>
                 <div className="flex flex-col gap-2 min-[400px]:flex-row">
                   <Button asChild size="lg">
-                    <Link href="/dashboard/schedule">Agendar um Serviço</Link>
+                    <Link href="/schedule">Agendar um Serviço</Link>
                   </Button>
                   <Button asChild variant="secondary" size="lg" className="bg-accent text-accent-foreground hover:bg-accent/90">
                     <Link href="/register/provider">Seja um Profissional</Link>
