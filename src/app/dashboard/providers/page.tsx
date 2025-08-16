@@ -16,6 +16,7 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Download, Eye } from "lucide-react"
+import Link from "next/link"
 
 const mockProviders = [
     { id: 1, name: "Maria Aparecida", cpf: "123.456.789-00", status: "Aprovado", date: "15/07/2024" },
@@ -69,16 +70,18 @@ export default function ProvidersPage() {
                                     <TableCell>{provider.cpf}</TableCell>
                                     <TableCell>{provider.date}</TableCell>
                                     <TableCell>
-                                        <Badge variant={getStatusVariant(provider.status)}>{provider.status}</Badge>
+                                        <Badge variant={getStatusVariant(provider.status) as "default" | "secondary" | "destructive" | "outline"}>{provider.status}</Badge>
                                     </TableCell>
                                     <TableCell className="text-right">
                                         <Button variant="outline" size="icon" className="mr-2">
                                             <Download className="h-4 w-4" />
                                             <span className="sr-only">Baixar Documentos</span>
                                         </Button>
-                                        <Button variant="outline" size="icon">
+                                        <Button variant="outline" size="icon" asChild>
+                                          <Link href={`/dashboard/providers/${provider.id}`}>
                                             <Eye className="h-4 w-4" />
                                             <span className="sr-only">Ver Detalhes</span>
+                                          </Link>
                                         </Button>
                                     </TableCell>
                                 </TableRow>
