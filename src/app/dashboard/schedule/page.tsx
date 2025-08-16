@@ -10,20 +10,23 @@ import { Label } from '@/components/ui/label';
 import { ClientContract } from '@/components/contracts/client-contract';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const mockServices = [
-    { name: "Faxina Padrão", description: "Limpeza geral para manutenção." },
-    { name: "Passadoria", description: "Roupas passadas com cuidado." },
-    { name: "Cuidador de Idosos", description: "Atenção e companhia." },
-    { name: "Cozinheira", description: "Refeições caseiras e saborosas." },
+    { name: "Faxina Padrão", description: "Limpeza geral para manutenção.", pricePerHour: 25 },
+    { name: "Passadoria", description: "Roupas passadas com cuidado.", pricePerHour: 30 },
+    { name: "Cuidador de Idosos", description: "Atenção e companhia.", pricePerHour: 15 },
+    { name: "Cozinheira", description: "Refeições caseiras e saborosas.", pricePerHour: 40 },
 ];
 
 export default function SchedulePage() {
     const [step, setStep] = useState(1);
-    const [selectedService, setSelectedService] = useState<{name: string; description: string} | null>(null);
+    const [selectedService, setSelectedService] = useState<{name: string; description: string; pricePerHour: number} | null>(null);
     const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
     const [agreedToContract, setAgreedToContract] = useState(false);
     const { toast } = useToast();
+    const [hours, setHours] = useState("2");
+    const [time, setTime] = useState("09:00");
 
     const handleSelectService = (service: any) => {
         setSelectedService(service);
@@ -54,6 +57,8 @@ export default function SchedulePage() {
             setStep(step - 1);
         }
     }
+
+    const totalPrice = selectedService ? selectedService.pricePerHour * parseInt(hours) : 0;
 
     return (
         <div className="flex flex-col">
@@ -99,9 +104,26 @@ export default function SchedulePage() {
                                 onSelect={setSelectedDate}
                                 className="rounded-md border"
                             />
-                            <div className="w-full md:w-auto space-y-4">
-                                <Label htmlFor="time">Horário</Label>
-                                <Input id="time" type="time" defaultValue="09:00" />
+                             <div className="w-full md:w-auto space-y-4">
+                                <div className='space-y-2'>
+                                    <Label htmlFor="time">Horário de Início</Label>
+                                    <Input id="time" type="time" value={time} onChange={(e) => setTime(e.target.value)} />
+                                </div>
+                                <div className='space-y-2'>
+                                    <Label htmlFor="hours">Quantidade de Horas</Label>
+                                    <Select value={hours} onValueChange={setHours}>
+                                        <SelectTrigger id="hours">
+                                            <SelectValue placeholder="Selecione..." />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {[...Array(7)].map((_, i) => (
+                                                <SelectItem key={i+2} value={(i + 2).toString()}>
+                                                    {i + 2} horas
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
                                 <Button onClick={handleConfirmDateTime} className="w-full">Confirmar Data e Hora</Button>
                             </div>
                         </CardContent>
@@ -119,7 +141,9 @@ export default function SchedulePage() {
                                 <h4 className="font-semibold">Resumo do Agendamento</h4>
                                 <p><strong>Serviço:</strong> {selectedService?.name}</p>
                                 <p><strong>Data:</strong> {selectedDate?.toLocaleDateString('pt-BR')}</p>
-                                <p className="text-xl font-bold">Total: R$ 150,00</p>
+                                <p><strong>Horário:</strong> {time}</p>
+                                <p><strong>Duração:</strong> {hours} horas</p>
+                                <p className="text-xl font-bold">Total: R$ {totalPrice.toFixed(2)}</p>
                                 
                                 <form onSubmit={handlePayment} className="space-y-4 pt-4">
                                     <div className="flex items-center gap-2">
