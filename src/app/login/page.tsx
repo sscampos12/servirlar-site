@@ -22,7 +22,7 @@ export default function LoginPage() {
     // For the prototype, we'll just show a success message and redirect.
     toast({
       title: "Login bem-sucedido!",
-      description: "Redirecionando para a confirmação do agendamento.",
+      description: "Redirecionando...",
     });
     router.push(redirectUrl);
   };

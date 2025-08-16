@@ -20,12 +20,11 @@ import {
 } from "lucide-react"
 import { Separator } from "@/components/ui/separator"
 import { useToast } from "@/hooks/use-toast"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import { Input } from '@/components/ui/input';
-import { MarketingLayout } from '@/components/marketing-layout';
-import { ScheduleLayout } from '../layout';
+import { ScheduleLayout } from '@/app/schedule/layout';
 
 const DetailRow = ({ icon: Icon, label, value }: { icon: React.ElementType, label: string, value: string }) => (
     <div className="flex items-center justify-between">
@@ -48,7 +47,7 @@ export default function ConfirmationPage() {
         title: "Pagamento Confirmado!",
         description: "Seu agendamento está confirmado. Obrigado!",
     });
-    router.push('/schedule'); // Redirect to a "my-appointments" page in a real app
+    router.push('/'); // Redirect to a "my-appointments" page in a real app
   }
   
   return (
