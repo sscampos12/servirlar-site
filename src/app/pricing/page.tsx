@@ -132,7 +132,7 @@ export default function PricingPage() {
             {/* Right side: Price Display */}
             <div className="bg-muted/50 rounded-lg p-6 text-center flex flex-col justify-center items-center h-full">
               <p className="text-muted-foreground font-semibold">Valor Total:</p>
-              <p className="font-headline text-5xl font-bold text-secondary my-2">
+              <p className="font-headline text-5xl font-bold text-accent my-2">
                 R$ {total.toFixed(2).replace('.', ',')}
               </p>
               {total > 0 && (
