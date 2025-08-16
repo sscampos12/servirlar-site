@@ -1,3 +1,4 @@
+
 import Link from "next/link";
 import { Button } from "./ui/button";
 import { Logo } from "./logo";
@@ -12,7 +13,7 @@ export function LandingHeader() {
             <span className="font-bold">Ajuda em Casa</span>
           </Link>
           <nav className="hidden space-x-6 text-sm font-medium md:flex">
-            <Link href="/#features" className="transition-colors hover:text-foreground/80 text-foreground/60">Serviços</Link>
+            <Link href="/pricing" className="transition-colors hover:text-foreground/80 text-foreground/60">Preços e Serviços</Link>
             <Link href="/register/provider" className="transition-colors hover:text-foreground/80 text-foreground/60">Para Profissionais</Link>
             <Link href="/faq" className="transition-colors hover:text-foreground/80 text-foreground/60">FAQ</Link>
             <Link href="/legal" className="transition-colors hover:text-foreground/80 text-foreground/60">Legal</Link>
@@ -27,3 +28,5 @@ export function LandingHeader() {
     </header>
   );
 }
+
+    

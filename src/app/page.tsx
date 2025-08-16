@@ -1,3 +1,4 @@
+
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -50,7 +51,7 @@ export default function Home() {
           </p>
           <div className="flex justify-center gap-4">
             <Button asChild size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground">
-              <Link href="/dashboard/schedule">Contratar um Profissional</Link>
+              <Link href="/pricing">Contratar um Profissional</Link>
             </Button>
             <Button asChild size="lg" variant="outline">
               <Link href="/register/provider">Seja um Profissional</Link>
@@ -134,3 +135,5 @@ export default function Home() {
     </MarketingLayout>
   );
 }
+
+    
