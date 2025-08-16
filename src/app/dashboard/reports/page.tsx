@@ -87,13 +87,13 @@ const mockAppointments: Appointment[] = [
 
 const mockProfessionals = ["Maria Aparecida", "João da Silva", "Ana Paula", "Carlos de Souza"];
 
-const DetailRow = ({ icon, label, value }: { icon: React.ElementType, label: string, value: React.ReactNode }) => (
+const DetailRow = ({ icon: Icon, label, value }: { icon: React.ElementType, label: string, value: React.ReactNode }) => (
     <div className="flex items-center gap-3">
         <div className="flex items-center justify-center bg-muted rounded-md h-8 w-8">
-            <label.icon className="h-4 w-4 text-muted-foreground" />
+            <Icon className="h-4 w-4 text-muted-foreground" />
         </div>
         <div>
-            <p className="text-sm text-muted-foreground">{icon}</p>
+            <p className="text-sm text-muted-foreground">{label}</p>
             <p className="font-medium">{value}</p>
         </div>
     </div>
@@ -348,3 +348,5 @@ function ReportChart({ title, data, dataKey }: { title: string, data: any[], dat
     </Card>
   )
 }
+
+    
