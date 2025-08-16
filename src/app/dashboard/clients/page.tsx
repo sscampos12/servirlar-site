@@ -34,10 +34,22 @@ const mockClients = [
 const mockAppointments = [
     { id: 1, clientId: 1, professional: "Maria Aparecida", service: "Faxina Padrão", date: "2024-07-10", status: "Finalizado", value: 140.00 },
     { id: 2, clientId: 1, professional: "Ana Paula", service: "Passadoria", date: "2024-06-25", status: "Finalizado", value: 74.00 },
+    { id: 3, clientId: 1, professional: "Maria Aparecida", service: "Faxina Padrão", date: "2024-06-10", status: "Finalizado", value: 140.00 },
+    { id: 4, clientId: 1, professional: "Ana Paula", service: "Passadoria", date: "2024-05-25", status: "Finalizado", value: 148.00 },
+    { id: 9, clientId: 1, professional: "João da Silva", service: "Cozinheira", date: "2024-05-11", status: "Finalizado", value: 248.00 },
     { id: 5, clientId: 2, professional: "Maria Aparecida", service: "Faxina Padrão", date: "2024-07-12", status: "Confirmado", value: 198.00 },
+    { id: 10, clientId: 2, professional: "Ana Paula", service: "Faxina Padrão", date: "2024-06-15", status: "Finalizado", value: 150.00 },
+    { id: 11, clientId: 2, professional: "João da Silva", service: "Passadoria", date: "2024-05-20", status: "Finalizado", value: 102.00 },
     { id: 6, clientId: 3, professional: "Maria Aparecida", service: "Cozinheira", date: "2024-07-11", status: "Finalizado", value: 228.00 },
     { id: 7, clientId: 3, professional: "Ana Paula", service: "Faxina Padrão", date: "2024-07-01", status: "Finalizado", value: 240.00 },
+    { id: 12, clientId: 3, professional: "João da Silva", service: "Faxina Padrão", date: "2024-06-20", status: "Finalizado", value: 150.00 },
+    { id: 13, clientId: 3, professional: "Maria Aparecida", service: "Passadoria", date: "2024-06-10", status: "Finalizado", value: 148.00 },
+    { id: 14, clientId: 3, professional: "Ana Paula", service: "Cozinheira", date: "2024-05-30", status: "Finalizado", value: 160.00 },
+    { id: 15, clientId: 3, professional: "João da Silva", service: "Faxina Padrão", date: "2024-05-20", status: "Finalizado", value: 90.00 },
+    { id: 16, clientId: 3, professional: "Maria Aparecida", service: "Passadoria", date: "2024-05-10", status: "Finalizado", value: 74.00 },
+    { id: 17, clientId: 3, professional: "Ana Paula", service: "Faxina Padrão", date: "2024-04-25", status: "Finalizado", value: 110.00 },
     { id: 8, clientId: 5, professional: "João da Silva", service: "Faxina Padrão", date: "2024-07-15", status: "Confirmado", value: 198.00 },
+    { id: 18, clientId: 4, professional: "Maria Aparecida", service: "Faxina Padrão", date: "2024-07-05", status: "Finalizado", value: 150.00 },
 ]
 
 type Client = typeof mockClients[0];
