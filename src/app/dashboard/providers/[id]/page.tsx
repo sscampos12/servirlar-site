@@ -8,7 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft, Check, Download, ThumbsDown, ThumbsUp, User, Video, X, Banknote, FileText } from "lucide-react"
+import { ArrowLeft, Check, Download, ThumbsDown, ThumbsUp, User, Video, X, Banknote, FileText, MessageCircle } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { useToast } from "@/hooks/use-toast"
 import { notFound } from "next/navigation"
@@ -61,6 +61,11 @@ export default function ProviderDetailPage({ params }: { params: { id: string } 
             title: `Profissional ${action === "aprovar" ? "Aprovado" : "Rejeitado"}`,
             description: `${provider.name} foi ${action === "aprovar" ? "aprovado" : "rejeitado"} com sucesso.`
         })
+    }
+
+    const getWhatsAppLink = (phone: string) => {
+        const justDigits = phone.replace(/\D/g, '');
+        return `https://wa.me/55${justDigits}`;
     }
     
     return (
@@ -126,14 +131,19 @@ export default function ProviderDetailPage({ params }: { params: { id: string } 
              <Card>
                 <CardHeader>
                     <CardTitle className="font-headline">Ações do Administrador</CardTitle>
-                    <CardDescription>Aprove ou rejeite o cadastro deste profissional.</CardDescription>
+                    <CardDescription>Aprove, rejeite ou entre em contato com este profissional.</CardDescription>
                 </CardHeader>
-                <CardContent className="flex gap-4">
+                <CardContent className="flex flex-wrap gap-4">
                      <Button onClick={() => handleAction("aprovar")} disabled={provider.status === "Aprovado"}>
                         <ThumbsUp className="mr-2 h-4 w-4" /> Aprovar Cadastro
                     </Button>
                     <Button variant="destructive" onClick={() => handleAction("rejeitar")} disabled={provider.status === "Rejeitado"}>
                         <ThumbsDown className="mr-2 h-4 w-4" /> Rejeitar Cadastro
+                    </Button>
+                    <Button variant="outline" asChild>
+                        <a href={getWhatsAppLink(provider.phone)} target="_blank" rel="noopener noreferrer">
+                           <MessageCircle className="mr-2 h-4 w-4" /> Contatar via WhatsApp
+                        </a>
                     </Button>
                 </CardContent>
             </Card>
