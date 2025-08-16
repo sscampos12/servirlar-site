@@ -2,8 +2,9 @@
 import { UserNav } from "@/components/dashboard/user-nav";
 import { Logo } from "@/components/logo";
 import Link from "next/link";
+import React from "react";
 
-export default function ScheduleLayout({
+export function ScheduleLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -30,3 +31,5 @@ export default function ScheduleLayout({
     </div>
   );
 }
+
+export default ScheduleLayout;
