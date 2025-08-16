@@ -62,6 +62,8 @@ export default function SchedulePage() {
     });
   }
 
+  const ServiceIcon = selectedService ? services.find(s => s.id === selectedService)?.icon : Info;
+
   return (
     <div className="grid gap-8 md:grid-cols-3">
       <div className="md:col-span-2">
@@ -182,7 +184,7 @@ export default function SchedulePage() {
           <CardContent className="space-y-4">
              <div className="flex items-center gap-3">
                 <div className="flex items-center justify-center bg-muted rounded-md h-8 w-8">
-                    {selectedService ? services.find(s => s.id === selectedService)?.icon({ className: "h-4 w-4 text-muted-foreground" }) : <Info className="h-4 w-4 text-muted-foreground" />}
+                    {ServiceIcon && <ServiceIcon className="h-4 w-4 text-muted-foreground" />}
                 </div>
                 <div>
                     <p className="text-sm text-muted-foreground">Serviço</p>
@@ -258,4 +260,3 @@ export default function SchedulePage() {
   );
 }
 
-    
