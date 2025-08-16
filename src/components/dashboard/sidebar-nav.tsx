@@ -14,7 +14,6 @@ const navItems = [
     { href: "/dashboard/reports", label: "Relatórios", icon: LineChart },
     { href: "/dashboard/financial", label: "Financeiro", icon: Banknote },
     { href: "/dashboard/insights", label: "AI Insights", icon: Bot, badge: "Beta" },
-    { href: "/dashboard/profile", label: "Perfil", icon: User },
 ]
 
 export function SidebarNav() {
@@ -28,7 +27,8 @@ export function SidebarNav() {
           href={item.href}
           className={cn(
             "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary",
-            pathname === item.href && "bg-muted text-primary"
+            pathname.startsWith(item.href) && item.href !== "/dashboard" && "bg-muted text-primary",
+            pathname === "/dashboard" && item.href === "/dashboard" && "bg-muted text-primary"
           )}
         >
           <item.icon className="h-4 w-4" />

@@ -2,10 +2,9 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Shield, Star, Award, Zap, CreditCard, Calendar } from 'lucide-react';
+import { Shield, CreditCard, Calendar } from 'lucide-react';
 import Link from 'next/link';
 import { MarketingLayout } from '@/components/marketing-layout';
-import Image from 'next/image';
 
 export default function Home() {
   const features = [
@@ -108,8 +107,8 @@ export default function Home() {
             <h2 className="text-3xl font-bold mb-12">Por que escolher a Ajuda em Casa?</h2>
             <div className="grid md:grid-cols-3 gap-8">
               {features.map((feature, index) => (
-                <div key={index} className="flex flex-col items-center">
-                  <div className="p-4 bg-primary rounded-full mb-4">
+                <div key={index} className="flex flex-col items-center p-4">
+                  <div className="p-4 bg-primary/10 rounded-full mb-4">
                     {feature.icon}
                   </div>
                   <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>

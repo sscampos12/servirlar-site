@@ -1,6 +1,6 @@
 import { DashboardHeader } from "@/components/dashboard/header";
 import { SidebarNav } from "@/components/dashboard/sidebar-nav";
-import { Zap } from "lucide-react";
+import { Logo } from "@/components/logo";
 import Link from "next/link";
 
 export default function DashboardLayout({
@@ -14,18 +14,18 @@ export default function DashboardLayout({
         <div className="flex h-full max-h-screen flex-col gap-2">
           <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
             <Link href="/" className="flex items-center gap-2 font-semibold">
-              <Zap className="h-6 w-6 text-accent" />
+              <Logo className="h-6 w-6" />
               <span className="">Ajuda em Casa</span>
             </Link>
           </div>
-          <div className="flex-1">
+          <div className="flex-1 overflow-y-auto">
             <SidebarNav />
           </div>
         </div>
       </div>
       <div className="flex flex-col">
         <DashboardHeader />
-        <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
+        <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 overflow-y-auto">
           {children}
         </main>
       </div>
