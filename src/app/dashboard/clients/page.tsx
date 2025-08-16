@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/table"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog"
-import { User, Mail, Phone, Calendar, DollarSign, Briefcase, Clock, CheckCircle } from "lucide-react";
+import { User, Mail, Phone, Calendar, DollarSign, Briefcase } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 
@@ -32,12 +32,12 @@ const mockClients = [
 ];
 
 const mockAppointments = [
-    { id: 1, clientId: 1, service: "Faxina Padrão", date: "2024-07-10", status: "Finalizado", value: 140.00 },
-    { id: 2, clientId: 1, service: "Passadoria", date: "2024-06-25", status: "Finalizado", value: 74.00 },
-    { id: 5, clientId: 2, service: "Faxina Padrão", date: "2024-07-12", status: "Confirmado", value: 198.00 },
-    { id: 6, clientId: 3, service: "Cozinheira", date: "2024-07-11", status: "Finalizado", value: 228.00 },
-    { id: 7, clientId: 3, service: "Faxina Padrão", date: "2024-07-01", status: "Finalizado", value: 240.00 },
-    { id: 8, clientId: 5, service: "Faxina Padrão", date: "2024-07-15", status: "Confirmado", value: 198.00 },
+    { id: 1, clientId: 1, professional: "Maria Aparecida", service: "Faxina Padrão", date: "2024-07-10", status: "Finalizado", value: 140.00 },
+    { id: 2, clientId: 1, professional: "Ana Paula", service: "Passadoria", date: "2024-06-25", status: "Finalizado", value: 74.00 },
+    { id: 5, clientId: 2, professional: "Maria Aparecida", service: "Faxina Padrão", date: "2024-07-12", status: "Confirmado", value: 198.00 },
+    { id: 6, clientId: 3, professional: "Maria Aparecida", service: "Cozinheira", date: "2024-07-11", status: "Finalizado", value: 228.00 },
+    { id: 7, clientId: 3, professional: "Ana Paula", service: "Faxina Padrão", date: "2024-07-01", status: "Finalizado", value: 240.00 },
+    { id: 8, clientId: 5, professional: "João da Silva", service: "Faxina Padrão", date: "2024-07-15", status: "Confirmado", value: 198.00 },
 ]
 
 type Client = typeof mockClients[0];
@@ -112,15 +112,15 @@ export default function ClientsPage() {
                     </CardContent>
                 </Card>
                 {selectedClient && (
-                    <DialogContent className="sm:max-w-2xl">
+                    <DialogContent className="sm:max-w-3xl">
                         <DialogHeader>
                             <DialogTitle>Detalhes do Cliente: {selectedClient.name}</DialogTitle>
                             <DialogDescription>
                                 Informações completas e histórico de agendamentos.
                             </DialogDescription>
                         </DialogHeader>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
-                            <div className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-4">
+                            <div className="space-y-4 md:col-span-1">
                                 <h4 className="font-semibold text-foreground">Informações de Contato</h4>
                                 <DetailRow icon={User} label="Nome do Cliente" value={selectedClient.name} />
                                 <DetailRow icon={Mail} label="Email" value={selectedClient.email} />
@@ -130,24 +130,35 @@ export default function ClientsPage() {
                                 <DetailRow icon={Calendar} label="Total de Agendamentos" value={`${selectedClient.appointments} serviços`} />
                                 <DetailRow icon={DollarSign} label="Valor Total Gasto" value={`R$ ${selectedClient.totalSpent.toFixed(2).replace('.', ',')}`} />
                             </div>
-                            <div className="space-y-4">
+                            <div className="space-y-4 md:col-span-2">
                                 <h4 className="font-semibold text-foreground">Histórico de Agendamentos</h4>
-                                <div className="border rounded-md max-h-60 overflow-y-auto">
+                                <div className="border rounded-md max-h-80 overflow-y-auto">
                                     {clientAppointments.length > 0 ? (
-                                        <ul className="divide-y">
-                                            {clientAppointments.map(app => (
-                                                <li key={app.id} className="p-3 text-sm">
-                                                    <div className="flex justify-between items-center">
-                                                        <span className="font-medium">{app.service}</span>
-                                                        <span className="font-mono">R$ {app.value.toFixed(2).replace('.', ',')}</span>
-                                                    </div>
-                                                    <div className="flex justify-between items-center text-muted-foreground mt-1">
-                                                        <span>{new Date(app.date).toLocaleDateString('pt-BR', {timeZone: 'UTC'})}</span>
-                                                         <Badge variant={app.status === 'Finalizado' ? 'default' : 'secondary'}>{app.status}</Badge>
-                                                    </div>
-                                                </li>
-                                            ))}
-                                        </ul>
+                                        <Table>
+                                            <TableHeader>
+                                                <TableRow>
+                                                    <TableHead>Serviço</TableHead>
+                                                    <TableHead>Profissional</TableHead>
+                                                    <TableHead>Data</TableHead>
+                                                    <TableHead>Status</TableHead>
+                                                </TableRow>
+                                            </TableHeader>
+                                            <TableBody>
+                                                {clientAppointments.map(app => (
+                                                    <TableRow key={app.id}>
+                                                        <TableCell>
+                                                           <div className="font-medium">{app.service}</div>
+                                                           <div className="text-xs text-muted-foreground font-mono">R$ {app.value.toFixed(2).replace('.', ',')}</div>
+                                                        </TableCell>
+                                                        <TableCell>{app.professional}</TableCell>
+                                                        <TableCell>{new Date(app.date).toLocaleDateString('pt-BR', {timeZone: 'UTC'})}</TableCell>
+                                                        <TableCell>
+                                                            <Badge variant={app.status === 'Finalizado' ? 'default' : 'secondary'}>{app.status}</Badge>
+                                                        </TableCell>
+                                                    </TableRow>
+                                                ))}
+                                            </TableBody>
+                                        </Table>
                                     ) : (
                                         <div className="text-center text-muted-foreground p-8">
                                             Nenhum agendamento encontrado.
