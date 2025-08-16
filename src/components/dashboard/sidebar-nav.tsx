@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { Home, Calendar, Bot, User, Users, LineChart, Contact } from "lucide-react"
+import { Home, Calendar, Bot, User, Users, LineChart, Contact, Banknote } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 
 const navItems = [
@@ -12,6 +12,7 @@ const navItems = [
     { href: "/dashboard/providers", label: "Profissionais", icon: Users },
     { href: "/dashboard/clients", label: "Clientes", icon: Contact },
     { href: "/dashboard/reports", label: "Relatórios", icon: LineChart },
+    { href: "/dashboard/financial", label: "Financeiro", icon: Banknote },
     { href: "/dashboard/insights", label: "AI Insights", icon: Bot, badge: "Beta" },
     { href: "/dashboard/profile", label: "Perfil", icon: User },
 ]
