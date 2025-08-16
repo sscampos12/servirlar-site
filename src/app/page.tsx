@@ -50,7 +50,7 @@ export default function Home() {
           </p>
           <div className="flex justify-center gap-4">
             <Button asChild size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground">
-              <Link href="/login">Contratar um Profissional</Link>
+              <Link href="/dashboard/schedule">Contratar um Profissional</Link>
             </Button>
             <Button asChild size="lg" variant="outline">
               <Link href="/register/provider">Seja um Profissional</Link>
@@ -85,7 +85,7 @@ export default function Home() {
 
         {/* Features Section */}
         <section className="py-16 px-4 bg-card">
-          <div className="container mx-auto text-center">
+          <div className="container mx-auto text-center" id="features">
             <h2 className="font-headline text-3xl font-bold mb-12">Por que escolher a Ajuda em Casa?</h2>
             <div className="grid md:grid-cols-3 gap-8">
               {features.map((feature, index) => (
