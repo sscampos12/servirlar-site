@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/chart"
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Line, LineChart as RechartsLineChart } from "recharts"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Calendar as CalendarIcon, Filter } from "lucide-react"
+import { Calendar as CalendarIcon, Filter, DollarSign, Users } from "lucide-react"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Button } from "@/components/ui/button"
@@ -64,10 +64,11 @@ const chartConfig = {
 }
 
 const mockAppointments = [
-    { id: 1, client: "Carlos Mendes", service: "Faxina Padrão", date: new Date(), time: "09:00", duration: "4 horas", address: "Rua das Flores, 123", status: "Confirmado", professional: "Maria Aparecida" },
-    { id: 2, client: "Ana Silva", service: "Passadoria", date: new Date(), time: "14:00", duration: "2 horas", address: "Av. Principal, 456", status: "Confirmado", professional: "João da Silva" },
-    { id: 3, client: "Pedro Souza", service: "Cozinheira", date: new Date(new Date().setDate(new Date().getDate() + 1)), time: "10:00", duration: "6 horas", address: "Praça Central, 789", status: "Pendente", professional: "Maria Aparecida" },
-    { id: 4, client: "Juliana Costa", service: "Faxina Padrão", date: new Date(), time: "08:00", duration: "8 horas", address: "Rua das Palmeiras, 321", status: "Finalizado", professional: "Ana Paula" },
+    { id: 1, client: "Carlos Mendes", service: "Faxina Padrão", date: new Date(), time: "09:00", duration: "4 horas", address: "Rua das Flores, 123", status: "Confirmado", professional: "Maria Aparecida", value: 140.00 },
+    { id: 2, client: "Ana Silva", service: "Passadoria", date: new Date(), time: "14:00", duration: "2 horas", address: "Av. Principal, 456", status: "Confirmado", professional: "João da Silva", value: 74.00 },
+    { id: 3, client: "Pedro Souza", service: "Cozinheira", date: new Date(new Date().setDate(new Date().getDate() + 1)), time: "10:00", duration: "6 horas", address: "Praça Central, 789", status: "Pendente", professional: "Maria Aparecida", value: 228.00 },
+    { id: 4, client: "Juliana Costa", service: "Faxina Padrão", date: new Date(), time: "08:00", duration: "8 horas", address: "Rua das Palmeiras, 321", status: "Finalizado", professional: "Ana Paula", value: 240.00 },
+    { id: 5, client: "Fernanda Lima", service: "Faxina Padrão", date: new Date(), time: "10:00", duration: "6 horas", address: "Rua dos Sonhos, 555", status: "Confirmado", professional: "Maria Aparecida", value: 198.00 },
 ]
 
 const mockProfessionals = ["Maria Aparecida", "João da Silva", "Ana Paula", "Carlos de Souza"];
@@ -82,6 +83,16 @@ export default function ReportsPage() {
         const isSameProfessional = selectedProfessional === 'todos' || app.professional === selectedProfessional;
         return isSameDay && isSameProfessional;
     });
+
+    const paymentSummary = filteredAppointments.reduce((acc, app) => {
+        if (app.status === 'Finalizado' || app.status === 'Confirmado') {
+            if (!acc[app.professional]) {
+                acc[app.professional] = 0;
+            }
+            acc[app.professional] += app.value;
+        }
+        return acc;
+    }, {} as Record<string, number>);
     
   return (
     <div className="flex flex-col gap-8">
@@ -109,12 +120,12 @@ export default function ReportsPage() {
 
       <div>
         <h1 className="font-headline text-lg font-semibold md:text-2xl mb-4">
-          Relatório de Agendamentos
+          Relatório Operacional de Agendamentos
         </h1>
         <Card>
             <CardHeader>
                 <CardTitle className="font-headline">Filtros do Relatório</CardTitle>
-                <CardDescription>Selecione a data e o profissional para visualizar os agendamentos.</CardDescription>
+                <CardDescription>Selecione a data e o profissional para visualizar os detalhes.</CardDescription>
             </CardHeader>
             <CardContent>
                 <div className="flex flex-col md:flex-row gap-4 mb-6">
@@ -142,7 +153,7 @@ export default function ReportsPage() {
                     </Popover>
                     <Select value={selectedProfessional} onValueChange={setSelectedProfessional}>
                         <SelectTrigger className="w-full md:w-[280px]">
-                            <Filter className="mr-2 h-4 w-4" />
+                            <Users className="mr-2 h-4 w-4" />
                             <SelectValue placeholder="Filtrar por profissional..." />
                         </SelectTrigger>
                         <SelectContent>
@@ -153,7 +164,28 @@ export default function ReportsPage() {
                         </SelectContent>
                     </Select>
                 </div>
+                
+                {selectedProfessional === 'todos' && Object.keys(paymentSummary).length > 0 && (
+                     <div className="mb-6">
+                        <h3 className="font-headline text-lg font-semibold mb-4">Resumo de Pagamentos do Dia</h3>
+                        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                            {Object.entries(paymentSummary).map(([professional, total]) => (
+                                <Card key={professional}>
+                                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                        <CardTitle className="text-sm font-medium">{professional}</CardTitle>
+                                        <DollarSign className="h-4 w-4 text-muted-foreground" />
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="text-2xl font-bold">R$ {total.toFixed(2).replace('.', ',')}</div>
+                                        <p className="text-xs text-muted-foreground">Valor a receber hoje</p>
+                                    </CardContent>
+                                </Card>
+                            ))}
+                        </div>
+                    </div>
+                )}
 
+                <h3 className="font-headline text-lg font-semibold mb-4">Lista de Agendamentos</h3>
                 <div className="border rounded-md">
                      <Table>
                         <TableHeader>
@@ -163,6 +195,7 @@ export default function ReportsPage() {
                                 <TableHead>Profissional</TableHead>
                                 <TableHead>Horário</TableHead>
                                 <TableHead>Endereço</TableHead>
+                                <TableHead className="text-right">Valor (R$)</TableHead>
                                 <TableHead className="text-right">Status</TableHead>
                             </TableRow>
                         </TableHeader>
@@ -178,6 +211,7 @@ export default function ReportsPage() {
                                         <TableCell>{app.professional}</TableCell>
                                         <TableCell>{app.time}</TableCell>
                                         <TableCell>{app.address}</TableCell>
+                                        <TableCell className="text-right font-mono">{app.value.toFixed(2).replace('.', ',')}</TableCell>
                                         <TableCell className="text-right">
                                             <Badge variant={app.status === 'Confirmado' ? 'default' : app.status === 'Pendente' ? 'secondary' : 'outline'}>
                                                 {app.status}
@@ -187,7 +221,7 @@ export default function ReportsPage() {
                                 ))
                             ) : (
                                 <TableRow>
-                                    <TableCell colSpan={6} className="text-center h-24">
+                                    <TableCell colSpan={7} className="text-center h-24">
                                         Nenhum agendamento encontrado para os filtros selecionados.
                                     </TableCell>
                                 </TableRow>
