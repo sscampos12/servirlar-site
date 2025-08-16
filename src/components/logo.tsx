@@ -9,7 +9,7 @@ export function Logo({ className, ...props }: React.SVGProps<SVGSVGElement>) {
       viewBox="0 0 150 35"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className={cn("text-primary", className)}
+      className={cn(className)}
       {...props}
     >
       <path
@@ -28,19 +28,19 @@ export function Logo({ className, ...props }: React.SVGProps<SVGSVGElement>) {
       />
       <text
         x="55"
-        y="25"
-        fontFamily="Poppins, sans-serif"
-        fontSize="18"
+        y="18"
+        fontFamily="sans-serif"
+        fontSize="16"
         fontWeight="bold"
         fill="#003366"
       >
         Ajuda
       </text>
       <text
-        x="100"
-        y="25"
-        fontFamily="Poppins, sans-serif"
-        fontSize="18"
+        x="55"
+        y="34"
+        fontFamily="sans-serif"
+        fontSize="16"
         fontWeight="bold"
         fill="#468499"
       >
