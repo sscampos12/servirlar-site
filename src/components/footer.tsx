@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Zap } from "lucide-react";
+import { Logo } from "./logo";
 
 export function Footer() {
   return (
@@ -8,7 +8,7 @@ export function Footer() {
         <div className="flex flex-wrap justify-between gap-6">
           <div>
             <Link href="/" className="flex items-center space-x-2 mb-4">
-              <Zap className="h-6 w-6 text-accent" />
+              <Logo className="h-6 w-6 text-primary" />
               <span className="font-bold text-lg">Ajuda em Casa</span>
             </Link>
             <p className="text-muted-foreground text-sm max-w-xs">

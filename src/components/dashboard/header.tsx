@@ -1,7 +1,6 @@
 import Link from "next/link"
 import {
   Menu,
-  Zap,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -12,6 +11,7 @@ import {
 } from "@/components/ui/sheet"
 import { UserNav } from "./user-nav"
 import { SidebarNav } from "./sidebar-nav"
+import { Logo } from "@/components/logo"
 
 export function DashboardHeader() {
   return (
@@ -33,8 +33,8 @@ export function DashboardHeader() {
               href="#"
               className="flex items-center gap-2 text-lg font-semibold mb-4"
             >
-              <Zap className="h-6 w-6 text-accent" />
-              <span className="sr-only">Ajuda em Casa</span>
+              <Logo className="h-6 w-6 text-primary" />
+              <span className="">Ajuda em Casa</span>
             </Link>
             <SidebarNav />
           </nav>

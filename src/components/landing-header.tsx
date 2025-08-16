@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Button } from "./ui/button";
-import { Zap } from "lucide-react";
+import { Logo } from "./logo";
 
 export function LandingHeader() {
   return (
@@ -8,7 +8,7 @@ export function LandingHeader() {
       <div className="container flex h-14 items-center">
         <div className="mr-4 flex items-center">
           <Link href="/" className="mr-6 flex items-center space-x-2">
-            <Zap className="h-6 w-6 text-accent" />
+            <Logo className="h-6 w-6 text-primary" />
             <span className="font-bold">Ajuda em Casa</span>
           </Link>
           <nav className="hidden space-x-6 text-sm font-medium md:flex">
