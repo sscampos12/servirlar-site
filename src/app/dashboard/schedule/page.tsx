@@ -3,8 +3,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Star, ArrowLeft, CreditCard } from 'lucide-react';
+import { ArrowLeft, CreditCard } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -19,16 +18,9 @@ const mockServices = [
     { name: "Cozinheira", description: "Refeições caseiras e saborosas." },
 ];
 
-const mockProfessionals = [
-  { id: 1, name: "Maria Aparecida", specialization: "Faxina", location: "Centro", rating: 5, imageUrl: "https://placehold.co/100x100.png?text=MA", dataAiHint: "woman portrait" },
-  { id: 2, name: "João da Silva", specialization: "Passadoria", location: "Zona Sul", rating: 4, imageUrl: "https://placehold.co/100x100.png?text=JS", dataAiHint: "man portrait" },
-  { id: 3, name: "Ana Paula", specialization: "Cuidadora", location: "Zona Norte", rating: 5, imageUrl: "https://placehold.co/100x100.png?text=AP", dataAiHint: "woman face" },
-];
-
 export default function SchedulePage() {
     const [step, setStep] = useState(1);
-    const [selectedService, setSelectedService] = useState(null);
-    const [selectedProfessional, setSelectedProfessional] = useState(null);
+    const [selectedService, setSelectedService] = useState<{name: string; description: string} | null>(null);
     const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
     const [agreedToContract, setAgreedToContract] = useState(false);
     const { toast } = useToast();
@@ -38,13 +30,8 @@ export default function SchedulePage() {
         setStep(2);
     };
 
-    const handleSelectProfessional = (professional: any) => {
-        setSelectedProfessional(professional);
-        setStep(3);
-    };
-
     const handleConfirmDateTime = () => {
-        setStep(4);
+        setStep(3);
     }
 
     const handlePayment = (e: React.FormEvent) => {
@@ -58,7 +45,6 @@ export default function SchedulePage() {
         setTimeout(() => {
             setStep(1);
             setSelectedService(null);
-            setSelectedProfessional(null);
             setAgreedToContract(false);
         }, 2000);
     };
@@ -101,40 +87,10 @@ export default function SchedulePage() {
                 )}
 
                 {step === 2 && (
-                    <>
-                        <CardHeader>
-                            <CardTitle className="font-headline">Passo 2: Escolha o Profissional</CardTitle>
-                            <CardDescription>Veja os profissionais disponíveis para '{selectedService?.name}'.</CardDescription>
-                        </CardHeader>
-                        <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {mockProfessionals.map(p => (
-                                <Card key={p.id} className="text-center transition-transform transform hover:scale-105">
-                                    <CardContent className="p-4">
-                                        <Avatar className="w-24 h-24 mx-auto mb-2">
-                                            <AvatarImage src={p.imageUrl} alt={p.name} data-ai-hint={p.dataAiHint} />
-                                            <AvatarFallback>{p.name.substring(0,2)}</AvatarFallback>
-                                        </Avatar>
-                                        <h3 className="text-lg font-bold">{p.name}</h3>
-                                        <p className="text-sm text-muted-foreground">{p.specialization}</p>
-                                        <div className="flex items-center justify-center mt-2">
-                                            <span className="text-md text-accent font-bold">{p.rating}</span>
-                                            <Star className="h-4 w-4 text-accent fill-current ml-1" />
-                                        </div>
-                                        <Button onClick={() => handleSelectProfessional(p)} className="mt-4 w-full">
-                                            Agendar
-                                        </Button>
-                                    </CardContent>
-                                </Card>
-                            ))}
-                        </CardContent>
-                    </>
-                )}
-
-                {step === 3 && selectedProfessional && (
                      <>
                         <CardHeader>
-                            <CardTitle className="font-headline">Passo 3: Escolha a Data e Hora</CardTitle>
-                            <CardDescription>Agendando com {selectedProfessional.name}.</CardDescription>
+                            <CardTitle className="font-headline">Passo 2: Escolha a Data e Hora</CardTitle>
+                            <CardDescription>Agendando o serviço de {selectedService?.name}.</CardDescription>
                         </CardHeader>
                         <CardContent className="flex flex-col md:flex-row gap-8 items-center justify-center">
                             <Calendar
@@ -152,16 +108,15 @@ export default function SchedulePage() {
                     </>
                 )}
 
-                {step === 4 && selectedProfessional && (
+                {step === 3 && (
                      <>
                         <CardHeader>
-                            <CardTitle className="font-headline">Passo 4: Pagamento e Confirmação</CardTitle>
+                            <CardTitle className="font-headline">Passo 3: Pagamento e Confirmação</CardTitle>
                             <CardDescription>Revise os detalhes e confirme o agendamento.</CardDescription>
                         </CardHeader>
                         <CardContent className="grid md:grid-cols-2 gap-8">
                             <div className="space-y-4">
                                 <h4 className="font-semibold">Resumo do Agendamento</h4>
-                                <p><strong>Profissional:</strong> {selectedProfessional.name}</p>
                                 <p><strong>Serviço:</strong> {selectedService?.name}</p>
                                 <p><strong>Data:</strong> {selectedDate?.toLocaleDateString('pt-BR')}</p>
                                 <p className="text-xl font-bold">Total: R$ 150,00</p>
