@@ -2,11 +2,10 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Shield, Star, CheckCircle } from 'lucide-react';
+import { Shield, Star, CheckCircle, Soup, Shirt, HomeIcon } from 'lucide-react';
 import Link from 'next/link';
 import { MarketingLayout } from '@/components/marketing-layout';
 import Image from 'next/image';
-import { Logo } from '@/components/logo';
 
 export default function Home() {
   const features = [
@@ -44,35 +43,50 @@ export default function Home() {
     <MarketingLayout>
       <div className="flex flex-col">
         {/* Hero Section */}
-        <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48 bg-background">
-          <div className="container mx-auto px-4 md:px-6">
-            <div className="grid gap-6 lg:grid-cols-[1fr_400px] lg:gap-12 xl:grid-cols-[1fr_600px]">
-              <div className="flex flex-col justify-center space-y-4">
-                <div className="space-y-2">
+        <section className="w-full py-12 md:py-24 lg:py-32 xl:py-40 bg-background relative">
+            <div className="absolute inset-0 z-0 opacity-10">
+                 <Image 
+                    src="https://placehold.co/1920x1080.png" 
+                    data-ai-hint="living room background"
+                    alt="background" 
+                    layout="fill"
+                    objectFit="cover"
+                 />
+            </div>
+          <div className="container mx-auto px-4 md:px-6 z-10 relative">
+            <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 xl:gap-24">
+              <div className="flex justify-center items-center">
+                  <div className="relative">
+                     <Image
+                        src="https://placehold.co/500x500.png"
+                        data-ai-hint="professional cleaner person"
+                        alt="Hero"
+                        width={500}
+                        height={500}
+                        className="rounded-full object-cover shadow-2xl"
+                    />
+                    <div className="absolute -bottom-4 -left-12 flex gap-4">
+                        <div className="bg-card p-3 rounded-full shadow-lg border border-border"><HomeIcon className="h-8 w-8 text-primary" /></div>
+                        <div className="bg-card p-3 rounded-full shadow-lg border border-border"><Soup className="h-8 w-8 text-primary" /></div>
+                        <div className="bg-card p-3 rounded-full shadow-lg border border-border"><Shirt className="h-8 w-8 text-primary" /></div>
+                    </div>
+                  </div>
+              </div>
+              <div className="flex flex-col justify-center space-y-6">
+                <div className="space-y-4">
                   <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none font-headline text-secondary">
-                    O cuidado que seu lar merece, com a confiança que você precisa.
+                    Conectando você com as melhores profissionais do lar.
                   </h1>
                   <p className="max-w-[600px] text-muted-foreground md:text-xl">
-                    Conectamos você aos melhores profissionais de limpeza, passadoria e muito mais. Agendamento fácil, pagamento seguro e serviço de qualidade.
+                    Sua casa limpa, suas roupas passadas e suas refeições preparadas com o carinho e a confiança que você merece.
                   </p>
                 </div>
                 <div className="flex flex-col gap-2 min-[400px]:flex-row">
                   <Button asChild size="lg">
-                    <Link href="/pricing">Agendar um Serviço</Link>
-                  </Button>
-                  <Button asChild variant="outline" size="lg">
-                    <Link href="/register/provider">Seja um Profissional</Link>
+                    <Link href="/dashboard/schedule">Agende Agora</Link>
                   </Button>
                 </div>
               </div>
-              <Image
-                src="https://placehold.co/600x500.png"
-                data-ai-hint="professional cleaner"
-                alt="Hero"
-                width={600}
-                height={500}
-                className="mx-auto aspect-video overflow-hidden rounded-xl object-cover sm:w-full lg:order-last lg:aspect-square"
-              />
             </div>
           </div>
         </section>
