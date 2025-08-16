@@ -84,9 +84,15 @@ export default function ProviderRegistrationPage() {
                         <Input id="phone" type="tel" placeholder="(00) 90000-0000" required />
                     </div>
                 </div>
-                <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input id="email" type="email" placeholder="seu@email.com" required />
+                <div className="grid md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="email">Email</Label>
+                        <Input id="email" type="email" placeholder="seu@email.com" required />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="pixKey">Chave PIX</Label>
+                        <Input id="pixKey" placeholder="Sua chave PIX" required />
+                    </div>
                 </div>
                 
                 <div className="space-y-2">
