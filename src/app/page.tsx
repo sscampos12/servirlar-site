@@ -2,9 +2,38 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { CheckCircle, Shield, Star } from 'lucide-react';
+import { Shield, Star, CheckCircle } from 'lucide-react';
 import Link from 'next/link';
 import { MarketingLayout } from '@/components/marketing-layout';
+import Image from 'next/image';
+import { Logo } from '@/components/logo';
+
+// Inline SVG icons for the hero section
+const BroomIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg {...props} width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M14 8.5L20 14.5" />
+    <path d="M11.5 11L5.5 17" />
+    <path d="M16 12.5L20 16.5" />
+    <path d="M12.5 15.5L10.5 17.5" />
+    <path d="M5.121 10.469a5.002 5.002 0 0 0 7.071 7.071l8.364-8.364a1 1 0 0 0-1.414-1.414L10.778 16.126" />
+    <path d="M15.536 6.015L17.985 3.566a1 1 0 0 1 1.414 1.414l-2.45 2.45" />
+  </svg>
+);
+
+const BowlIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg {...props} width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 5c-6.627 0-12 3.358-12 7.5s5.373 7.5 12 7.5 12-3.358 12-7.5S18.627 5 12 5z" />
+    <path d="M5 12.5h14" />
+  </svg>
+);
+
+const IronIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg {...props} width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M20.5 16H3.5a1.5 1.5 0 0 1-1.5-1.5V9.5a1.5 1.5 0 0 1 1.5-1.5h17a1.5 1.5 0 0 1 1.5 1.5v5a1.5 1.5 0 0 1-1.5 1.5z" />
+    <path d="M16 8V6.5a1.5 1.5 0 0 0-1.5-1.5h-5A1.5 1.5 0 0 0 8 6.5V8" />
+  </svg>
+);
+
 
 export default function Home() {
   const features = [
@@ -42,22 +71,57 @@ export default function Home() {
     <MarketingLayout>
       <div className="flex flex-col">
         {/* Hero Section */}
-        <section className="text-center py-20 px-4 bg-card">
-          <h1 className="font-headline text-4xl md:text-5xl font-bold text-secondary mb-4">
-            Seu lar em boas mãos.
-          </h1>
-          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
-            Encontre e agende serviços domésticos com profissionais de confiança, de forma rápida, segura e transparente.
-          </p>
-          <div className="flex justify-center gap-4">
-            <Button asChild size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground">
-              <Link href="/pricing">Contratar um Profissional</Link>
-            </Button>
-            <Button asChild size="lg" variant="secondary">
-              <Link href="/register/provider">Seja um Profissional</Link>
-            </Button>
+        <section className="w-full bg-background">
+          <div className="container mx-auto grid lg:grid-cols-2 gap-4 px-4 py-8 md:py-16">
+            <div className="bg-[#E0F5F1] rounded-lg p-8 flex flex-col justify-between relative overflow-hidden">
+              <div>
+                <h2 className="text-2xl font-semibold text-secondary mb-4">Ícones</h2>
+                <div className="flex gap-4">
+                  <BroomIcon className="text-secondary" />
+                  <BowlIcon className="text-primary" />
+                  <IronIcon className="text-accent" />
+                </div>
+              </div>
+              <div className="mt-8 self-center">
+                 <Image 
+                    src="https://placehold.co/400x500.png"
+                    data-ai-hint="professional cleaner"
+                    alt="Profissional de limpeza sorrindo"
+                    width={400}
+                    height={500}
+                    className="object-cover rounded-t-lg z-10"
+                />
+              </div>
+              <div className="absolute bottom-0 left-0 right-0 h-48 bg-white rounded-t-3xl" />
+            </div>
+            
+            <div className="grid grid-rows-2 gap-4">
+               <div className="bg-white rounded-lg p-8 flex flex-col justify-center items-start">
+                  <Logo className="h-12 w-12 mb-4 text-primary" />
+                  <h1 className="font-headline text-4xl md:text-5xl font-bold text-secondary mb-4">
+                    Conectando você com as melhores profissionais do lar.
+                  </h1>
+                  <p className="text-lg text-muted-foreground mb-8">
+                    Simples, rápido e seguro.
+                  </p>
+                  <Button asChild size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground">
+                    <Link href="/pricing">Agende agora</Link>
+                  </Button>
+                </div>
+                <div className="bg-card rounded-lg relative overflow-hidden">
+                     <Image 
+                        src="https://placehold.co/600x400.png" 
+                        data-ai-hint="living room"
+                        alt="Sala de estar com sofá e almofadas verdes"
+                        layout="fill"
+                        objectFit="cover"
+                        className="rounded-lg"
+                     />
+                </div>
+            </div>
           </div>
         </section>
+
 
         {/* How it works */}
         <section className="py-16 px-4">
