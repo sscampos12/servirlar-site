@@ -21,7 +21,7 @@ export function ProviderContract() {
         </div>
         <div>
           <h4 className="font-semibold text-foreground">5. Pagamento</h4>
-          <p>O pagamento é feito integralmente através da Plataforma. A Lar Seguro pode reter uma taxa de intermediação informada previamente.</p>
+          <p>O pagamento é feito integralmente através da Plataforma. A Ajuda em Casa pode reter uma taxa de intermediação informada previamente.</p>
         </div>
         <div>
           <h4 className="font-semibold text-foreground">6. Cancelamento e Penalidades</h4>
@@ -46,4 +46,3 @@ export function ProviderContract() {
       </div>
     );
   }
-  

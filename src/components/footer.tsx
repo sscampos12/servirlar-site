@@ -9,7 +9,7 @@ export function Footer() {
           <div>
             <Link href="/" className="flex items-center space-x-2 mb-4">
               <Zap className="h-6 w-6 text-accent" />
-              <span className="font-bold text-lg">Lar Seguro</span>
+              <span className="font-bold text-lg">Ajuda em Casa</span>
             </Link>
             <p className="text-muted-foreground text-sm max-w-xs">
               Profissionais de confiança, na hora que você precisa. Seu lar em boas mãos.
@@ -30,12 +30,13 @@ export function Footer() {
                 <li><Link href="/legal" className="hover:text-foreground">Termos de Serviço</Link></li>
                 <li><Link href="/legal" className="hover:text-foreground">Política de Privacidade</Link></li>
                 <li><Link href="/faq" className="hover:text-foreground">FAQ</Link></li>
+                <li><Link href="/admin/login" className="hover:text-foreground">Admin</Link></li>
               </ul>
             </div>
           </div>
         </div>
         <div className="mt-8 border-t pt-6 text-center text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} Lar Seguro. Todos os direitos reservados.</p>
+          <p>&copy; {new Date().getFullYear()} Ajuda em Casa. Todos os direitos reservados.</p>
         </div>
       </div>
     </footer>

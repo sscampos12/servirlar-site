@@ -15,7 +15,7 @@ export default function DashboardLayout({
           <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
             <Link href="/" className="flex items-center gap-2 font-semibold">
               <Zap className="h-6 w-6 text-accent" />
-              <span className="">Lar Seguro</span>
+              <span className="">Ajuda em Casa</span>
             </Link>
           </div>
           <div className="flex-1">

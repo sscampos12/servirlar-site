@@ -34,7 +34,7 @@ export function DashboardHeader() {
               className="flex items-center gap-2 text-lg font-semibold mb-4"
             >
               <Zap className="h-6 w-6 text-accent" />
-              <span className="sr-only">Lar Seguro</span>
+              <span className="sr-only">Ajuda em Casa</span>
             </Link>
             <SidebarNav />
           </nav>

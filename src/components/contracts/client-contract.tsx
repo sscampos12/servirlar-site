@@ -6,7 +6,7 @@ export function ClientContract() {
         
         <div>
           <h4 className="font-semibold text-foreground">1. Intermediação</h4>
-          <p>A Lar Seguro atua apenas como intermediadora. Não há vínculo empregatício com o prestador de serviço.</p>
+          <p>A Ajuda em Casa atua apenas como intermediadora. Não há vínculo empregatício com o prestador de serviço.</p>
         </div>
         <div>
           <h4 className="font-semibold text-foreground">2. Responsabilidade do Prestador</h4>
@@ -39,4 +39,3 @@ export function ClientContract() {
       </div>
     );
   }
-  

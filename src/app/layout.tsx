@@ -3,7 +3,7 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
-  title: 'Lar Seguro',
+  title: 'Ajuda em Casa',
   description: 'Conectando você aos melhores profissionais domésticos.',
 };
 

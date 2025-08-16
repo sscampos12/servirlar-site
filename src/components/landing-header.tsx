@@ -9,7 +9,7 @@ export function LandingHeader() {
         <div className="mr-4 flex items-center">
           <Link href="/" className="mr-6 flex items-center space-x-2">
             <Zap className="h-6 w-6 text-accent" />
-            <span className="font-bold">Lar Seguro</span>
+            <span className="font-bold">Ajuda em Casa</span>
           </Link>
           <nav className="hidden space-x-6 text-sm font-medium md:flex">
             <Link href="/#features" className="transition-colors hover:text-foreground/80 text-foreground/60">Serviços</Link>
