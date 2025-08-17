@@ -1,4 +1,5 @@
 
+
 "use client"
 
 import { useState } from 'react';
@@ -16,34 +17,101 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Calendar as CalendarIcon, Clock, Home, Info, DollarSign, Shirt, Soup, UserPlus } from "lucide-react"
+import { Calendar as CalendarIcon, Clock, Home, Info, DollarSign, Shirt, Soup, UserPlus, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { ScheduleLayout } from './layout';
+import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/use-auth';
+import { db } from '@/lib/firebase';
+import { collection, addDoc, serverTimestamp, doc, getDoc } from 'firebase/firestore';
+
 
 const services = [
-  { id: 'faxina', name: 'Faxina Padrão', icon: Home },
-  { id: 'passadoria', name: 'Passadoria', icon: Shirt },
-  { id: 'cozinheira', name: 'Cozinheira', icon: Soup },
-  { id: 'cuidador', name: 'Cuidador(a) de Idosos', icon: UserPlus },
+  { id: 'Faxina Padrão', name: 'Faxina Padrão', icon: Home, prices: { '4 horas': 140, '6 horas': 198, '8 horas': 240 } },
+  { id: 'Passadoria', name: 'Passadoria', icon: Shirt, prices: { '4 horas': 148, '6 horas': 210, '8 horas': 264 } },
+  { id: 'Cozinheira', name: 'Cozinheira', icon: Soup, prices: { '4 horas': 160, '6 horas': 228, '8 horas': 288 } },
+  { id: 'Cuidador(a) de Idosos', name: 'Cuidador(a) de Idosos', icon: UserPlus, prices: { '4 horas': 168, '6 horas': 240, '8 horas': 304 } },
 ]
 
 const durations = ['4 horas', '6 horas', '8 horas'];
 const times = ['08:00', '09:00', '10:00', '13:00', '14:00'];
 
 export default function SchedulePage() {
+  const { user } = useAuth();
+  const router = useRouter();
+  const { toast } = useToast();
+  
   const [selectedService, setSelectedService] = useState<string | undefined>();
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [selectedTime, setSelectedTime] = useState<string | undefined>();
   const [selectedDuration, setSelectedDuration] = useState<string | undefined>();
-  const [address, setAddress] = useState('Rua das Flores, 123 - Centro');
+  const [address, setAddress] = useState('');
   const [observations, setObservations] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const isFormComplete = selectedService && date && selectedTime && selectedDuration && address;
-
   const ServiceIcon = selectedService ? services.find(s => s.id === selectedService)?.icon : Info;
+  
+  const estimatedValue = selectedService && selectedDuration
+    ? services.find(s => s.id === selectedService)?.prices[selectedDuration as keyof typeof services[0]['prices']] || 0
+    : 0;
+
+  const handleConfirm = async () => {
+    if (!isFormComplete) return;
+    if (!user) {
+        router.push('/login?redirect=/schedule/confirm');
+        return;
+    }
+
+    setIsLoading(true);
+
+    try {
+        const clientDocRef = doc(db, "clients", user.uid);
+        const clientDocSnap = await getDoc(clientDocRef);
+
+        if (!clientDocSnap.exists()) {
+             toast({ variant: "destructive", title: "Erro", description: "Perfil de cliente não encontrado." });
+             setIsLoading(false);
+             return;
+        }
+
+        const clientData = clientDocSnap.data();
+
+        await addDoc(collection(db, "schedules"), {
+            clientId: user.uid,
+            clientName: clientData.fullName,
+            clientEmail: user.email,
+            service: selectedService,
+            date: format(date, 'yyyy-MM-dd'),
+            time: selectedTime,
+            duration: selectedDuration,
+            address: address,
+            observations: observations,
+            value: estimatedValue,
+            status: "Pendente",
+            createdAt: serverTimestamp(),
+        });
+        
+        toast({
+            title: "Agendamento Criado!",
+            description: "Agora, confirme o pagamento para finalizar.",
+        });
+        router.push('/schedule/confirm');
+
+    } catch (error) {
+        console.error("Error creating schedule: ", error);
+        toast({
+            variant: "destructive",
+            title: "Erro",
+            description: "Não foi possível criar o agendamento. Tente novamente.",
+        });
+    } finally {
+        setIsLoading(false);
+    }
+  }
 
   return (
     <ScheduleLayout>
@@ -137,7 +205,7 @@ export default function SchedulePage() {
                   </div>
                   <div>
                       <Label htmlFor="address" className="font-semibold">5. Endereço do serviço</Label>
-                      <Input id="address" value={address} onChange={(e) => setAddress(e.target.value)} className="mt-2" />
+                      <Input id="address" value={address} onChange={(e) => setAddress(e.target.value)} className="mt-2" placeholder='Seu endereço completo'/>
                   </div>
               </div>
               
@@ -204,14 +272,14 @@ export default function SchedulePage() {
               <div className="border-t pt-4 mt-4">
                   <div className="flex justify-between items-center">
                       <p className="text-sm text-muted-foreground">Valor Estimado</p>
-                      <p className="font-headline text-xl font-bold">R$ 140,00</p>
+                      <p className="font-headline text-xl font-bold">R$ {estimatedValue.toFixed(2).replace('.', ',')}</p>
                   </div>
               </div>
             </CardContent>
           </Card>
           
-          <Button size="lg" className="w-full" disabled={!isFormComplete} asChild>
-              <Link href="/login?redirect=/schedule/confirm">Confirmar e Ir para Pagamento</Link>
+          <Button size="lg" className="w-full" disabled={!isFormComplete || isLoading} onClick={handleConfirm}>
+              {isLoading ? <Loader2 className="animate-spin" /> : "Confirmar e Ir para Pagamento"}
           </Button>
 
           <p className="text-xs text-muted-foreground text-center">

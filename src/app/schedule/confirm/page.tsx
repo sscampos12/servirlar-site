@@ -2,7 +2,7 @@
 
 "use client"
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Card,
   CardContent,
@@ -29,6 +29,9 @@ import { Label } from "@/components/ui/label"
 import { Input } from '@/components/ui/input';
 import { ScheduleLayout } from '@/app/schedule/layout';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { useAuth } from '@/hooks/use-auth';
+import { db } from '@/lib/firebase';
+import { collection, query, where, getDocs, orderBy, limit, DocumentData } from 'firebase/firestore';
 
 const DetailRow = ({ icon: Icon, label, value }: { icon: React.ElementType, label: string, value: string }) => (
     <div className="flex items-center justify-between">
@@ -44,25 +47,14 @@ const DetailRow = ({ icon: Icon, label, value }: { icon: React.ElementType, labe
 export default function ConfirmationPage() {
   const { toast } = useToast();
   const router = useRouter();
+  const { user } = useAuth();
+
   const [paymentMethod, setPaymentMethod] = useState("card");
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [qrCodeImage, setQrCodeImage] = useState<string | null>(null);
   const [pixCopiaECola, setPixCopiaECola] = useState<string | null>(null);
-
-  // Exemplo de dados do agendamento (em um app real, viria do estado global ou props)
-  const orderDetails = {
-    service: "Faxina Padrão",
-    date: "28 de Julho, 2024",
-    time: "09:00 (4 horas)",
-    professional: "Maria Aparecida",
-    total: 140.00,
-    clientName: "Cliente Exemplo",
-    address: "Rua das Flores, 123 - Centro",
-    clientCpf: "123.456.789-00", // CPF para o PIX
-    clientEmail: "cliente@exemplo.com", // Email para o Cartão
-    clientPhone: "11999998888", // Telefone para o Cartão
-  };
+  const [orderDetails, setOrderDetails] = useState<DocumentData | null>(null);
 
   // Estados do formulário de cartão
   const [cardNumber, setCardNumber] = useState('');
@@ -70,7 +62,43 @@ export default function ConfirmationPage() {
   const [cardCvc, setCardCvc] = useState('');
   const [cardName, setCardName] = useState('');
 
+   useEffect(() => {
+    const fetchLastSchedule = async () => {
+      if (user) {
+        setIsLoading(true);
+        try {
+          const q = query(
+            collection(db, "schedules"),
+            where("clientId", "==", user.uid),
+            where("status", "==", "Pendente"),
+            orderBy("createdAt", "desc"),
+            limit(1)
+          );
+          const querySnapshot = await getDocs(q);
+          if (!querySnapshot.empty) {
+            const lastSchedule = querySnapshot.docs[0].data();
+            setOrderDetails(lastSchedule);
+          } else {
+             setError("Nenhum agendamento pendente encontrado.");
+          }
+        } catch (e) {
+          setError("Erro ao buscar detalhes do agendamento.");
+          console.error(e);
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    fetchLastSchedule();
+  }, [user]);
+
   const handlePayment = async () => {
+    if (!orderDetails) {
+        toast({ variant: "destructive", title: "Erro", description: "Detalhes do pedido não encontrados." });
+        return;
+    }
+
     setIsLoading(true);
     setError(null);
     setQrCodeImage(null);
@@ -81,7 +109,7 @@ export default function ConfirmationPage() {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    valor: orderDetails.total,
+                    valor: orderDetails.value,
                     cpf: orderDetails.clientCpf,
                     nome: orderDetails.clientName,
                     descricao: `Serviço: ${orderDetails.service}`,
@@ -98,7 +126,7 @@ export default function ConfirmationPage() {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    valor: orderDetails.total,
+                    valor: orderDetails.value,
                     cpf: orderDetails.clientCpf,
                     nome: cardName,
                     email: orderDetails.clientEmail,
@@ -132,6 +160,28 @@ export default function ConfirmationPage() {
     }
   };
   
+    if (isLoading) {
+        return (
+            <ScheduleLayout>
+                <div className="flex h-full items-center justify-center">
+                    <Loader2 className="h-16 w-16 animate-spin" />
+                </div>
+            </ScheduleLayout>
+        );
+    }
+
+    if (error || !orderDetails) {
+        return (
+             <ScheduleLayout>
+                <Alert variant="destructive">
+                    <AlertTitle>Erro</AlertTitle>
+                    <AlertDescription>{error || "Não foi possível carregar os detalhes do seu agendamento."}</AlertDescription>
+                </Alert>
+            </ScheduleLayout>
+        )
+    }
+
+
   return (
     <ScheduleLayout>
         <div className="max-w-4xl mx-auto">
@@ -154,13 +204,13 @@ export default function ConfirmationPage() {
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <DetailRow icon={Home} label="Serviço" value={orderDetails.service} />
-                            <DetailRow icon={Calendar} label="Data" value={orderDetails.date} />
-                            <DetailRow icon={Clock} label="Horário" value={orderDetails.time} />
-                            <DetailRow icon={User} label="Profissional" value={orderDetails.professional} />
+                            <DetailRow icon={Calendar} label="Data" value={new Date(orderDetails.date).toLocaleDateString('pt-BR', {timeZone: 'UTC'})} />
+                            <DetailRow icon={Clock} label="Horário" value={`${orderDetails.time} (${orderDetails.duration})`} />
+                            <DetailRow icon={User} label="Profissional" value={orderDetails.professionalName || "Aguardando"} />
                             <Separator />
                             <div className="flex items-center justify-between text-lg font-bold">
                                 <span>Total</span>
-                                <span>R$ {orderDetails.total.toFixed(2).replace('.',',')}</span>
+                                <span>R$ {orderDetails.value.toFixed(2).replace('.',',')}</span>
                             </div>
                         </CardContent>
                     </Card>

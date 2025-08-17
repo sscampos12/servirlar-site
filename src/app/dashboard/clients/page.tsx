@@ -17,26 +17,22 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
-import { User, Mail, Phone, Calendar, DollarSign, Bell } from "lucide-react";
+import { User, Mail, Phone, Calendar, DollarSign, Bell, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { useAuth } from "@/hooks/use-auth";
+import { useEffect, useState } from "react";
+import { doc, getDoc, collection, query, where, getDocs, DocumentData } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
-const mockClient = { 
-    id: 1, 
-    name: "Carlos Mendes", 
-    email: "carlos.mendes@example.com", 
-    phone: "(11) 91234-5678", 
-    appointments: 5, 
-    totalSpent: 750.00 
-};
-
-const mockAppointments = [
-    { id: 1, clientId: 1, professional: "Maria Aparecida", service: "Faxina Padrão", date: "2024-07-10", status: "Finalizado", value: 140.00 },
-    { id: 2, clientId: 1, professional: "Ana Paula", service: "Passadoria", date: "2024-06-25", status: "Finalizado", value: 74.00 },
-    { id: 3, clientId: 1, professional: "Maria Aparecida", service: "Faxina Padrão", date: "2024-06-10", status: "Finalizado", value: 140.00 },
-    { id: 4, clientId: 1, professional: "Ana Paula", service: "Passadoria", date: "2024-05-25", status: "Finalizado", value: 148.00 },
-    { id: 9, clientId: 1, professional: "João da Silva", service: "Cozinheira", date: "2024-05-11", status: "Finalizado", value: 248.00 },
-];
+interface Appointment {
+    id: string;
+    professionalName?: string;
+    service: string;
+    date: string;
+    status: string;
+    value: number;
+}
 
 const mockNotifications = [
     { id: 1, title: "Agendamento Confirmado", description: "Sua faxina com Maria Aparecida foi confirmada para 10/07." },
@@ -58,6 +54,58 @@ const DetailRow = ({ icon: Icon, label, value }: { icon: React.ElementType, labe
 
 
 export default function ClientHistoryPage() {
+    const { user } = useAuth();
+    const [clientData, setClientData] = useState<DocumentData | null>(null);
+    const [appointments, setAppointments] = useState<Appointment[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            if (user) {
+                try {
+                    // Fetch client profile
+                    const clientDocRef = doc(db, "clients", user.uid);
+                    const clientDocSnap = await getDoc(clientDocRef);
+                    if (clientDocSnap.exists()) {
+                        setClientData(clientDocSnap.data());
+                    }
+
+                    // Fetch client appointments
+                    const q = query(collection(db, "schedules"), where("clientId", "==", user.uid));
+                    const querySnapshot = await getDocs(q);
+                    const appointmentsData: Appointment[] = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Appointment));
+                    setAppointments(appointmentsData);
+
+                } catch (error) {
+                    console.error("Error fetching client data:", error);
+                } finally {
+                    setIsLoading(false);
+                }
+            } else {
+                 setIsLoading(false);
+            }
+        };
+
+        fetchData();
+    }, [user]);
+
+    const totalSpent = appointments.reduce((sum, app) => sum + (app.value || 0), 0);
+
+     if (isLoading) {
+        return (
+            <div className="flex h-full items-center justify-center">
+                <Loader2 className="h-16 w-16 animate-spin" />
+            </div>
+        );
+    }
+    
+    if (!user || !clientData) {
+        return (
+             <div className="text-center text-muted-foreground p-8">
+                Cliente não encontrado. Por favor, faça login novamente.
+            </div>
+        )
+    }
 
     return (
         <div className="flex flex-col gap-6">
@@ -74,12 +122,12 @@ export default function ClientHistoryPage() {
                             <CardTitle className="font-headline">Minhas Informações</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                            <DetailRow icon={User} label="Nome" value={mockClient.name} />
-                            <DetailRow icon={Mail} label="Email" value={mockClient.email} />
-                            <DetailRow icon={Phone} label="Telefone" value={mockClient.phone} />
+                            <DetailRow icon={User} label="Nome" value={clientData.fullName} />
+                            <DetailRow icon={Mail} label="Email" value={clientData.email} />
+                            <DetailRow icon={Phone} label="Telefone" value={"Não informado"} />
                             <Separator />
-                            <DetailRow icon={Calendar} label="Total de Agendamentos" value={`${mockClient.appointments} serviços`} />
-                            <DetailRow icon={DollarSign} label="Valor Total Gasto" value={`R$ ${mockClient.totalSpent.toFixed(2).replace('.', ',')}`} />
+                            <DetailRow icon={Calendar} label="Total de Agendamentos" value={`${appointments.length} serviços`} />
+                            <DetailRow icon={DollarSign} label="Valor Total Gasto" value={`R$ ${totalSpent.toFixed(2).replace('.', ',')}`} />
                         </CardContent>
                     </Card>
                     <Card>
@@ -114,7 +162,7 @@ export default function ClientHistoryPage() {
                         </CardHeader>
                         <CardContent>
                             <div className="border rounded-md max-h-[600px] overflow-y-auto">
-                                {mockAppointments.length > 0 ? (
+                                {appointments.length > 0 ? (
                                     <Table>
                                         <TableHeader>
                                             <TableRow>
@@ -125,16 +173,16 @@ export default function ClientHistoryPage() {
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody>
-                                            {mockAppointments.map(app => (
+                                            {appointments.map(app => (
                                                 <TableRow key={app.id}>
                                                     <TableCell>
                                                        <div className="font-medium">{app.service}</div>
                                                        <div className="text-xs text-muted-foreground font-mono">R$ {app.value.toFixed(2).replace('.', ',')}</div>
                                                     </TableCell>
-                                                    <TableCell>{app.professional}</TableCell>
+                                                    <TableCell>{app.professionalName || 'Aguardando'}</TableCell>
                                                     <TableCell>{new Date(app.date).toLocaleDateString('pt-BR', {timeZone: 'UTC'})}</TableCell>
                                                     <TableCell>
-                                                        <Badge variant={app.status === 'Finalizado' ? 'default' : 'secondary'}>{app.status}</Badge>
+                                                        <Badge variant={app.status === 'Finalizado' ? 'default' : app.status === 'Confirmado' ? 'secondary' : 'outline'}>{app.status}</Badge>
                                                     </TableCell>
                                                 </TableRow>
                                             ))}
