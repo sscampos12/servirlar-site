@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from "next/link"
@@ -7,6 +6,9 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useSearchParams, useRouter } from "next/navigation"
 import { useToast } from "@/hooks/use-toast";
+import React, { useState } from "react";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "@/lib/firebase";
 
 export function LoginForm() {
   const searchParams = useSearchParams();
@@ -14,15 +16,29 @@ export function LoginForm() {
   const { toast } = useToast();
   const redirectUrl = searchParams.get('redirect') || '/dashboard/clients';
 
-  const handleLogin = (e: React.FormEvent) => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real app, you'd perform authentication here.
-    // For the prototype, we'll just show a success message and redirect.
-    toast({
-      title: "Login bem-sucedido!",
-      description: "Redirecionando...",
-    });
-    router.push(redirectUrl);
+    setIsLoading(true);
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      toast({
+        title: "Login bem-sucedido!",
+        description: "Redirecionando...",
+      });
+      router.push(redirectUrl);
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Erro no Login",
+        description: error.message,
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -34,6 +50,8 @@ export function LoginForm() {
           type="email"
           placeholder="seu@email.com"
           required
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
         />
       </div>
       <div className="grid gap-2">
@@ -46,10 +64,16 @@ export function LoginForm() {
             Esqueceu sua senha?
           </Link>
         </div>
-        <Input id="password" type="password" required />
+        <Input 
+            id="password" 
+            type="password" 
+            required 
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+        />
       </div>
-      <Button type="submit" className="w-full">
-        Entrar
+      <Button type="submit" className="w-full" disabled={isLoading}>
+        {isLoading ? "Entrando..." : "Entrar"}
       </Button>
       <div className="mt-4 text-center text-sm">
         Não tem uma conta?{" "}

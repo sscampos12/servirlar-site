@@ -1,0 +1,112 @@
+"use client";
+
+import { useState } from 'react';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import { ClientContract } from '@/components/contracts/client-contract';
+import { useToast } from '@/hooks/use-toast';
+import { useRouter } from 'next/navigation';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
+
+
+export function ClientRegistrationForm() {
+  const [agreedToContract, setAgreedToContract] = useState(false);
+  const { toast } = useToast();
+  const router = useRouter();
+
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!agreedToContract) {
+      toast({
+        variant: "destructive",
+        title: "Erro de Validação",
+        description: "Por favor, leia e aceite os Termos de Serviço para continuar.",
+      });
+      return;
+    }
+    if (password !== confirmPassword) {
+        toast({
+            variant: "destructive",
+            title: "Erro de Validação",
+            description: "As senhas não coincidem.",
+        });
+        return;
+    }
+
+    setIsLoading(true);
+
+    try {
+        await createUserWithEmailAndPassword(auth, email, password);
+        toast({
+            title: "Cadastro Realizado!",
+            description: "Sua conta foi criada com sucesso. Faça o login para começar.",
+        });
+        router.push('/login');
+    } catch (error: any) {
+        toast({
+            variant: "destructive",
+            title: "Erro no Cadastro",
+            description: error.message,
+        });
+    } finally {
+        setIsLoading(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="grid md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+            <Label htmlFor="fullName">Nome Completo</Label>
+            <Input id="fullName" placeholder="Seu nome" required />
+        </div>
+            <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <Input id="email" type="email" placeholder="seu@email.com" required value={email} onChange={e => setEmail(e.target.value)} />
+        </div>
+        </div>
+        <div className="space-y-2">
+            <Label htmlFor="address">Endereço Principal</Label>
+            <Input id="address" placeholder="Rua, Número, Bairro" required />
+        </div>
+        <div className="grid md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+            <Label htmlFor="password">Senha</Label>
+            <Input id="password" type="password" required value={password} onChange={e => setPassword(e.target.value)} />
+        </div>
+        <div className="space-y-2">
+            <Label htmlFor="confirmPassword">Confirmar Senha</Label>
+            <Input id="confirmPassword" type="password" required value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} />
+        </div>
+        </div>
+        
+        <div className="space-y-4 pt-4">
+        <h3 className="font-headline text-xl font-semibold text-center">Termos do Serviço</h3>
+        <div className="h-48 overflow-y-scroll bg-muted/50 p-4 rounded-md border">
+            <ClientContract />
+        </div>
+        <div className="flex items-center space-x-2">
+            <Checkbox id="agreeContract" checked={agreedToContract} onCheckedChange={(checked) => setAgreedToContract(!!checked)} />
+            <Label htmlFor="agreeContract" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+            Li e concordo com os Termos do Serviço.
+            </Label>
+        </div>
+        </div>
+
+        <div className="text-center pt-4">
+        <Button type="submit" size="lg" disabled={!agreedToContract || isLoading}>
+            {isLoading ? "Criando Conta..." : "Criar Conta"}
+        </Button>
+        </div>
+    </form>
+  );
+}
