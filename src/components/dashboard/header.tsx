@@ -12,6 +12,7 @@ import {
 import { UserNav } from "./user-nav"
 import { SidebarNav } from "./sidebar-nav"
 import { Logo } from "@/components/logo"
+import { Notifications } from "./notifications"
 
 export function DashboardHeader() {
   return (
@@ -44,6 +45,7 @@ export function DashboardHeader() {
       <div className="w-full flex-1">
         {/* Can add search or other header elements here */}
       </div>
+      <Notifications />
       <UserNav />
     </header>
   )

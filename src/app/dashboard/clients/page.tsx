@@ -17,7 +17,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
-import { User, Mail, Phone, Calendar, DollarSign } from "lucide-react";
+import { User, Mail, Phone, Calendar, DollarSign, Bell } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 
@@ -36,6 +36,12 @@ const mockAppointments = [
     { id: 3, clientId: 1, professional: "Maria Aparecida", service: "Faxina Padrão", date: "2024-06-10", status: "Finalizado", value: 140.00 },
     { id: 4, clientId: 1, professional: "Ana Paula", service: "Passadoria", date: "2024-05-25", status: "Finalizado", value: 148.00 },
     { id: 9, clientId: 1, professional: "João da Silva", service: "Cozinheira", date: "2024-05-11", status: "Finalizado", value: 248.00 },
+];
+
+const mockNotifications = [
+    { id: 1, title: "Agendamento Confirmado", description: "Sua faxina com Maria Aparecida foi confirmada para 10/07." },
+    { id: 2, title: "Lembrete de Serviço", description: "Seu serviço de passadoria com Ana Paula é amanhã." },
+    { id: 3, title: "Pagamento Recebido", description: "O pagamento de R$ 140,00 foi processado com sucesso." },
 ];
 
 const DetailRow = ({ icon: Icon, label, value }: { icon: React.ElementType, label: string, value: React.ReactNode }) => (
@@ -61,8 +67,8 @@ export default function ClientHistoryPage() {
                 </h1>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="space-y-4 md:col-span-1">
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                <div className="space-y-6 xl:col-span-1">
                     <Card>
                         <CardHeader>
                             <CardTitle className="font-headline">Minhas Informações</CardTitle>
@@ -76,8 +82,29 @@ export default function ClientHistoryPage() {
                             <DetailRow icon={DollarSign} label="Valor Total Gasto" value={`R$ ${mockClient.totalSpent.toFixed(2).replace('.', ',')}`} />
                         </CardContent>
                     </Card>
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="font-headline flex items-center gap-2">
+                                <Bell className="h-5 w-5" />
+                                Últimas Notificações
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            {mockNotifications.map(notification => (
+                                <div key={notification.id} className="flex items-start gap-3">
+                                     <div className="flex items-center justify-center bg-primary/10 rounded-full h-8 w-8 flex-shrink-0 mt-1">
+                                        <Bell className="h-4 w-4 text-primary" />
+                                    </div>
+                                    <div>
+                                        <p className="font-semibold text-sm">{notification.title}</p>
+                                        <p className="text-xs text-muted-foreground">{notification.description}</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </CardContent>
+                    </Card>
                 </div>
-                <div className="space-y-4 md:col-span-2">
+                <div className="space-y-4 xl:col-span-2">
                     <Card>
                         <CardHeader>
                             <CardTitle className="font-headline">Histórico de Agendamentos</CardTitle>
@@ -86,7 +113,7 @@ export default function ClientHistoryPage() {
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <div className="border rounded-md max-h-[500px] overflow-y-auto">
+                            <div className="border rounded-md max-h-[600px] overflow-y-auto">
                                 {mockAppointments.length > 0 ? (
                                     <Table>
                                         <TableHeader>
