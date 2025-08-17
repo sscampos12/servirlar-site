@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { Home, Calendar, Bot, User, Users, LineChart, Contact, Banknote } from "lucide-react"
+import { Home, Calendar, Bot, User, Users, LineChart, Contact, Banknote, Briefcase } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 
 const navItems = [
@@ -11,6 +11,7 @@ const navItems = [
     { href: "/schedule", label: "Agendar", icon: Calendar },
     { href: "/dashboard/providers", label: "Profissionais", icon: Users },
     { href: "/dashboard/clients", label: "Clientes", icon: Contact },
+    { href: "/dashboard/services", label: "Serviços", icon: Briefcase },
     { href: "/dashboard/reports", label: "Relatórios", icon: LineChart },
     { href: "/dashboard/financial", label: "Financeiro", icon: Banknote },
     { href: "/dashboard/insights", label: "AI Insights", icon: Bot, badge: "Beta" },
@@ -39,5 +40,3 @@ export function SidebarNav() {
     </nav>
   )
 }
-
-    
