@@ -1,3 +1,5 @@
+"use client"
+
 import {
     Avatar,
     AvatarFallback,
@@ -75,4 +77,3 @@ import { useRouter } from "next/navigation"
       </DropdownMenu>
     )
   }
-  
