@@ -1,3 +1,4 @@
+
 "use client"
 import Link from "next/link"
 import {
@@ -8,19 +9,15 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft, Download, ThumbsDown, ThumbsUp, User, Video, Banknote, FileText, MessageCircle, Calendar, DollarSign } from "lucide-react"
+import { ArrowLeft, Download, ThumbsDown, ThumbsUp, User, Video, Banknote, FileText, MessageCircle, Calendar, DollarSign, Loader2 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { useToast } from "@/hooks/use-toast"
-import { notFound } from "next/navigation"
+import { notFound, useRouter } from "next/navigation"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Separator } from "@/components/ui/separator"
-
-const mockProviders = [
-    { id: 1, name: "Maria Aparecida", cpf: "123.456.789-00", status: "Aprovado", date: "15/07/2024", email: "maria.aparecida@example.com", phone: "(11) 98765-4321", birthdate: "10/05/1985", pixKey: "maria.pix@banco.com", bankRefs: ["Gerente João - Banco A", "Gerente Ana - Banco B", "Contato Silva - Banco C"], videoUrl: "https://youtu.be/exemplo" },
-    { id: 2, name: "João da Silva", cpf: "987.654.321-00", status: "Pendente", date: "14/07/2024", email: "joao.silva@example.com", phone: "(21) 91234-5678", birthdate: "22/08/1990", pixKey: "joao.da.silva@email.com", bankRefs: ["Referência 1", "Referência 2", "Referência 3"] },
-    { id: 3, name: "Ana Paula", cpf: "111.222.333-44", status: "Aprovado", date: "13/07/2024", email: "ana.paula@example.com", phone: "(31) 99999-8888", birthdate: "03/11/1992", pixKey: "11122233344", bankRefs: ["Banco X", "Banco Y", "Banco Z"] },
-    { id: 4, name: "Carlos de Souza", cpf: "444.555.666-77", status: "Rejeitado", date: "12/07/2024", email: "carlos.souza@example.com", phone: "(41) 98877-6655", birthdate: "15/02/1980", pixKey: "carlos.souza@email.com.br", bankRefs: ["Ref A", "Ref B", "Ref C"] },
-];
+import { useEffect, useState } from "react"
+import { doc, getDoc, updateDoc, DocumentData, Timestamp } from "firebase/firestore"
+import { db } from "@/lib/firebase"
 
 const mockAppointments = [
     { id: 1, client: "Carlos Mendes", service: "Faxina Padrão", date: "2024-07-10", status: "Finalizado", professional: "Maria Aparecida", value: 140.00 },
@@ -49,15 +46,61 @@ const DetailSection = ({ title, icon, children, className }: { title: string, ic
     </Card>
 )
 
+interface Professional {
+    id: string;
+    fullName: string;
+    cpf: string;
+    birthdate: string;
+    createdAt: Timestamp;
+    email: string;
+    phone: string;
+    pixKey: string;
+    bankRef1: string;
+    bankRef2: string;
+    bankRef3: string;
+    videoUrl?: string;
+    status: 'Aprovado' | 'Pendente' | 'Rejeitado';
+}
+
 export default function ProviderDetailPage({ params }: { params: { id: string } }) {
     const { toast } = useToast();
-    const provider = mockProviders.find(p => p.id.toString() === params.id);
+    const router = useRouter();
+    const [provider, setProvider] = useState<Professional | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
 
+    useEffect(() => {
+        const fetchProvider = async () => {
+            if (params.id) {
+                const docRef = doc(db, "professionals", params.id);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    setProvider({ id: docSnap.id, ...docSnap.data() } as Professional);
+                } else {
+                    notFound();
+                }
+                setIsLoading(false);
+            }
+        };
+
+        fetchProvider();
+    }, [params.id]);
+
+
+    if (isLoading) {
+        return (
+            <div className="flex h-full items-center justify-center">
+                <Loader2 className="h-16 w-16 animate-spin" />
+            </div>
+        );
+    }
+    
     if (!provider) {
         return notFound();
     }
 
-    const providerAppointments = mockAppointments.filter(app => app.professional === provider.name);
+    // TODO: Replace with real data from Firestore
+    const providerAppointments = mockAppointments.filter(app => app.professional === provider.fullName);
     const totalAppointments = providerAppointments.length;
     const totalBilled = providerAppointments.reduce((sum, app) => sum + app.value, 0);
     
@@ -72,11 +115,25 @@ export default function ProviderDetailPage({ params }: { params: { id: string } 
         }
     }
 
-    const handleAction = (action: "aprovar" | "rejeitar") => {
-        toast({
-            title: `Profissional ${action === "aprovar" ? "Aprovado" : "Rejeitado"}`,
-            description: `${provider.name} foi ${action === "aprovar" ? "aprovado" : "rejeitado"} com sucesso.`
-        })
+    const handleAction = async (action: "aprovar" | "rejeitar") => {
+        const newStatus = action === "aprovar" ? "Aprovado" : "Rejeitado";
+        const docRef = doc(db, "professionals", provider.id);
+        
+        try {
+            await updateDoc(docRef, { status: newStatus });
+            setProvider(prev => prev ? { ...prev, status: newStatus } : null);
+            toast({
+                title: `Profissional ${action === "aprovar" ? "Aprovado" : "Rejeitado"}`,
+                description: `${provider.fullName} foi ${action === "aprovar" ? "aprovado" : "rejeitado"} com sucesso.`
+            });
+             router.push("/dashboard/providers");
+        } catch (error) {
+             toast({
+                variant: "destructive",
+                title: "Erro",
+                description: "Não foi possível atualizar o status do profissional."
+            });
+        }
     }
 
     const getWhatsAppLink = (phone: string) => {
@@ -101,10 +158,10 @@ export default function ProviderDetailPage({ params }: { params: { id: string } 
             <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
                 <DetailSection title="Informações Pessoais" icon={<User className="h-5 w-5 text-primary"/>}>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <InfoField label="Nome Completo" value={provider.name} />
+                        <InfoField label="Nome Completo" value={provider.fullName} />
                         <InfoField label="CPF" value={provider.cpf} />
                         <InfoField label="Data de Nascimento" value={provider.birthdate} />
-                        <InfoField label="Data de Cadastro" value={provider.date} />
+                        <InfoField label="Data de Cadastro" value={provider.createdAt ? new Date(provider.createdAt.seconds * 1000).toLocaleDateString('pt-BR') : 'N/A'} />
                         <InfoField label="Email" value={provider.email} />
                         <InfoField label="Telefone" value={provider.phone} />
                     </div>
@@ -116,7 +173,9 @@ export default function ProviderDetailPage({ params }: { params: { id: string } 
                          <div>
                             <span className="text-sm text-muted-foreground">Referências Bancárias</span>
                             <ul className="list-disc list-inside font-medium space-y-1">
-                                {provider.bankRefs.map((ref, i) => <li key={i}>{ref}</li>)}
+                                {provider.bankRef1 && <li>{provider.bankRef1}</li>}
+                                {provider.bankRef2 && <li>{provider.bankRef2}</li>}
+                                {provider.bankRef3 && <li>{provider.bankRef3}</li>}
                             </ul>
                         </div>
                     </div>

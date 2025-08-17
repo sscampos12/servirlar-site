@@ -1,3 +1,6 @@
+
+"use client";
+
 import {
     Card,
     CardContent,
@@ -15,17 +18,45 @@ import {
   } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Download, Eye } from "lucide-react"
+import { Eye, Loader2 } from "lucide-react"
 import Link from "next/link"
+import { useEffect, useState } from "react";
+import { collection, onSnapshot, query, DocumentData, Timestamp } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
-const mockProviders = [
-    { id: 1, name: "Maria Aparecida", cpf: "123.456.789-00", status: "Aprovado", date: "15/07/2024" },
-    { id: 2, name: "João da Silva", cpf: "987.654.321-00", status: "Pendente", date: "14/07/2024" },
-    { id: 3, name: "Ana Paula", cpf: "111.222.333-44", status: "Aprovado", date: "13/07/2024" },
-    { id: 4, name: "Carlos de Souza", cpf: "444.555.666-77", status: "Rejeitado", date: "12/07/2024" },
-];
+interface Professional {
+    id: string;
+    fullName: string;
+    cpf: string;
+    createdAt: Timestamp;
+    status: "Aprovado" | "Pendente" | "Rejeitado";
+}
 
 export default function ProvidersPage() {
+    const [professionals, setProfessionals] = useState<Professional[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const q = query(collection(db, "professionals"));
+        const unsubscribe = onSnapshot(q, (querySnapshot) => {
+            const professionalsData: Professional[] = [];
+            querySnapshot.forEach((doc: DocumentData) => {
+                const data = doc.data();
+                professionalsData.push({
+                    id: doc.id,
+                    fullName: data.fullName,
+                    cpf: data.cpf,
+                    createdAt: data.createdAt,
+                    status: data.status,
+                });
+            });
+            setProfessionals(professionalsData);
+            setIsLoading(false);
+        });
+
+        return () => unsubscribe();
+    }, []);
+
     const getStatusVariant = (status: string) => {
         switch (status) {
             case "Aprovado":
@@ -53,41 +84,47 @@ export default function ProvidersPage() {
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Nome</TableHead>
-                                <TableHead>CPF</TableHead>
-                                <TableHead>Data de Cadastro</TableHead>
-                                <TableHead>Status</TableHead>
-                                <TableHead className="text-right">Ações</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {mockProviders.map((provider) => (
-                                <TableRow key={provider.id}>
-                                    <TableCell className="font-medium">{provider.name}</TableCell>
-                                    <TableCell>{provider.cpf}</TableCell>
-                                    <TableCell>{provider.date}</TableCell>
-                                    <TableCell>
-                                        <Badge variant={getStatusVariant(provider.status) as "default" | "secondary" | "destructive" | "outline"}>{provider.status}</Badge>
-                                    </TableCell>
-                                    <TableCell className="text-right">
-                                        <Button variant="outline" size="icon" className="mr-2">
-                                            <Download className="h-4 w-4" />
-                                            <span className="sr-only">Baixar Documentos</span>
-                                        </Button>
-                                        <Button variant="outline" size="icon" asChild>
-                                          <Link href={`/dashboard/providers/${provider.id}`}>
-                                            <Eye className="h-4 w-4" />
-                                            <span className="sr-only">Ver Detalhes</span>
-                                          </Link>
-                                        </Button>
-                                    </TableCell>
+                    {isLoading ? (
+                        <div className="flex justify-center items-center h-48">
+                            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                        </div>
+                    ) : (
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Nome</TableHead>
+                                    <TableHead>CPF</TableHead>
+                                    <TableHead>Data de Cadastro</TableHead>
+                                    <TableHead>Status</TableHead>
+                                    <TableHead className="text-right">Ações</TableHead>
                                 </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
+                            </TableHeader>
+                            <TableBody>
+                                {professionals.length > 0 ? professionals.map((provider) => (
+                                    <TableRow key={provider.id}>
+                                        <TableCell className="font-medium">{provider.fullName}</TableCell>
+                                        <TableCell>{provider.cpf}</TableCell>
+                                        <TableCell>{provider.createdAt ? new Date(provider.createdAt.seconds * 1000).toLocaleDateString('pt-BR') : 'N/A'}</TableCell>
+                                        <TableCell>
+                                            <Badge variant={getStatusVariant(provider.status) as "default" | "secondary" | "destructive" | "outline"}>{provider.status}</Badge>
+                                        </TableCell>
+                                        <TableCell className="text-right">
+                                            <Button variant="outline" size="icon" asChild>
+                                              <Link href={`/dashboard/providers/${provider.id}`}>
+                                                <Eye className="h-4 w-4" />
+                                                <span className="sr-only">Ver Detalhes</span>
+                                              </Link>
+                                            </Button>
+                                        </TableCell>
+                                    </TableRow>
+                                )) : (
+                                    <TableRow>
+                                        <TableCell colSpan={5} className="text-center h-24">Nenhum profissional cadastrado.</TableCell>
+                                    </TableRow>
+                                )}
+                            </TableBody>
+                        </Table>
+                    )}
                 </CardContent>
             </Card>
         </div>
