@@ -9,9 +9,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { MarketingLayout } from "@/components/marketing-layout";
 import { useToast } from "@/hooks/use-toast";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "@/lib/firebase";
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
+import { auth, db } from "@/lib/firebase";
 import { Loader2 } from "lucide-react";
+import { doc, setDoc } from "firebase/firestore";
+
+const ADMIN_EMAIL = "contato@ajudaemcasa.com";
+const ADMIN_PASS = "Admin123!";
 
 export default function AdminLoginPage() {
   const [email, setEmail] = useState("");
@@ -24,7 +28,7 @@ export default function AdminLoginPage() {
     e.preventDefault();
     setIsLoading(true);
 
-    if (email !== "contato@ajudaemcasa.com") {
+    if (email !== ADMIN_EMAIL) {
         toast({
             variant: "destructive",
             title: "Acesso Negado",
@@ -35,26 +39,58 @@ export default function AdminLoginPage() {
     }
     
     try {
+      // Try to sign in first
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       
-      // Additional check to ensure it's the admin user.
-      if (userCredential.user.email === "contato@ajudaemcasa.com") {
-        localStorage.setItem("isAdmin", "true"); // Still needed for the initial role check in layout
+      if (userCredential.user.email === ADMIN_EMAIL) {
+        localStorage.setItem("isAdmin", "true");
         toast({
           title: "Login bem-sucedido!",
           description: "Redirecionando para o painel de controle.",
         });
-        router.push("/dashboard/providers"); // Redirect directly to the admin's main page
+        router.push("/dashboard/providers");
       } else {
-        // This case should theoretically not be hit if the email check above is done
         throw new Error("Credenciais de administrador inválidas.");
       }
     } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Credenciais Inválidas",
-        description: "Por favor, verifique seu e-mail e senha.",
-      });
+      // If user not found, create the admin user
+      if (error.code === 'auth/user-not-found' && password === ADMIN_PASS) {
+        try {
+          const newUserCredential = await createUserWithEmailAndPassword(auth, email, password);
+          const user = newUserCredential.user;
+
+          // Set the role in Firestore
+          await setDoc(doc(db, "users", user.uid), {
+            role: "admin",
+            name: "Administrador",
+            email: user.email,
+          });
+
+          localStorage.setItem("isAdmin", "true");
+          toast({
+            title: "Conta de Administrador Criada!",
+            description: "Redirecionando para o painel de controle.",
+          });
+          router.push("/dashboard/providers");
+
+        } catch (creationError: any) {
+           toast({
+            variant: "destructive",
+            title: "Erro ao Criar Admin",
+            description: creationError.message,
+          });
+        }
+      } else {
+          let errorMessage = "Credenciais inválidas. Por favor, verifique seu e-mail e senha.";
+          if(error.code === 'auth/wrong-password') {
+              errorMessage = `Senha incorreta. A senha padrão é: ${ADMIN_PASS}`;
+          }
+          toast({
+            variant: "destructive",
+            title: "Erro no Login",
+            description: errorMessage,
+          });
+      }
     } finally {
       setIsLoading(false);
     }
@@ -95,6 +131,7 @@ export default function AdminLoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   disabled={isLoading}
+                  placeholder="A senha padrão é Admin123!"
                 />
               </div>
               <Button type="submit" className="w-full" disabled={isLoading}>
