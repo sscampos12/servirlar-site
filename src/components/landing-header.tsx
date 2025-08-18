@@ -9,14 +9,13 @@ export function LandingHeader() {
       <div className="container flex h-16 items-center">
         <div className="mr-4 flex items-center">
           <Link href="/" className="mr-6 flex items-center space-x-2">
-            <Logo className="h-8 w-auto" />
-            <span className="font-bold text-lg text-primary font-headline">
-                Lar Seguro
-            </span>
+            <Logo />
           </Link>
           <nav className="hidden space-x-6 text-sm font-medium md:flex">
-            <Link href="/pricing" className="transition-colors hover:text-foreground/80 text-foreground">Preços e Serviços</Link>
-            <Link href="/register/provider" className="transition-colors hover:text-foreground/80 text-foreground">Para Profissionais</Link>
+            <Link href="/pricing" className="transition-colors hover:text-foreground/80 text-foreground">PREÇOS E SERVIÇOS</Link>
+            <Link href="/register/provider" className="transition-colors hover:text-foreground/80 text-foreground">PARA PROFISSIONAIS</Link>
+            <Link href="/faq" className="transition-colors hover:text-foreground/80 text-foreground">FAQ</Link>
+            <Link href="/legal" className="transition-colors hover:text-foreground/80 text-foreground">LEGAL</Link>
           </nav>
         </div>
         <div className="flex flex-1 items-center justify-end space-x-4">
