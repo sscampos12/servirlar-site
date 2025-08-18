@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,33 +9,54 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { MarketingLayout } from "@/components/marketing-layout";
 import { useToast } from "@/hooks/use-toast";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "@/lib/firebase";
+import { Loader2 } from "lucide-react";
 
 export default function AdminLoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
 
-  useEffect(() => {
-    // Clear any existing session storage on page load
-    localStorage.removeItem("isAdmin");
-  }, []);
-
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (email === "contato@ajudaemcasa.com" && password === "Admin123") {
-      localStorage.setItem("isAdmin", "true");
-      toast({
-        title: "Login bem-sucedido!",
-        description: "Redirecionando para o painel de controle.",
-      });
-      router.push("/dashboard");
-    } else {
+    setIsLoading(true);
+
+    if (email !== "contato@ajudaemcasa.com") {
+        toast({
+            variant: "destructive",
+            title: "Acesso Negado",
+            description: "Este e-mail não pertence a um administrador.",
+        });
+        setIsLoading(false);
+        return;
+    }
+    
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      
+      // Additional check to ensure it's the admin user.
+      if (userCredential.user.email === "contato@ajudaemcasa.com") {
+        localStorage.setItem("isAdmin", "true"); // Still needed for the initial role check in layout
+        toast({
+          title: "Login bem-sucedido!",
+          description: "Redirecionando para o painel de controle.",
+        });
+        router.push("/dashboard/providers"); // Redirect directly to the admin's main page
+      } else {
+        // This case should theoretically not be hit if the email check above is done
+        throw new Error("Credenciais de administrador inválidas.");
+      }
+    } catch (error: any) {
       toast({
         variant: "destructive",
         title: "Credenciais Inválidas",
         description: "Por favor, verifique seu e-mail e senha.",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -60,6 +81,7 @@ export default function AdminLoginPage() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  disabled={isLoading}
                 />
               </div>
               <div className="grid gap-2">
@@ -72,10 +94,11 @@ export default function AdminLoginPage() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  disabled={isLoading}
                 />
               </div>
-              <Button type="submit" className="w-full">
-                Entrar como Admin
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : "Entrar como Admin"}
               </Button>
             </form>
           </CardContent>
