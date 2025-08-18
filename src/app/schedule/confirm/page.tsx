@@ -1,5 +1,4 @@
 
-
 "use client"
 
 import { useState, useEffect } from 'react';
@@ -87,11 +86,13 @@ export default function ConfirmationPage() {
         } finally {
           setIsLoading(false);
         }
+      } else {
+          router.push('/login?redirect=/schedule/confirm');
       }
     };
 
     fetchLastSchedule();
-  }, [user]);
+  }, [user, router]);
 
   const handlePayment = async () => {
     if (!orderDetails) {

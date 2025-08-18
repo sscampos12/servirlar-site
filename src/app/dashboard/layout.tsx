@@ -48,7 +48,6 @@ export default function DashboardLayout({
       if (isAdmin && user.email === "contato@ajudaemcasa.com") {
         setRole('admin');
         setIsLoadingRole(false);
-        // Admin-specific redirect logic is handled in the next useEffect
         return; 
       }
       
