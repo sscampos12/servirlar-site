@@ -17,10 +17,8 @@ import {
   MapPin,
   DollarSign,
   User,
-  Calendar,
   Info,
   ThumbsUp,
-  ThumbsDown,
   Loader2,
   CheckCircle,
   XCircle,
@@ -30,7 +28,7 @@ import { useToast } from "@/hooks/use-toast"
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { db } from '@/lib/firebase';
-import { collection, query, where, getDocs, doc, updateDoc, DocumentData, getDoc, onSnapshot } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc, updateDoc, onSnapshot, getDoc } from 'firebase/firestore';
 import { useAuth } from '@/hooks/use-auth';
 
 interface Service {
@@ -60,24 +58,18 @@ const InfoRow = ({ icon: Icon, label, value }: { icon: React.ElementType, label:
 );
 
 
-const ServiceCard = ({ service, onAccept, onDecline, accepted, declined }: { service: Service, onAccept: (id: string) => Promise<void>, onDecline: (id: string) => void, accepted: boolean, declined: boolean }) => {
-    const [isAccepting, setIsAccepting] = useState(false);
-    const [isDeclining, setIsDeclining] = useState(false);
+const ServiceCard = ({ service, onAccept, onDecline, isAccepting, isDeclining }: { service: Service, onAccept: (id: string) => Promise<void>, onDecline: (id: string) => void, isAccepting: boolean, isDeclining: boolean }) => {
     
     const handleAccept = async () => {
-        setIsAccepting(true);
         await onAccept(service.id);
-        // No need to set isAccepting to false, as the component will be removed from the list
     }
     
     const handleDecline = () => {
-        setIsDeclining(true);
         onDecline(service.id);
-        setIsDeclining(false);
     }
     
   return (
-    <Card className={`transition-all duration-300 ${accepted ? 'border-green-500' : ''} ${declined ? 'border-red-500 opacity-50' : ''}`}>
+    <Card className={`transition-all duration-300`}>
       <CardHeader>
         <CardTitle className="font-headline text-lg">{service.service}</CardTitle>
         <CardDescription>{new Date(service.date).toLocaleDateString('pt-BR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' })}</CardDescription>
@@ -91,28 +83,14 @@ const ServiceCard = ({ service, onAccept, onDecline, accepted, declined }: { ser
          <p className="text-xs text-muted-foreground text-right">(Valor total: R$ {service.value.toFixed(2).replace('.', ',')} - Taxa da plataforma: 25%)</p>
       </CardContent>
       <CardFooter className="flex justify-end gap-2">
-        {accepted ? (
-            <div className="flex items-center gap-2 text-green-600 font-semibold">
-                <CheckCircle className="h-5 w-5" />
-                Serviço Aceito!
-            </div>
-        ) : declined ? (
-             <div className="flex items-center gap-2 text-red-600 font-semibold">
-                <XCircle className="h-5 w-5" />
-                Serviço Recusado
-            </div>
-        ) : (
-          <>
             <Button variant="outline" size="sm" onClick={handleDecline} disabled={isAccepting || isDeclining}>
-                {isDeclining ? <Loader2 className="animate-spin h-4 w-4" /> : <ThumbsDown className="h-4 w-4" />}
+                {isDeclining ? <Loader2 className="animate-spin h-4 w-4" /> : <XCircle className="h-4 w-4" />}
                 <span className="ml-2 hidden sm:inline">Recusar</span>
             </Button>
             <Button size="sm" onClick={handleAccept} disabled={isAccepting || isDeclining}>
                 {isAccepting ? <Loader2 className="animate-spin h-4 w-4" /> : <ThumbsUp className="h-4 w-4" />}
                 <span className="ml-2 hidden sm:inline">Aceitar</span>
             </Button>
-          </>
-        )}
       </CardFooter>
     </Card>
   )
@@ -125,6 +103,7 @@ export default function ServicesPage() {
     const [myServices, setMyServices] = useState<Service[]>([]);
     const [declinedServices, setDeclinedServices] = useState<string[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [isProcessing, setIsProcessing] = useState<string | null>(null);
 
     useEffect(() => {
         if (!user) {
@@ -176,6 +155,7 @@ export default function ServicesPage() {
             toast({ variant: "destructive", title: "Erro", description: "Você precisa estar logado para aceitar." });
             return;
         }
+        setIsProcessing(id);
 
         const professionalDocRef = doc(db, "professionals", user.uid);
         
@@ -183,6 +163,7 @@ export default function ServicesPage() {
             const professionalDoc = await getDoc(professionalDocRef);
             if (!professionalDoc.exists()) {
                  toast({ variant: "destructive", title: "Erro", description: "Perfil de profissional não encontrado." });
+                 setIsProcessing(null);
                 return;
             }
 
@@ -198,23 +179,21 @@ export default function ServicesPage() {
             toast({
                 title: "Serviço Aceito!",
                 description: "O agendamento foi adicionado à sua lista de 'Meus Serviços'.",
+                className: "bg-green-100 border-green-500 text-green-700",
             });
         } catch (error) {
              toast({
                 variant: "destructive",
                 title: "Erro",
-                description: "Não foi possível aceitar o serviço.",
+                description: "Não foi possível aceitar o serviço. Outro profissional pode ter aceitado primeiro.",
             });
+        } finally {
+            setIsProcessing(null);
         }
     };
 
     const handleDeclineService = (id: string) => {
         setDeclinedServices(prev => [...prev, id]);
-         toast({
-            title: "Serviço Recusado",
-            description: "O serviço não será mais exibido para você.",
-            duration: 3000,
-        });
     };
 
      const getStatusVariant = (status: string) => {
@@ -257,8 +236,8 @@ export default function ServicesPage() {
                                     service={service} 
                                     onAccept={handleAcceptService}
                                     onDecline={handleDeclineService}
-                                    accepted={false}
-                                    declined={declinedServices.includes(service.id)}
+                                    isAccepting={isProcessing === service.id}
+                                    isDeclining={false}
                                 />
                             ))
                         ) : (
@@ -313,4 +292,3 @@ export default function ServicesPage() {
     </div>
   )
 }
-

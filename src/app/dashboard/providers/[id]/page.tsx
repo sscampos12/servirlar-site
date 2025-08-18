@@ -62,11 +62,12 @@ interface Professional {
     status: 'Aprovado' | 'Pendente' | 'Rejeitado';
 }
 
-export default function ProviderDetailPage({ params: { id } }: { params: { id: string } }) {
+export default function ProviderDetailPage({ params }: { params: { id: string } }) {
     const { toast } = useToast();
     const router = useRouter();
     const [provider, setProvider] = useState<Professional | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const { id } = params;
 
     useEffect(() => {
         const fetchProvider = async () => {

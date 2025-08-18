@@ -45,7 +45,7 @@ export default function DashboardLayout({
       const profDocSnap = await getDoc(profDocRef);
       if (profDocSnap.exists()) {
           setRole('professional');
-          if (pathname.startsWith('/dashboard/services') || pathname.startsWith('/dashboard/providers/profile')) {
+          if (pathname.startsWith('/dashboard/services')) {
               setIsAuthorized(true);
           } else {
               router.replace('/dashboard/services');

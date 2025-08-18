@@ -15,7 +15,7 @@ const allNavItems = [
     { href: "/dashboard/insights", label: "AI Insights", icon: Bot, badge: "Beta", roles: ["admin"] },
     { href: "/dashboard/services", label: "Marketplace", icon: Briefcase, roles: ["professional"] },
     { href: "/dashboard/clients", label: "Meus Agendamentos", icon: User, roles: ["client"] },
-    { href: "/schedule", label: "Agendar Serviço", icon: Calendar, roles: ["client", "professional"] },
+    { href: "/schedule", label: "Agendar Serviço", icon: Calendar, roles: ["client"] },
 ];
 
 export function SidebarNav({ role }: { role: 'admin' | 'client' | 'professional' | null }) {
@@ -35,7 +35,8 @@ export function SidebarNav({ role }: { role: 'admin' | 'client' | 'professional'
           href={item.href}
           className={cn(
             "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary",
-            pathname === item.href && "bg-muted text-primary"
+            pathname.startsWith(item.href) && item.href !== "/" && "bg-muted text-primary",
+            pathname === item.href && item.href === "/" && "bg-muted text-primary"
           )}
         >
           <item.icon className="h-4 w-4" />
