@@ -4,9 +4,9 @@ import React from "react";
 export function Logo({ className, ...props }: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
-      width="170"
-      height="35"
-      viewBox="0 0 170 35"
+      width="53"
+      height="40"
+      viewBox="0 0 53 40"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={cn(className)}
@@ -26,36 +26,6 @@ export function Logo({ className, ...props }: React.SVGProps<SVGSVGElement>) {
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      <text
-        x="55"
-        y="26"
-        fontFamily="'Poppins', sans-serif"
-        fontSize="20"
-        fontWeight="bold"
-        fill="hsl(var(--primary))"
-      >
-        Ajuda
-      </text>
-      <text
-        x="110"
-        y="26"
-        fontFamily="'Poppins', sans-serif"
-        fontSize="20"
-        fontWeight="bold"
-        fill="#A8E6CF"
-      >
-        em
-      </text>
-      <text
-        x="140"
-        y="26"
-        fontFamily="'Poppins', sans-serif"
-        fontSize="20"
-        fontWeight="bold"
-        fill="hsl(var(--primary))"
-      >
-        Casa
-      </text>
     </svg>
   );
 }

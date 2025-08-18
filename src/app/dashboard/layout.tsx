@@ -19,7 +19,7 @@ export type Role = "admin" | "client" | "professional";
 const protectedRoutes: Record<Role, string[]> = {
     admin: ["/dashboard", "/dashboard/providers", "/dashboard/financial", "/dashboard/reports", "/dashboard/insights", "/dashboard/getting-started"],
     professional: ["/dashboard/services"],
-    client: ["/dashboard/clients", "/schedule"],
+    client: ["/dashboard/clients", "/schedule", "/chat"],
 };
 
 export default function DashboardLayout({
@@ -47,31 +47,28 @@ export default function DashboardLayout({
       const isAdmin = localStorage.getItem("isAdmin") === "true";
       if (isAdmin) {
         setRole('admin');
+        setIsLoadingRole(false);
         return;
       }
       
-      const userDocRef = doc(db, "users", user.uid);
-      const userDocSnap = await getDoc(userDocRef);
+      const professionalDocRef = doc(db, "professionals", user.uid);
+      const professionalDocSnap = await getDoc(professionalDocRef);
 
-      if (userDocSnap.exists()) {
-          const userRole = userDocSnap.data().role as Role;
-          setRole(userRole);
-
-          // Check if user is trying to access a forbidden route
-          const allowedRoutes = protectedRoutes[userRole] || [];
-          const isRouteAllowed = allowedRoutes.some(route => pathname.startsWith(route));
-
-          if (!isRouteAllowed) {
-              console.warn(`Redirecting user with role '${userRole}' from forbidden route '${pathname}'`);
-              const defaultRoute = userRole === 'professional' ? '/dashboard/services' : '/dashboard/clients';
-              router.replace(defaultRoute);
-          }
-
+      if (professionalDocSnap.exists()) {
+          setRole("professional");
       } else {
-        // This case should ideally not happen if login/register flow is correct
-        console.error("User document not found, logging out.");
-        await signOut(auth);
-        router.replace('/login?error=user_not_found');
+          const clientDocRef = doc(db, "clients", user.uid);
+          const clientDocSnap = await getDoc(clientDocRef);
+           if (clientDocSnap.exists()) {
+              setRole("client");
+           } else {
+               // This case should ideally not happen if login/register flow is correct
+                console.error("User document not found, logging out.");
+                await signOut(auth);
+                router.replace('/login?error=user_not_found');
+                setIsLoadingRole(false);
+                return;
+           }
       }
       setIsLoadingRole(false);
     };
@@ -79,6 +76,20 @@ export default function DashboardLayout({
     checkUserRole();
 
   }, [loading, user, pathname, router]);
+
+   useEffect(() => {
+    if (isLoadingRole || !role || !user) return;
+
+    const allowedRoutes = protectedRoutes[role] || [];
+    const isRouteAllowed = allowedRoutes.some(route => pathname.startsWith(route));
+
+    if (!isRouteAllowed) {
+        console.warn(`Redirecting user with role '${role}' from forbidden route '${pathname}'`);
+        const defaultRoute = role === 'professional' ? '/dashboard/services' : '/dashboard/clients';
+        router.replace(defaultRoute);
+    }
+   }, [role, isLoadingRole, user, pathname, router]);
+
 
   const isAuthorizing = loading || isLoadingRole;
 
@@ -97,6 +108,11 @@ export default function DashboardLayout({
           <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
             <Link href="/" className="flex items-center gap-2 font-semibold">
               <Logo className="h-8 w-auto" />
+               <span className="font-bold text-lg">
+                    <span className="text-primary">Ajuda</span>
+                    <span className="text-[#A8E6CF]">em</span>
+                    <span className="text-primary">Casa</span>
+                </span>
             </Link>
           </div>
           <div className="flex-1 overflow-y-auto">

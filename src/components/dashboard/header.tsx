@@ -38,7 +38,12 @@ export function DashboardHeader() {
           return;
         }
 
-        setRole('client');
+        const clientDoc = await getDoc(doc(db, "clients", user.uid));
+         if (clientDoc.exists()) {
+          setRole('client');
+          return;
+        }
+
       }
     };
     determineRole();
@@ -59,11 +64,13 @@ export function DashboardHeader() {
         </SheetTrigger>
         <SheetContent side="left" className="flex flex-col p-0">
           <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
-            <Link
-              href="/"
-              className="flex items-center gap-2 font-semibold"
-            >
+             <Link href="/" className="flex items-center gap-2 font-semibold">
               <Logo className="h-8 w-auto" />
+               <span className="font-bold text-lg">
+                    <span className="text-primary">Ajuda</span>
+                    <span className="text-[#A8E6CF]">em</span>
+                    <span className="text-primary">Casa</span>
+                </span>
             </Link>
           </div>
           <div className="flex-1 overflow-y-auto">

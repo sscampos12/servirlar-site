@@ -10,6 +10,11 @@ export function LandingHeader() {
         <div className="mr-4 flex items-center">
           <Link href="/" className="mr-6 flex items-center space-x-2">
             <Logo className="h-8 w-auto" />
+            <span className="font-bold text-lg">
+                <span className="text-primary">Ajuda</span>
+                <span className="text-[#A8E6CF]">em</span>
+                <span className="text-primary">Casa</span>
+            </span>
           </Link>
           <nav className="hidden space-x-6 text-sm font-medium md:flex">
             <Link href="/pricing" className="transition-colors hover:text-foreground/80 text-foreground uppercase">Preços e Serviços</Link>
