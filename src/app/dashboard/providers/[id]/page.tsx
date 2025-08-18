@@ -1,4 +1,3 @@
-
 "use client"
 import Link from "next/link"
 import {
@@ -15,7 +14,7 @@ import { useToast } from "@/hooks/use-toast"
 import { notFound, useRouter } from "next/navigation"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Separator } from "@/components/ui/separator"
-import { useEffect, useState } from "react"
+import { use, useEffect, useState } from "react"
 import { doc, getDoc, updateDoc, DocumentData, Timestamp } from "firebase/firestore"
 import { db } from "@/lib/firebase"
 
@@ -67,7 +66,7 @@ export default function ProviderDetailPage({ params }: { params: { id: string } 
     const router = useRouter();
     const [provider, setProvider] = useState<Professional | null>(null);
     const [isLoading, setIsLoading] = useState(true);
-    const { id } = params;
+    const { id } = use(params);
 
     useEffect(() => {
         const fetchProvider = async () => {
@@ -288,3 +287,5 @@ export default function ProviderDetailPage({ params }: { params: { id: string } 
         </div>
     )
 }
+
+    
