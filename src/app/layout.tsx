@@ -4,7 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from '@/hooks/use-auth';
 
 export const metadata: Metadata = {
-  title: 'Ajuda em Casa',
+  title: 'Lar Seguro',
   description: 'Conectando você aos melhores profissionais domésticos.',
 };
 

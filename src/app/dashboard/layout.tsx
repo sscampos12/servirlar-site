@@ -11,6 +11,16 @@ import { Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { signOut } from "firebase/auth";
+import { auth } from "@/lib/firebase";
+
+export type Role = "admin" | "client" | "professional";
+
+const protectedRoutes: Record<Role, string[]> = {
+    admin: ["/dashboard", "/dashboard/providers", "/dashboard/financial", "/dashboard/reports", "/dashboard/insights", "/dashboard/getting-started"],
+    professional: ["/dashboard/services"],
+    client: ["/dashboard/clients", "/schedule"],
+};
 
 export default function DashboardLayout({
   children,
@@ -20,8 +30,8 @@ export default function DashboardLayout({
   const { user, loading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
-  const [isAuthorized, setIsAuthorized] = useState(false);
-  const [role, setRole] = useState<'admin' | 'client' | 'professional' | null>(null);
+  const [role, setRole] = useState<Role | null>(null);
+  const [isLoadingRole, setIsLoadingRole] = useState(true);
 
   useEffect(() => {
     if (loading) return;
@@ -32,41 +42,47 @@ export default function DashboardLayout({
     }
 
     const checkUserRole = async () => {
+      setIsLoadingRole(true);
       // 1. Check for admin in localStorage (simple check for prototype)
       const isAdmin = localStorage.getItem("isAdmin") === "true";
       if (isAdmin) {
         setRole('admin');
-        setIsAuthorized(true);
         return;
       }
       
-      // 2. Check if user is a professional
-      const profDocRef = doc(db, "professionals", user.uid);
-      const profDocSnap = await getDoc(profDocRef);
-      if (profDocSnap.exists()) {
-          setRole('professional');
-          if (pathname.startsWith('/dashboard/services')) {
-              setIsAuthorized(true);
-          } else {
-              router.replace('/dashboard/services');
-          }
-          return;
-      }
+      const userDocRef = doc(db, "users", user.uid);
+      const userDocSnap = await getDoc(userDocRef);
 
-      // 3. Default to client
-      setRole('client');
-      if (pathname.startsWith('/dashboard/clients') || pathname === '/schedule') {
-        setIsAuthorized(true);
+      if (userDocSnap.exists()) {
+          const userRole = userDocSnap.data().role as Role;
+          setRole(userRole);
+
+          // Check if user is trying to access a forbidden route
+          const allowedRoutes = protectedRoutes[userRole] || [];
+          const isRouteAllowed = allowedRoutes.some(route => pathname.startsWith(route));
+
+          if (!isRouteAllowed) {
+              console.warn(`Redirecting user with role '${userRole}' from forbidden route '${pathname}'`);
+              const defaultRoute = userRole === 'professional' ? '/dashboard/services' : '/dashboard/clients';
+              router.replace(defaultRoute);
+          }
+
       } else {
-        router.replace('/dashboard/clients');
+        // This case should ideally not happen if login/register flow is correct
+        console.error("User document not found, logging out.");
+        await signOut(auth);
+        router.replace('/login?error=user_not_found');
       }
+      setIsLoadingRole(false);
     };
 
     checkUserRole();
 
   }, [loading, user, pathname, router]);
 
-  if (loading || !isAuthorized) {
+  const isAuthorizing = loading || isLoadingRole;
+
+  if (isAuthorizing) {
     return (
       <div className="flex h-screen items-center justify-center">
         <Loader2 className="h-16 w-16 animate-spin" />

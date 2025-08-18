@@ -28,7 +28,7 @@ export default function Home() {
   const testimonials = [
     {
       name: 'Ana Silva',
-      quote: 'Contratei uma diarista pela Ajuda em Casa e o serviço foi impecável! A profissional foi pontual, educada e muito eficiente. Recomendo!',
+      quote: 'Contratei uma diarista pelo Lar Seguro e o serviço foi impecável! A profissional foi pontual, educada e muito eficiente. Recomendo!',
       avatar: 'AS',
     },
     {
@@ -104,7 +104,7 @@ export default function Home() {
         {/* Features Section */}
         <section className="py-16 bg-muted px-4">
           <div className="container mx-auto text-center" id="features">
-            <h2 className="text-3xl font-bold mb-12 font-headline">Por que escolher a Ajuda em Casa?</h2>
+            <h2 className="text-3xl font-bold mb-12 font-headline">Por que escolher o Lar Seguro?</h2>
             <div className="grid md:grid-cols-3 gap-8">
               {features.map((feature, index) => (
                 <div key={index} className="flex flex-col items-center p-4">
