@@ -17,8 +17,8 @@ import { auth } from "@/lib/firebase";
 export type Role = "admin" | "client" | "professional";
 
 const protectedRoutes: Record<Role, string[]> = {
-    admin: ["/dashboard", "/dashboard/providers", "/dashboard/financial", "/dashboard/reports", "/dashboard/insights", "/dashboard/getting-started"],
-    professional: ["/dashboard/services"],
+    admin: ["/dashboard/providers", "/dashboard/financial", "/dashboard/reports", "/dashboard/insights", "/dashboard/getting-started"],
+    professional: ["/dashboard/services", "/dashboard/providers/profile"],
     client: ["/dashboard/clients", "/schedule", "/chat"],
 };
 
@@ -43,11 +43,14 @@ export default function DashboardLayout({
 
     const checkUserRole = async () => {
       setIsLoadingRole(true);
-      // 1. Check for admin in localStorage (simple check for prototype)
+      
       const isAdmin = localStorage.getItem("isAdmin") === "true";
       if (isAdmin) {
         setRole('admin');
         setIsLoadingRole(false);
+        if (pathname === '/dashboard' || pathname === '/dashboard/') {
+          router.replace('/dashboard/providers');
+        }
         return;
       }
       
@@ -62,12 +65,11 @@ export default function DashboardLayout({
            if (clientDocSnap.exists()) {
               setRole("client");
            } else {
-               // This case should ideally not happen if login/register flow is correct
-                console.error("User document not found, logging out.");
-                await signOut(auth);
-                router.replace('/login?error=user_not_found');
-                setIsLoadingRole(false);
-                return;
+               console.error("User document not found, logging out.");
+               await signOut(auth);
+               router.replace('/login?error=user_not_found');
+               setIsLoadingRole(false);
+               return;
            }
       }
       setIsLoadingRole(false);
@@ -79,13 +81,22 @@ export default function DashboardLayout({
 
    useEffect(() => {
     if (isLoadingRole || !role || !user) return;
+    
+    // Redirect logic based on role
+    const isDashboardRoot = pathname === '/dashboard' || pathname === '/dashboard/';
+    if (isDashboardRoot) {
+      if (role === 'admin') router.replace('/dashboard/providers');
+      else if (role === 'professional') router.replace('/dashboard/services');
+      else if (role === 'client') router.replace('/dashboard/clients');
+      return;
+    }
 
     const allowedRoutes = protectedRoutes[role] || [];
     const isRouteAllowed = allowedRoutes.some(route => pathname.startsWith(route));
 
     if (!isRouteAllowed) {
         console.warn(`Redirecting user with role '${role}' from forbidden route '${pathname}'`);
-        const defaultRoute = role === 'professional' ? '/dashboard/services' : '/dashboard/clients';
+        const defaultRoute = role === 'professional' ? '/dashboard/services' : role === 'admin' ? '/dashboard/providers' : '/dashboard/clients';
         router.replace(defaultRoute);
     }
    }, [role, isLoadingRole, user, pathname, router]);
@@ -108,11 +119,6 @@ export default function DashboardLayout({
           <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
             <Link href="/" className="flex items-center gap-2 font-semibold">
               <Logo className="h-8 w-auto" />
-               <span className="font-bold text-lg">
-                    <span className="text-primary">Ajuda</span>
-                    <span className="text-[#A8E6CF]">em</span>
-                    <span className="text-primary">Casa</span>
-                </span>
             </Link>
           </div>
           <div className="flex-1 overflow-y-auto">

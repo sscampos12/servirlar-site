@@ -26,24 +26,49 @@ export function LoginForm() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { toast } = useToast();
-  const defaultRedirect = '/dashboard/clients'; // Default redirect for clients
-  const redirectUrl = searchParams.get('redirect') || defaultRedirect;
+  const requestedRedirect = searchParams.get('redirect');
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
+  const redirectToPanel = async (userId: string) => {
+      // Check for Admin
+      const isAdmin = localStorage.getItem("isAdmin") === "true";
+      if (email === "contato@ajudaemcasa.com" && isAdmin) {
+           router.push(requestedRedirect || '/dashboard/providers');
+           return;
+      }
+
+      // Check for Professional
+      const profDoc = await getDoc(doc(db, "professionals", userId));
+      if (profDoc.exists()) {
+          router.push(requestedRedirect || '/dashboard/services');
+          return;
+      }
+
+      // Check for Client
+      const clientDoc = await getDoc(doc(db, "clients", userId));
+      if (clientDoc.exists()) {
+           router.push(requestedRedirect || '/dashboard/clients');
+           return;
+      }
+      
+      // Fallback
+      router.push('/dashboard/clients');
+  }
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
       toast({
         title: "Login bem-sucedido!",
         description: "Redirecionando...",
       });
-      router.push(redirectUrl);
+      await redirectToPanel(userCredential.user.uid);
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -72,6 +97,7 @@ export function LoginForm() {
 
         if (!clientDocSnap.exists() && !professionalDocSnap.exists()) {
             await setDoc(doc(db, "clients", user.uid), {
+                uid: user.uid,
                 fullName: user.displayName,
                 email: user.email,
                 address: "", // Google sign-in doesn't provide address
@@ -87,12 +113,7 @@ export function LoginForm() {
             });
         }
         
-        // Redirect based on profile type
-        if (professionalDocSnap.exists()) {
-             router.push('/dashboard/services');
-        } else {
-             router.push('/dashboard/clients');
-        }
+        await redirectToPanel(user.uid);
 
     } catch (error: any) {
         toast({
