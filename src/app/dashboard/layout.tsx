@@ -95,7 +95,7 @@ export default function DashboardLayout({
 
     if (!isRouteAllowed) {
         console.warn(`Redirecting user with role '${role}' from forbidden route '${pathname}'`);
-        const defaultRoute = role === 'professional' ? '/dashboard/services' : role === 'admin' ? '/dashboard/providers' : '/dashboard/clients';
+        const defaultRoute = role === 'admin' ? '/dashboard/providers' : role === 'professional' ? '/dashboard/services' : '/dashboard/clients';
         router.replace(defaultRoute);
     }
    }, [role, isLoadingRole, user, pathname, router]);
