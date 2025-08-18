@@ -4,18 +4,20 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { Home, Calendar, Bot, Users, LineChart, Banknote, Briefcase, User, CheckSquare } from "lucide-react"
+import { Home, Calendar, Bot, Users, LineChart, Banknote, Briefcase, User, CheckSquare, Building } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 
 type Role = 'admin' | 'client' | 'professional';
 
 const navConfig: Record<Role, { href: string; label: string; icon: React.ElementType; badge?: string }[]> = {
     admin: [
+        { href: "/dashboard", label: "Painel", icon: Home },
+        { href: "/schedule", label: "Agendar", icon: Calendar },
         { href: "/dashboard/providers", label: "Profissionais", icon: Users },
-        { href: "/dashboard/financial", label: "Financeiro", icon: Banknote },
+        { href: "/dashboard/clients", label: "Clientes", icon: Building },
         { href: "/dashboard/reports", label: "Relatórios", icon: LineChart },
+        { href: "/dashboard/financial", label: "Financeiro", icon: Banknote },
         { href: "/dashboard/insights", label: "AI Insights", icon: Bot, badge: "Beta" },
-        { href: "/dashboard/getting-started", label: "Primeiros Passos", icon: CheckSquare },
     ],
     professional: [
         { href: "/dashboard/services", label: "Serviços", icon: Briefcase },
@@ -45,7 +47,7 @@ export function SidebarNav({ role }: { role: Role | null }) {
           href={item.href}
           className={cn(
             "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary",
-            pathname.startsWith(item.href) && "bg-muted text-primary",
+            pathname === item.href && "bg-muted text-primary",
           )}
         >
           <item.icon className="h-4 w-4" />
