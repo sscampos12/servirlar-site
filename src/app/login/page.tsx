@@ -4,6 +4,7 @@ import { MarketingLayout } from "@/components/marketing-layout"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { LoginForm } from '@/components/login-form';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Separator } from '@/components/ui/separator';
 
 function LoginSkeleton() {
   return (

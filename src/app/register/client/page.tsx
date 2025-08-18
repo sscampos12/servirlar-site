@@ -17,7 +17,12 @@ function RegistrationSkeleton() {
         <Skeleton className="h-10 w-full" />
         <Skeleton className="h-10 w-full" />
       </div>
-      <Skeleton className="h-32 w-full" />
+       <div className="relative py-4">
+        <div className="absolute inset-0 flex items-center">
+          <span className="w-full border-t" />
+        </div>
+      </div>
+      <Skeleton className="h-12 w-full" />
       <div className="flex items-center space-x-2">
         <Skeleton className="h-4 w-4" />
         <Skeleton className="h-4 w-48" />
