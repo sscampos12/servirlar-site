@@ -35,6 +35,7 @@ import Link from 'next/link';
 
 interface Service {
     id: string;
+    clientId: string;
     clientName: string;
     service: string;
     address: string;
@@ -64,11 +65,7 @@ const InfoRow = ({ icon: Icon, label, value }: { icon: React.ElementType, label:
 const ServiceCard = ({ service, onAccept, onDecline, isAccepting, isDeclining }: { service: Service, onAccept: (id: string, clientId: string) => Promise<void>, onDecline: (id: string) => void, isAccepting: boolean, isDeclining: boolean }) => {
     
     const handleAccept = async () => {
-        // Assume service has clientId, though not in interface. Add it if needed.
-        // For now, let's assume we can get it from somewhere or it's added to the service object.
-        // Let's modify the call to pass a placeholder, and adjust the function signature in the main component.
-        // A better approach: The service object from firestore should contain `clientId`. Let's assume it does.
-        await onAccept(service.id, (service as any).clientId);
+        await onAccept(service.id, service.clientId);
     }
     
     const handleDecline = () => {
@@ -180,7 +177,7 @@ export default function ServicesPage() {
                 members: [clientId, user.uid],
                 createdAt: serverTimestamp(),
                 lastMessage: "Serviço aceito! Bem-vindo ao chat.",
-                lastAt: serverTimestamp(),
+                lastMessageAt: serverTimestamp(),
                 serviceId: serviceId
             });
 
@@ -295,7 +292,7 @@ export default function ServicesPage() {
                                         <InfoRow icon={User} label="Cliente" value={`${service.clientName}`} />
                                         <InfoRow icon={MapPin} label="Endereço" value={`${service.address}`} />
                                         <InfoRow icon={Clock} label="Horário" value={`${service.time} (${service.duration})`} />
-                                        {service.chatId && (
+                                        {service.chatId && service.status === 'Confirmado' && (
                                             <Button asChild variant="outline" className="w-full mt-2">
                                                 <Link href={`/chat/${service.chatId}`}>
                                                     <MessageSquare className="mr-2 h-4 w-4" />
@@ -318,3 +315,5 @@ export default function ServicesPage() {
     </div>
   )
 }
+
+    

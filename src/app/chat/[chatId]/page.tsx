@@ -1,7 +1,7 @@
 
 "use client";
 import { useEffect, useState, useRef } from "react";
-import { collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, doc, getDoc } from "firebase/firestore";
+import { collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/hooks/use-auth";
 import { useRouter } from "next/navigation";
@@ -85,7 +85,14 @@ export default function ChatPage({ params }: { params: { chatId: string } }) {
         text: tempText.trim(),
         createdAt: serverTimestamp()
         });
-        // Optionally update chat metadata (lastMessage, etc.)
+
+        // Update chat metadata (lastMessage, etc.)
+        const chatRef = doc(db, 'chats', chatId);
+        await updateDoc(chatRef, {
+            lastMessage: tempText.trim(),
+            lastMessageAt: serverTimestamp()
+        });
+
     } catch (error) {
         console.error("Error sending message:", error);
         setText(tempText); // Restore text on error
@@ -115,7 +122,7 @@ export default function ChatPage({ params }: { params: { chatId: string } }) {
                     <div key={m.id} className={cn("flex items-end gap-2", m.from === user?.uid ? "justify-end" : "justify-start")}>
                          {m.from !== user?.uid && (
                             <Avatar className="h-8 w-8">
-                               <AvatarFallback>{/* Can fetch other user's initial */'O'}</AvatarFallback>
+                               <AvatarFallback>{/* Can fetch other user's initial */'P'}</AvatarFallback>
                            </Avatar>
                          )}
                         <div className={cn(
@@ -139,3 +146,5 @@ export default function ChatPage({ params }: { params: { chatId: string } }) {
     </ScheduleLayout>
   );
 }
+
+    
