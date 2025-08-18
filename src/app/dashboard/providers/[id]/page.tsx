@@ -62,7 +62,7 @@ interface Professional {
     status: 'Aprovado' | 'Pendente' | 'Rejeitado';
 }
 
-export default function ProviderDetailPage({ params }: { params: { id: string } }) {
+export default function ProviderDetailPage({ params: { id } }: { params: { id: string } }) {
     const { toast } = useToast();
     const router = useRouter();
     const [provider, setProvider] = useState<Professional | null>(null);
@@ -70,8 +70,8 @@ export default function ProviderDetailPage({ params }: { params: { id: string } 
 
     useEffect(() => {
         const fetchProvider = async () => {
-            if (params.id) {
-                const docRef = doc(db, "professionals", params.id);
+            if (id) {
+                const docRef = doc(db, "professionals", id);
                 const docSnap = await getDoc(docRef);
 
                 if (docSnap.exists()) {
@@ -84,7 +84,7 @@ export default function ProviderDetailPage({ params }: { params: { id: string } 
         };
 
         fetchProvider();
-    }, [params.id]);
+    }, [id]);
 
 
     if (isLoading) {
