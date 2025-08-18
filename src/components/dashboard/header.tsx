@@ -14,40 +14,12 @@ import { UserNav } from "./user-nav"
 import { SidebarNav } from "./sidebar-nav"
 import { Logo } from "@/components/logo"
 import { Notifications } from "./notifications"
-import { useAuth } from "@/hooks/use-auth"
-import { doc, getDoc } from "firebase/firestore"
-import { db } from "@/lib/firebase"
 import React from "react"
+import { Role } from "@/app/dashboard/layout"
+
 
 export function DashboardHeader() {
-  const { user } = useAuth();
-  const [role, setRole] = React.useState<'admin' | 'client' | 'professional' | null>(null);
-
-  React.useEffect(() => {
-    const determineRole = async () => {
-      if (user) {
-        const isAdmin = localStorage.getItem("isAdmin") === "true";
-        if (isAdmin) {
-          setRole('admin');
-          return;
-        }
-
-        const profDoc = await getDoc(doc(db, "professionals", user.uid));
-        if (profDoc.exists()) {
-          setRole('professional');
-          return;
-        }
-
-        const clientDoc = await getDoc(doc(db, "clients", user.uid));
-         if (clientDoc.exists()) {
-          setRole('client');
-          return;
-        }
-
-      }
-    };
-    determineRole();
-  }, [user]);
+    const [role, setRole] = React.useState<Role | null>('admin');
 
   return (
     <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6">
