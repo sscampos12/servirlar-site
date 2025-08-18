@@ -1,3 +1,4 @@
+
 import Link from "next/link"
 import {
   Menu,
@@ -13,8 +14,36 @@ import { UserNav } from "./user-nav"
 import { SidebarNav } from "./sidebar-nav"
 import { Logo } from "@/components/logo"
 import { Notifications } from "./notifications"
+import { useAuth } from "@/hooks/use-auth"
+import { doc, getDoc } from "firebase/firestore"
+import { db } from "@/lib/firebase"
+import React from "react"
 
 export function DashboardHeader() {
+  const { user } = useAuth();
+  const [role, setRole] = React.useState<'admin' | 'client' | 'professional' | null>(null);
+
+  React.useEffect(() => {
+    const determineRole = async () => {
+      if (user) {
+        const isAdmin = localStorage.getItem("isAdmin") === "true";
+        if (isAdmin) {
+          setRole('admin');
+          return;
+        }
+
+        const profDoc = await getDoc(doc(db, "professionals", user.uid));
+        if (profDoc.exists()) {
+          setRole('professional');
+          return;
+        }
+
+        setRole('client');
+      }
+    };
+    determineRole();
+  }, [user]);
+
   return (
     <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6">
       <Sheet>
@@ -38,7 +67,7 @@ export function DashboardHeader() {
             </Link>
           </div>
           <div className="flex-1 overflow-y-auto">
-            <SidebarNav />
+            <SidebarNav role={role} />
           </div>
         </SheetContent>
       </Sheet>

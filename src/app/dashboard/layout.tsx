@@ -9,15 +9,8 @@ import { Logo } from "@/components/logo";
 import Link from "next/link";
 import { Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
-
-const adminRoutes = [
-  '/dashboard/providers',
-  '/dashboard/financial',
-  '/dashboard/reports',
-  '/dashboard/insights',
-  // Note: /dashboard/services is for professionals
-];
-
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 export default function DashboardLayout({
   children,
@@ -28,28 +21,49 @@ export default function DashboardLayout({
   const router = useRouter();
   const pathname = usePathname();
   const [isAuthorized, setIsAuthorized] = useState(false);
+  const [role, setRole] = useState<'admin' | 'client' | 'professional' | null>(null);
 
   useEffect(() => {
-    if (!loading) {
-      const isAdmin = localStorage.getItem("isAdmin") === "true";
+    if (loading) return;
 
-      if (pathname === '/dashboard' && !isAdmin) {
-         router.replace("/dashboard/clients");
-         return;
+    if (!user) {
+      router.replace(`/login?redirect=${pathname}`);
+      return;
+    }
+
+    const checkUserRole = async () => {
+      // 1. Check for admin in localStorage (simple check for prototype)
+      const isAdmin = localStorage.getItem("isAdmin") === "true";
+      if (isAdmin) {
+        setRole('admin');
+        setIsAuthorized(true);
+        return;
       }
       
-      if (adminRoutes.some(route => pathname.startsWith(route)) && !isAdmin) {
-        // If it's an admin route and user is not admin, deny access
-        router.replace("/admin/login");
-      } else {
-        // For other dashboard routes, user just needs to be logged in
-        if (!user && !isAdmin) {
-            router.replace("/login");
-        } else {
-            setIsAuthorized(true);
-        }
+      // 2. Check if user is a professional
+      const profDocRef = doc(db, "professionals", user.uid);
+      const profDocSnap = await getDoc(profDocRef);
+      if (profDocSnap.exists()) {
+          setRole('professional');
+          if (pathname.startsWith('/dashboard/services') || pathname.startsWith('/dashboard/providers/profile')) {
+              setIsAuthorized(true);
+          } else {
+              router.replace('/dashboard/services');
+          }
+          return;
       }
-    }
+
+      // 3. Default to client
+      setRole('client');
+      if (pathname.startsWith('/dashboard/clients') || pathname === '/schedule') {
+        setIsAuthorized(true);
+      } else {
+        router.replace('/dashboard/clients');
+      }
+    };
+
+    checkUserRole();
+
   }, [loading, user, pathname, router]);
 
   if (loading || !isAuthorized) {
@@ -70,7 +84,7 @@ export default function DashboardLayout({
             </Link>
           </div>
           <div className="flex-1 overflow-y-auto">
-            <SidebarNav />
+            <SidebarNav role={role} />
           </div>
         </div>
       </div>
