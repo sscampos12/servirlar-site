@@ -28,7 +28,7 @@ export default function Home() {
   const testimonials = [
     {
       name: 'Ana Silva',
-      quote: 'Contratei uma diarista pelo Lar Seguro e o serviço foi impecável! A profissional foi pontual, educada e muito eficiente. Recomendo!',
+      quote: 'Contratei uma diarista pelo Ajuda em Casa e o serviço foi impecável! A profissional foi pontual, educada e muito eficiente. Recomendo!',
       avatar: 'AS',
     },
     {
@@ -42,13 +42,13 @@ export default function Home() {
     <MarketingLayout>
       <div className="flex flex-col">
         {/* Hero Section */}
-        <section className="bg-muted py-16 px-8 text-center">
+        <section className="bg-secondary/50 py-16 px-8 text-center">
           <div className="max-w-4xl mx-auto">
             <h2 className="font-headline font-bold text-4xl text-primary mb-4">
-              Como Funciona o Lar Seguro
+              Como Funciona o Ajuda em Casa
             </h2>
             <p className="text-lg text-primary/80 leading-relaxed mb-8">
-              O Lar Seguro conecta você a profissionais qualificados, como diaristas, passadeiras, cozinheiras, jardineiros e personal organizers. Agendar um serviço é rápido, simples e seguro, com preços fixos por pacotes de horas. Tudo sem surpresas, garantindo confiança e comodidade para o seu lar.
+              O Ajuda em Casa conecta você a profissionais qualificados, como diaristas, passadeiras, cozinheiras, jardineiros e personal organizers. Agendar um serviço é rápido, simples e seguro, com preços fixos por pacotes de horas. Tudo sem surpresas, garantindo confiança e comodidade para o seu lar.
             </p>
 
             <div className="flex justify-center gap-4">
@@ -104,7 +104,7 @@ export default function Home() {
         {/* Features Section */}
         <section className="py-16 bg-muted px-4">
           <div className="container mx-auto text-center" id="features">
-            <h2 className="text-3xl font-bold mb-12 font-headline">Por que escolher o Lar Seguro?</h2>
+            <h2 className="text-3xl font-bold mb-12 font-headline">Por que escolher o Ajuda em Casa?</h2>
             <div className="grid md:grid-cols-3 gap-8">
               {features.map((feature, index) => (
                 <div key={index} className="flex flex-col items-center p-4">

@@ -35,7 +35,7 @@ export function Footer() {
           </div>
         </div>
         <div className="mt-8 border-t pt-6 text-center text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} Lar Seguro. Todos os direitos reservados.</p>
+          <p>&copy; {new Date().getFullYear()} Ajuda em Casa. Todos os direitos reservados.</p>
         </div>
       </div>
     </footer>

@@ -1,41 +1,42 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=PT+Sans:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 body {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Poppins', sans-serif;
 }
 
 h1, h2, h3, h4, h5, h6, .font-headline {
-  font-family: 'PT Sans', sans-serif;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
 }
 
 @layer base {
   :root {
-    --background: 200 12% 96%; /* #F0F4F5 */
+    --background: 210 20% 98%; /* Light grey/blue background */
     --foreground: 210 100% 10%; 
     --card: 0 0% 100%;
     --card-foreground: 210 100% 10%;
     --popover: 0 0% 100%;
     --popover-foreground: 210 100% 10%;
-    --primary: 196 35% 43%; /* #468499 */
+    --primary: 210 100% 20%; /* #003366 */
     --primary-foreground: 0 0% 98%;
-    --secondary: 196 20% 90%;
+    --secondary: 158 58% 90%; /* Lighter version of #A8E6CF */
     --secondary-foreground: 210 100% 10%;
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 40 24% 61%; /* #B5A281 */
-    --accent-foreground: 0 0% 100%;
+    --accent: 45 100% 51%; /* #FFC107 */
+    --accent-foreground: 210 100% 20%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 196 35% 43%;
-    --chart-1: 196 35% 43%;
-    --chart-2: 40 24% 61%;
-    --chart-3: 210 100% 20%;
+    --ring: 210 100% 20%;
+    --chart-1: 158 58% 68%; /* #A8E6CF */
+    --chart-2: 210 100% 20%; /* #003366 */
+    --chart-3: 45 100% 51%; /* #FFC107 */
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
     --radius: 0.5rem;
@@ -47,22 +48,22 @@ h1, h2, h3, h4, h5, h6, .font-headline {
     --card-foreground: 0 0% 98%;
     --popover: 210 100% 10%;
     --popover-foreground: 0 0% 98%;
-    --primary: 196 35% 55%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 196 20% 20%;
+    --primary: 158 58% 68%; /* #A8E6CF */
+    --primary-foreground: 210 100% 10%;
+    --secondary: 210 100% 20%;
     --secondary-foreground: 0 0% 98%;
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
-    --accent: 40 24% 70%;
+    --accent: 45 100% 51%;
     --accent-foreground: 210 100% 10%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 196 35% 55%;
+    --ring: 158 58% 68%;
     --chart-1: 0 0% 98%;
-    --chart-2: 40 24% 70%;
-    --chart-3: 196 35% 55%;
+    --chart-2: 158 58% 68%;
+    --chart-3: 45 100% 51%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
   }
