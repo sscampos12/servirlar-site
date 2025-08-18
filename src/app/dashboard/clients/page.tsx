@@ -16,7 +16,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
-import { User, Mail, Phone, Calendar, DollarSign, Bell, Loader2, Home } from "lucide-react";
+import { User, Mail, Phone, Calendar, DollarSign, Bell, Loader2, Home, MessageSquare } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/hooks/use-auth";
@@ -25,6 +25,7 @@ import { doc, getDoc, collection, query, where, getDocs, DocumentData } from "fi
 import { db } from "@/lib/firebase";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 interface Appointment {
     id: string;
@@ -33,6 +34,7 @@ interface Appointment {
     date: string;
     status: string;
     value: number;
+    chatId?: string;
 }
 
 const mockNotifications = [
@@ -177,6 +179,7 @@ export default function ClientHistoryPage() {
                                                 <TableHead>Profissional</TableHead>
                                                 <TableHead>Data</TableHead>
                                                 <TableHead>Status</TableHead>
+                                                <TableHead>Ações</TableHead>
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody>
@@ -190,6 +193,16 @@ export default function ClientHistoryPage() {
                                                     <TableCell>{new Date(app.date).toLocaleDateString('pt-BR', {timeZone: 'UTC'})}</TableCell>
                                                     <TableCell>
                                                         <Badge variant={app.status === 'Finalizado' ? 'default' : app.status === 'Confirmado' ? 'secondary' : 'outline'}>{app.status}</Badge>
+                                                    </TableCell>
+                                                     <TableCell>
+                                                        {app.chatId && app.status === 'Confirmado' && (
+                                                            <Button asChild variant="outline" size="icon">
+                                                                <Link href={`/chat/${app.chatId}`}>
+                                                                    <MessageSquare className="h-4 w-4" />
+                                                                    <span className="sr-only">Abrir Chat</span>
+                                                                </Link>
+                                                            </Button>
+                                                        )}
                                                     </TableCell>
                                                 </TableRow>
                                             ))}

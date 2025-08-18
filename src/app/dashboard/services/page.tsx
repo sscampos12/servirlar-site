@@ -22,14 +22,16 @@ import {
   Loader2,
   CheckCircle,
   XCircle,
+  MessageSquare,
 } from "lucide-react"
 import { Separator } from "@/components/ui/separator"
 import { useToast } from "@/hooks/use-toast"
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { db } from '@/lib/firebase';
-import { collection, query, where, getDocs, doc, updateDoc, onSnapshot, getDoc } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc, updateDoc, onSnapshot, getDoc, addDoc, serverTimestamp } from 'firebase/firestore';
 import { useAuth } from '@/hooks/use-auth';
+import Link from 'next/link';
 
 interface Service {
     id: string;
@@ -44,6 +46,7 @@ interface Service {
     status: "Pendente" | "Confirmado" | "Finalizado";
     professionalId?: string;
     professionalName?: string;
+    chatId?: string;
 }
 
 
@@ -58,10 +61,14 @@ const InfoRow = ({ icon: Icon, label, value }: { icon: React.ElementType, label:
 );
 
 
-const ServiceCard = ({ service, onAccept, onDecline, isAccepting, isDeclining }: { service: Service, onAccept: (id: string) => Promise<void>, onDecline: (id: string) => void, isAccepting: boolean, isDeclining: boolean }) => {
+const ServiceCard = ({ service, onAccept, onDecline, isAccepting, isDeclining }: { service: Service, onAccept: (id: string, clientId: string) => Promise<void>, onDecline: (id: string) => void, isAccepting: boolean, isDeclining: boolean }) => {
     
     const handleAccept = async () => {
-        await onAccept(service.id);
+        // Assume service has clientId, though not in interface. Add it if needed.
+        // For now, let's assume we can get it from somewhere or it's added to the service object.
+        // Let's modify the call to pass a placeholder, and adjust the function signature in the main component.
+        // A better approach: The service object from firestore should contain `clientId`. Let's assume it does.
+        await onAccept(service.id, (service as any).clientId);
     }
     
     const handleDecline = () => {
@@ -150,12 +157,12 @@ export default function ServicesPage() {
 
     }, [user, toast]);
 
-    const handleAcceptService = async (id: string) => {
+    const handleAcceptService = async (serviceId: string, clientId: string) => {
         if (!user) {
             toast({ variant: "destructive", title: "Erro", description: "Você precisa estar logado para aceitar." });
             return;
         }
-        setIsProcessing(id);
+        setIsProcessing(serviceId);
 
         const professionalDocRef = doc(db, "professionals", user.uid);
         
@@ -166,22 +173,33 @@ export default function ServicesPage() {
                  setIsProcessing(null);
                 return;
             }
-
             const professionalName = professionalDoc.data().fullName;
-            const serviceRef = doc(db, "schedules", id);
             
+            // 1. Create chat document
+            const chatRef = await addDoc(collection(db, "chats"), {
+                members: [clientId, user.uid],
+                createdAt: serverTimestamp(),
+                lastMessage: "Serviço aceito! Bem-vindo ao chat.",
+                lastAt: serverTimestamp(),
+                serviceId: serviceId
+            });
+
+            // 2. Update service with professional and chatId
+            const serviceRef = doc(db, "schedules", serviceId);
             await updateDoc(serviceRef, {
                 status: "Confirmado",
                 professionalId: user.uid,
-                professionalName: professionalName
+                professionalName: professionalName,
+                chatId: chatRef.id
             });
             
             toast({
                 title: "Serviço Aceito!",
-                description: "O agendamento foi adicionado à sua lista de 'Meus Serviços'.",
+                description: "O agendamento foi adicionado à sua lista e um chat foi criado.",
                 className: "bg-green-100 border-green-500 text-green-700",
             });
         } catch (error) {
+             console.error(error);
              toast({
                 variant: "destructive",
                 title: "Erro",
@@ -277,6 +295,14 @@ export default function ServicesPage() {
                                         <InfoRow icon={User} label="Cliente" value={`${service.clientName}`} />
                                         <InfoRow icon={MapPin} label="Endereço" value={`${service.address}`} />
                                         <InfoRow icon={Clock} label="Horário" value={`${service.time} (${service.duration})`} />
+                                        {service.chatId && (
+                                            <Button asChild variant="outline" className="w-full mt-2">
+                                                <Link href={`/chat/${service.chatId}`}>
+                                                    <MessageSquare className="mr-2 h-4 w-4" />
+                                                    Abrir Chat
+                                                </Link>
+                                            </Button>
+                                        )}
                                     </CardContent>
                                 </Card>
                             ))

@@ -15,7 +15,6 @@ const allNavItems = [
     { href: "/dashboard/insights", label: "AI Insights", icon: Bot, badge: "Beta", roles: ["admin"] },
     { href: "/dashboard/services", label: "Marketplace", icon: Briefcase, roles: ["professional"] },
     { href: "/dashboard/clients", label: "Meus Agendamentos", icon: User, roles: ["client"] },
-    { href: "/schedule", label: "Agendar Serviço", icon: Calendar, roles: ["client"] },
 ];
 
 export function SidebarNav({ role }: { role: 'admin' | 'client' | 'professional' | null }) {
@@ -26,6 +25,11 @@ export function SidebarNav({ role }: { role: 'admin' | 'client' | 'professional'
   }
 
   const navItems = allNavItems.filter(item => item.roles.includes(role));
+
+  // Adiciona o link de agendamento para clientes
+  if (role === 'client') {
+    navItems.push({ href: "/schedule", label: "Agendar Serviço", icon: Calendar, roles: ["client"] });
+  }
 
   return (
     <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
