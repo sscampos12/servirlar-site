@@ -136,7 +136,8 @@ export default function ProviderDetailPage({ params }: { params: { id: string } 
         }
     }
 
-    const getWhatsAppLink = (phone: string) => {
+    const getWhatsAppLink = (phone: string | undefined) => {
+        if (!phone) return '#';
         const justDigits = phone.replace(/\D/g, '');
         return `https://wa.me/55${justDigits}`;
     }
@@ -276,7 +277,7 @@ export default function ProviderDetailPage({ params }: { params: { id: string } 
                     <Button variant="destructive" onClick={() => handleAction("rejeitar")} disabled={provider.status === "Rejeitado"}>
                         <ThumbsDown className="mr-2 h-4 w-4" /> Rejeitar Cadastro
                     </Button>
-                    <Button variant="outline" asChild>
+                    <Button variant="outline" asChild disabled={!provider.phone}>
                         <a href={getWhatsAppLink(provider.phone)} target="_blank" rel="noopener noreferrer">
                            <MessageCircle className="mr-2 h-4 w-4" /> Contatar via WhatsApp
                         </a>
@@ -287,5 +288,3 @@ export default function ProviderDetailPage({ params }: { params: { id: string } 
         </div>
     )
 }
-
-    
