@@ -50,9 +50,10 @@ export default function SchedulePage() {
   const [selectedDuration, setSelectedDuration] = useState<string | undefined>();
   const [address, setAddress] = useState('');
   const [observations, setObservations] = useState('');
+  const [cpf, setCpf] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const isFormComplete = selectedService && date && selectedTime && selectedDuration && address;
+  const isFormComplete = selectedService && date && selectedTime && selectedDuration && address && cpf;
   const ServiceIcon = selectedService ? services.find(s => s.id === selectedService)?.icon : Info;
   
   const estimatedValue = selectedService && selectedDuration
@@ -94,7 +95,7 @@ export default function SchedulePage() {
             clientId: user.uid,
             clientName: clientData.fullName,
             clientEmail: user.email,
-            clientCpf: clientData.cpf || "", // Add CPF if available
+            clientCpf: cpf,
             clientPhone: clientData.phone || "", // Add phone if available
             service: selectedService,
             date: format(date, 'yyyy-MM-dd'),
@@ -223,6 +224,11 @@ export default function SchedulePage() {
                   </div>
               </div>
               
+                <div>
+                    <Label htmlFor="cpf" className="font-semibold">6. CPF do Contratante</Label>
+                    <Input id="cpf" value={cpf} onChange={(e) => setCpf(e.target.value)} className="mt-2" placeholder='Necessário para a cobrança'/>
+                </div>
+
               {/* Observations */}
               <div>
                 <Label htmlFor="observations" className="font-semibold">Observações (Opcional)</Label>

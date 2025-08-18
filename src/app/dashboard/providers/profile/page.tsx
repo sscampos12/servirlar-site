@@ -11,10 +11,11 @@ import { ProviderContract } from '@/components/contracts/provider-contract';
 import { FileSignature, CheckCircle2, Upload, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { db, auth } from '@/lib/firebase';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, setDoc, serverTimestamp, GeoPoint } from 'firebase/firestore';
 import { useAuth } from '@/hooks/use-auth';
 import { useRouter } from 'next/navigation';
 import DashboardLayout from '../../layout';
+import { geohashForLocation } from 'geofire-common';
 
 export default function CompleteProviderProfilePage() {
   const { user } = useAuth();
@@ -49,6 +50,14 @@ export default function CompleteProviderProfilePage() {
     
     try {
       const formData = new FormData(e.currentTarget);
+
+      // A geocodificação (endereço -> lat/lng) deve ser feita aqui.
+      // Como não podemos chamar APIs externas, usaremos valores fixos como exemplo.
+      // Em um app real, use uma API como a do Google Maps Geocoding.
+      const lat = -23.5505; // Exemplo: São Paulo
+      const lng = -46.6333;
+      const geohash = geohashForLocation([lat, lng]);
+
       const professionalData = {
         cpf: formData.get('cpf') as string,
         birthdate: formData.get('birthdate') as string,
@@ -59,7 +68,16 @@ export default function CompleteProviderProfilePage() {
         bankRef3: formData.get('bankRef3') as string,
         references: formData.get('references') as string,
         videoUrl: formData.get('video') as string,
+        addressInfo: {
+          street: formData.get('street') as string,
+          city: formData.get('city') as string,
+          state: formData.get('state') as string,
+          zip: formData.get('zip') as string,
+        },
+        location: new GeoPoint(lat, lng),
+        geohash: geohash,
         status: 'Pendente', // Update status to Pending for review
+        updatedAt: serverTimestamp(),
       };
 
       // TODO: Handle file uploads to Firebase Storage
@@ -134,6 +152,28 @@ export default function CompleteProviderProfilePage() {
                     <div className="space-y-2">
                         <Label htmlFor="pixKey">Chave PIX</Label>
                         <Input id="pixKey" name="pixKey" placeholder="Sua chave PIX" required />
+                    </div>
+                </div>
+
+                <div>
+                    <h4 className="font-medium mb-2">Endereço</h4>
+                     <div className="grid md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="street">Rua e Número</Label>
+                            <Input id="street" name="street" placeholder="Ex: Rua das Flores, 123" required />
+                        </div>
+                         <div className="space-y-2">
+                            <Label htmlFor="city">Cidade</Label>
+                            <Input id="city" name="city" placeholder="Ex: São Paulo" required />
+                        </div>
+                         <div className="space-y-2">
+                            <Label htmlFor="state">Estado</Label>
+                            <Input id="state" name="state" placeholder="Ex: SP" required />
+                        </div>
+                         <div className="space-y-2">
+                            <Label htmlFor="zip">CEP</Label>
+                            <Input id="zip" name="zip" placeholder="00000-000" required />
+                        </div>
                     </div>
                 </div>
                 

@@ -16,16 +16,17 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
-import { User, Mail, Phone, Calendar, DollarSign, Bell, Loader2, Home, MessageSquare } from "lucide-react";
+import { User, Mail, Phone, Calendar, DollarSign, Bell, Loader2, Home, MessageSquare, CheckCircle, Ban } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/hooks/use-auth";
 import { useEffect, useState } from "react";
-import { doc, getDoc, collection, query, where, getDocs, DocumentData } from "firebase/firestore";
+import { doc, getDoc, collection, query, where, getDocs, DocumentData, runTransaction, serverTimestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useToast } from "@/hooks/use-toast";
 
 interface Appointment {
     id: string;
@@ -59,9 +60,35 @@ const DetailRow = ({ icon: Icon, label, value }: { icon: React.ElementType, labe
 export default function ClientHistoryPage() {
     const { user, loading: authLoading } = useAuth();
     const router = useRouter();
+    const { toast } = useToast();
     const [clientData, setClientData] = useState<DocumentData | null>(null);
     const [appointments, setAppointments] = useState<Appointment[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [isActionLoading, setIsActionLoading] = useState<string | null>(null);
+
+    const fetchData = async () => {
+        if (user) {
+            try {
+                // Fetch client profile
+                const clientDocRef = doc(db, "clients", user.uid);
+                const clientDocSnap = await getDoc(clientDocRef);
+                if (clientDocSnap.exists()) {
+                    setClientData(clientDocSnap.data());
+                }
+
+                // Fetch client appointments
+                const q = query(collection(db, "schedules"), where("clientId", "==", user.uid));
+                const querySnapshot = await getDocs(q);
+                const appointmentsData: Appointment[] = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Appointment)).sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+                setAppointments(appointmentsData);
+
+            } catch (error) {
+                console.error("Error fetching client data:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        }
+    };
 
     useEffect(() => {
         if (!authLoading && !user) {
@@ -69,34 +96,68 @@ export default function ClientHistoryPage() {
             return;
         }
 
-        const fetchData = async () => {
-            if (user) {
-                try {
-                    // Fetch client profile
-                    const clientDocRef = doc(db, "clients", user.uid);
-                    const clientDocSnap = await getDoc(clientDocRef);
-                    if (clientDocSnap.exists()) {
-                        setClientData(clientDocSnap.data());
-                    }
-
-                    // Fetch client appointments
-                    const q = query(collection(db, "schedules"), where("clientId", "==", user.uid));
-                    const querySnapshot = await getDocs(q);
-                    const appointmentsData: Appointment[] = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Appointment));
-                    setAppointments(appointmentsData);
-
-                } catch (error) {
-                    console.error("Error fetching client data:", error);
-                } finally {
-                    setIsLoading(false);
-                }
-            }
-        };
-
         if (!authLoading && user) {
             fetchData();
         }
     }, [user, authLoading, router]);
+
+    const handleCompleteService = async (appointment: Appointment) => {
+        setIsActionLoading(appointment.id);
+        try {
+            const scheduleRef = doc(db, "schedules", appointment.id);
+            
+            await runTransaction(db, async (transaction) => {
+                const scheduleSnap = await transaction.get(scheduleRef);
+                if (!scheduleSnap.exists()) {
+                    throw new Error("Agendamento não encontrado.");
+                }
+                
+                const scheduleData = scheduleSnap.data();
+                if(scheduleData.status !== 'Confirmado') {
+                    throw new Error("Apenas agendamentos confirmados podem ser finalizados.");
+                }
+
+                // 1. Update schedule status
+                transaction.update(scheduleRef, { status: "Finalizado", completedAt: serverTimestamp() });
+
+                // 2. Create financial transaction record
+                const commissionRate = 0.25; // 25%
+                const totalValue = scheduleData.value;
+                const platformFee = totalValue * commissionRate;
+                const professionalAmount = totalValue - platformFee;
+                
+                const financialTxRef = doc(collection(db, "financialTransactions"));
+                transaction.set(financialTxRef, {
+                    scheduleId: appointment.id,
+                    clientId: scheduleData.clientId,
+                    professionalId: scheduleData.professionalId,
+                    professionalName: scheduleData.professionalName,
+                    clientName: scheduleData.clientName,
+                    service: scheduleData.service,
+                    totalValue: totalValue,
+                    platformFee: platformFee,
+                    professionalAmount: professionalAmount,
+                    status: "pending_payout",
+                    createdAt: serverTimestamp()
+                });
+            });
+
+            toast({
+                title: "Serviço Finalizado!",
+                description: "O pagamento foi liberado para o profissional."
+            });
+            await fetchData(); // Refresh data
+        } catch (error: any) {
+            toast({
+                variant: "destructive",
+                title: "Erro ao finalizar serviço",
+                description: error.message
+            });
+        } finally {
+            setIsActionLoading(null);
+        }
+    };
+
 
     const totalSpent = appointments.reduce((sum, app) => sum + (app.value || 0), 0);
 
@@ -179,7 +240,7 @@ export default function ClientHistoryPage() {
                                                 <TableHead>Profissional</TableHead>
                                                 <TableHead>Data</TableHead>
                                                 <TableHead>Status</TableHead>
-                                                <TableHead>Ações</TableHead>
+                                                <TableHead className="text-right">Ações</TableHead>
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody>
@@ -194,15 +255,28 @@ export default function ClientHistoryPage() {
                                                     <TableCell>
                                                         <Badge variant={app.status === 'Finalizado' ? 'default' : app.status === 'Confirmado' ? 'secondary' : 'outline'}>{app.status}</Badge>
                                                     </TableCell>
-                                                     <TableCell>
-                                                        {app.chatId && app.status === 'Confirmado' && (
-                                                            <Button asChild variant="outline" size="icon">
-                                                                <Link href={`/chat/${app.chatId}`}>
-                                                                    <MessageSquare className="h-4 w-4" />
-                                                                    <span className="sr-only">Abrir Chat</span>
-                                                                </Link>
-                                                            </Button>
-                                                        )}
+                                                     <TableCell className="text-right">
+                                                         <div className="flex gap-2 justify-end">
+                                                            {app.chatId && app.status === 'Confirmado' && (
+                                                                <Button asChild variant="outline" size="icon">
+                                                                    <Link href={`/chat/${app.chatId}`}>
+                                                                        <MessageSquare className="h-4 w-4" />
+                                                                        <span className="sr-only">Abrir Chat</span>
+                                                                    </Link>
+                                                                </Button>
+                                                            )}
+                                                            {app.status === 'Confirmado' && (
+                                                                <Button 
+                                                                    variant="default" 
+                                                                    size="icon" 
+                                                                    onClick={() => handleCompleteService(app)}
+                                                                    disabled={isActionLoading === app.id}
+                                                                    title="Finalizar Serviço"
+                                                                >
+                                                                    {isActionLoading === app.id ? <Loader2 className="h-4 w-4 animate-spin"/> : <CheckCircle className="h-4 w-4" />}
+                                                                </Button>
+                                                            )}
+                                                        </div>
                                                     </TableCell>
                                                 </TableRow>
                                             ))}
@@ -221,5 +295,3 @@ export default function ClientHistoryPage() {
         </div>
     )
 }
-
-    
