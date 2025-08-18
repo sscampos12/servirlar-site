@@ -1,5 +1,4 @@
 
-
 "use client"
 
 import {
@@ -17,13 +16,14 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
-import { User, Mail, Phone, Calendar, DollarSign, Bell, Loader2 } from "lucide-react";
+import { User, Mail, Phone, Calendar, DollarSign, Bell, Loader2, Home } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/hooks/use-auth";
 import { useEffect, useState } from "react";
 import { doc, getDoc, collection, query, where, getDocs, DocumentData } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { Button } from "@/components/ui/button";
 
 interface Appointment {
     id: string;
@@ -62,6 +62,7 @@ export default function ClientHistoryPage() {
     useEffect(() => {
         const fetchData = async () => {
             if (user) {
+                setIsLoading(true);
                 try {
                     // Fetch client profile
                     const clientDocRef = doc(db, "clients", user.uid);
@@ -99,10 +100,19 @@ export default function ClientHistoryPage() {
         );
     }
     
-    if (!user || !clientData) {
-        return (
+    if (!user) {
+         return (
              <div className="text-center text-muted-foreground p-8">
-                Cliente não encontrado. Por favor, faça login novamente.
+                <p>Por favor, faça login para ver seu histórico.</p>
+                <Button onClick={() => window.location.href = '/login'} className="mt-4">Ir para Login</Button>
+            </div>
+        )
+    }
+
+    if (!clientData) {
+         return (
+             <div className="text-center text-muted-foreground p-8">
+                Cliente não encontrado.
             </div>
         )
     }
@@ -124,7 +134,7 @@ export default function ClientHistoryPage() {
                         <CardContent className="space-y-4">
                             <DetailRow icon={User} label="Nome" value={clientData.fullName} />
                             <DetailRow icon={Mail} label="Email" value={clientData.email} />
-                            <DetailRow icon={Phone} label="Telefone" value={"Não informado"} />
+                            <DetailRow icon={Home} label="Endereço" value={clientData.address || "Não informado"} />
                             <Separator />
                             <DetailRow icon={Calendar} label="Total de Agendamentos" value={`${appointments.length} serviços`} />
                             <DetailRow icon={DollarSign} label="Valor Total Gasto" value={`R$ ${totalSpent.toFixed(2).replace('.', ',')}`} />
@@ -201,3 +211,5 @@ export default function ClientHistoryPage() {
         </div>
     )
 }
+
+    
