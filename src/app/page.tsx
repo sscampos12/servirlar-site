@@ -42,30 +42,30 @@ export default function Home() {
     <MarketingLayout>
       <div className="flex flex-col">
         {/* Hero Section */}
-        <section className="w-full py-12 md:py-24 lg:py-32 xl:py-40 bg-gradient-to-r from-secondary to-background">
-          <div className="container mx-auto px-4 md:px-6">
-            <div className="grid gap-6 lg:grid-cols-1 lg:gap-12 xl:gap-24">
-              <div className="flex flex-col justify-center space-y-4 text-center items-center">
-                <div className="space-y-2">
-                  <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none font-headline text-foreground">
-                    A ajuda que seu lar precisa, com a confiança que você merece.
-                  </h1>
-                  <p className="max-w-[600px] text-muted-foreground md:text-xl mx-auto">
-                    Encontre diaristas, passadeiras e cozinheiras qualificadas em poucos cliques. Simples, rápido e seguro.
-                  </p>
-                </div>
-                <div className="flex flex-col gap-2 min-[400px]:flex-row">
-                  <Button asChild size="lg">
-                    <Link href="/schedule">Agendar um Serviço</Link>
-                  </Button>
-                  <Button asChild variant="secondary" size="lg" className="bg-accent text-accent-foreground hover:bg-accent/90">
-                    <Link href="/register/provider">Seja um Profissional</Link>
-                  </Button>
-                </div>
-              </div>
+        <section className="bg-muted py-16 px-8 text-center">
+          <div className="max-w-4xl mx-auto">
+            <h2 className="font-headline font-bold text-4xl text-primary mb-4">
+              Como Funciona o Lar Seguro
+            </h2>
+            <p className="text-lg text-primary/80 leading-relaxed mb-8">
+              O Lar Seguro conecta você a profissionais qualificados, como diaristas, passadeiras, cozinheiras, jardineiros e personal organizers. Agendar um serviço é rápido, simples e seguro, com preços fixos por pacotes de horas. Tudo sem surpresas, garantindo confiança e comodidade para o seu lar.
+            </p>
+
+            <div className="flex justify-center gap-4">
+              <Button asChild size="lg" className="shadow-md">
+                <Link href="/schedule">
+                  Agendar um Serviço
+                </Link>
+              </Button>
+              <Button asChild size="lg" className="bg-accent text-accent-foreground hover:bg-accent/90 shadow-md">
+                <Link href="/register/provider">
+                  Seja um Profissional
+                </Link>
+              </Button>
             </div>
           </div>
         </section>
+
 
         {/* How it works */}
         <section className="py-16 bg-background px-4">
