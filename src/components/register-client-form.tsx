@@ -9,7 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { ClientContract } from '@/components/contracts/client-contract';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
-import { createUserWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
+import { createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { auth, db, googleProvider } from '@/lib/firebase';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 
@@ -116,6 +116,8 @@ export function ClientRegistrationForm() {
   const handleGoogleSignIn = async () => {
     setIsGoogleLoading(true);
     try {
+        googleProvider.addScope('profile');
+        googleProvider.addScope('email');
         const result = await signInWithPopup(auth, googleProvider);
         const user = result.user;
 

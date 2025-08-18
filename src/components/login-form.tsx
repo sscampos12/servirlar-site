@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label"
 import { useSearchParams, useRouter } from "next/navigation"
 import { useToast } from "@/hooks/use-toast";
 import React, { useState } from "react";
-import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
+import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { auth, db, googleProvider } from "@/lib/firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 
@@ -56,6 +56,8 @@ export function LoginForm() {
   const handleGoogleSignIn = async () => {
     setIsGoogleLoading(true);
     try {
+        googleProvider.addScope('profile');
+        googleProvider.addScope('email');
         const result = await signInWithPopup(auth, googleProvider);
         const user = result.user;
 
