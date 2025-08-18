@@ -1,36 +1,22 @@
 
 "use client";
 
-import { useEffect, useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
 import { DashboardHeader } from "@/components/dashboard/header";
 import { SidebarNav } from "@/components/dashboard/sidebar-nav";
 import { Logo } from "@/components/logo";
 import Link from "next/link";
-import { Loader2 } from "lucide-react";
-import { useAuth } from "@/hooks/use-auth";
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "@/lib/firebase";
-import { signOut } from "firebase/auth";
-import { auth } from "@/lib/firebase";
+import React from "react";
 
 export type Role = "admin" | "client" | "professional";
 
-const protectedRoutes: Record<Role, string[]> = {
-    admin: ["/dashboard/providers", "/dashboard/financial", "/dashboard/reports", "/dashboard/insights", "/dashboard/getting-started"],
-    professional: ["/dashboard/services", "/dashboard/providers/profile", "/chat"],
-    client: ["/dashboard/clients", "/schedule", "/chat"],
-};
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { user, loading } = useAuth();
-  const router = useRouter();
-  const pathname = usePathname();
-  const [role, setRole] = useState<Role | null>('admin'); // Default to admin for open access
+  // Para o protótipo, vamos assumir a role de admin para ver todos os menus.
+  const role: Role = 'admin';
 
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
