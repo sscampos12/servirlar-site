@@ -18,7 +18,7 @@ export type Role = "admin" | "client" | "professional";
 
 const protectedRoutes: Record<Role, string[]> = {
     admin: ["/dashboard/providers", "/dashboard/financial", "/dashboard/reports", "/dashboard/insights", "/dashboard/getting-started"],
-    professional: ["/dashboard/services", "/dashboard/providers/profile"],
+    professional: ["/dashboard/services", "/dashboard/providers/profile", "/chat"],
     client: ["/dashboard/clients", "/schedule", "/chat"],
 };
 
@@ -45,13 +45,11 @@ export default function DashboardLayout({
       setIsLoadingRole(true);
       
       const isAdmin = localStorage.getItem("isAdmin") === "true";
-      if (isAdmin) {
+      if (isAdmin && user.email === "contato@ajudaemcasa.com") {
         setRole('admin');
         setIsLoadingRole(false);
-        if (pathname === '/dashboard' || pathname === '/dashboard/') {
-          router.replace('/dashboard/providers');
-        }
-        return;
+        // Admin-specific redirect logic is handled in the next useEffect
+        return; 
       }
       
       const professionalDocRef = doc(db, "professionals", user.uid);
@@ -65,8 +63,9 @@ export default function DashboardLayout({
            if (clientDocSnap.exists()) {
               setRole("client");
            } else {
-               console.error("User document not found, logging out.");
+               console.error("User document not found in clients or professionals, logging out.");
                await signOut(auth);
+               localStorage.removeItem("isAdmin"); // Clean up admin flag
                router.replace('/login?error=user_not_found');
                setIsLoadingRole(false);
                return;
@@ -92,6 +91,7 @@ export default function DashboardLayout({
     }
 
     const allowedRoutes = protectedRoutes[role] || [];
+    // Allow access to chatId sub-routes
     const isRouteAllowed = allowedRoutes.some(route => pathname.startsWith(route));
 
     if (!isRouteAllowed) {

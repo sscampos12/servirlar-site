@@ -11,6 +11,7 @@ import React, { useState } from "react";
 import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
 import { auth, db, googleProvider } from "@/lib/firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
+import { Loader2 } from "lucide-react";
 
 const GoogleIcon = () => (
   <svg className="h-4 w-4" viewBox="0 0 48 48">
@@ -34,13 +35,6 @@ export function LoginForm() {
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   const redirectToPanel = async (userId: string) => {
-      // Check for Admin
-      const isAdmin = localStorage.getItem("isAdmin") === "true";
-      if (email === "contato@ajudaemcasa.com" && isAdmin) {
-           router.push(requestedRedirect || '/dashboard/providers');
-           return;
-      }
-
       // Check for Professional
       const profDoc = await getDoc(doc(db, "professionals", userId));
       if (profDoc.exists()) {
@@ -55,8 +49,13 @@ export function LoginForm() {
            return;
       }
       
-      // Fallback
-      router.push('/dashboard/clients');
+      // Fallback if user exists in Auth but not in DB collections (should not happen in normal flow)
+      toast({
+          variant: "destructive",
+          title: "Erro de Perfil",
+          description: "Não foi possível encontrar um perfil associado a esta conta.",
+      });
+      signOut(auth);
   }
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -101,6 +100,7 @@ export function LoginForm() {
                 fullName: user.displayName,
                 email: user.email,
                 address: "", // Google sign-in doesn't provide address
+                createdAt: serverTimestamp(),
             });
              toast({
                 title: "Conta Criada!",
@@ -139,7 +139,7 @@ export function LoginForm() {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            disabled={isGoogleLoading}
+            disabled={isGoogleLoading || isLoading}
           />
         </div>
         <div className="grid gap-2">
@@ -158,11 +158,11 @@ export function LoginForm() {
               required 
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              disabled={isGoogleLoading}
+              disabled={isGoogleLoading || isLoading}
           />
         </div>
         <Button type="submit" className="w-full" disabled={isLoading || isGoogleLoading}>
-          {isLoading ? "Entrando..." : "Entrar"}
+          {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Entrar"}
         </Button>
       </form>
       <div className="relative">
@@ -176,7 +176,7 @@ export function LoginForm() {
         </div>
       </div>
       <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={isLoading || isGoogleLoading}>
-        {isGoogleLoading ? "Aguarde..." : <><GoogleIcon /> <span className="ml-2">Google</span></>}
+        {isGoogleLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <><GoogleIcon /> <span className="ml-2">Google</span></>}
       </Button>
       <div className="mt-4 text-center text-sm">
         Não tem uma conta?{" "}
