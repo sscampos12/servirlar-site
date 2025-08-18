@@ -40,18 +40,12 @@ export default function AdminLoginPage() {
     
     try {
       // Try to sign in first
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      
-      if (userCredential.user.email === ADMIN_EMAIL) {
-        localStorage.setItem("isAdmin", "true");
-        toast({
-          title: "Login bem-sucedido!",
-          description: "Redirecionando para o painel de controle.",
-        });
-        router.push("/dashboard/providers");
-      } else {
-        throw new Error("Credenciais de administrador inválidas.");
-      }
+      await signInWithEmailAndPassword(auth, email, password);
+      toast({
+        title: "Login bem-sucedido!",
+        description: "Redirecionando para o painel de controle.",
+      });
+      router.push("/dashboard/providers");
     } catch (error: any) {
       // If user not found, create the admin user
       if (error.code === 'auth/user-not-found' && password === ADMIN_PASS) {
@@ -66,7 +60,6 @@ export default function AdminLoginPage() {
             email: user.email,
           });
 
-          localStorage.setItem("isAdmin", "true");
           toast({
             title: "Conta de Administrador Criada!",
             description: "Redirecionando para o painel de controle.",

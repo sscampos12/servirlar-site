@@ -44,8 +44,9 @@ export default function DashboardLayout({
     const checkUserRole = async () => {
       setIsLoadingRole(true);
       
-      const isAdmin = localStorage.getItem("isAdmin") === "true";
-      if (isAdmin && user.email === "contato@ajudaemcasa.com") {
+      const isAdminByEmail = user.email === "contato@ajudaemcasa.com";
+
+      if (isAdminByEmail) {
         setRole('admin');
         setIsLoadingRole(false);
         return; 
@@ -64,7 +65,6 @@ export default function DashboardLayout({
            } else {
                console.error("User document not found in clients or professionals, logging out.");
                await signOut(auth);
-               localStorage.removeItem("isAdmin"); // Clean up admin flag
                router.replace('/login?error=user_not_found');
                setIsLoadingRole(false);
                return;
