@@ -37,7 +37,7 @@ export function Logo({ className, ...props }: React.SVGProps<SVGSVGElement>) {
         Ajuda
       </text>
       <text
-        x="105"
+        x="110"
         y="26"
         fontFamily="'Poppins', sans-serif"
         fontSize="20"
@@ -47,7 +47,7 @@ export function Logo({ className, ...props }: React.SVGProps<SVGSVGElement>) {
         em
       </text>
       <text
-        x="135"
+        x="140"
         y="26"
         fontFamily="'Poppins', sans-serif"
         fontSize="20"
