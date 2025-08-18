@@ -1,31 +1,58 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { DashboardHeader } from "@/components/dashboard/header";
 import { SidebarNav } from "@/components/dashboard/sidebar-nav";
 import { Logo } from "@/components/logo";
 import Link from "next/link";
 import { Loader2 } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
+
+const adminRoutes = [
+  '/dashboard/providers',
+  '/dashboard/financial',
+  '/dashboard/reports',
+  '/dashboard/insights',
+  // Note: /dashboard/services is for professionals
+];
+
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const { user, loading } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
   const [isAuthorized, setIsAuthorized] = useState(false);
 
   useEffect(() => {
-    const isAdmin = localStorage.getItem("isAdmin") === "true";
-    if (!isAdmin) {
-      router.replace("/admin/login");
-    } else {
-      setIsAuthorized(true);
-    }
-  }, [router]);
+    if (!loading) {
+      const isAdmin = localStorage.getItem("isAdmin") === "true";
 
-  if (!isAuthorized) {
+      if (pathname === '/dashboard' && !isAdmin) {
+         router.replace("/dashboard/clients");
+         return;
+      }
+      
+      if (adminRoutes.some(route => pathname.startsWith(route)) && !isAdmin) {
+        // If it's an admin route and user is not admin, deny access
+        router.replace("/admin/login");
+      } else {
+        // For other dashboard routes, user just needs to be logged in
+        if (!user && !isAdmin) {
+            router.replace("/login");
+        } else {
+            setIsAuthorized(true);
+        }
+      }
+    }
+  }, [loading, user, pathname, router]);
+
+  if (loading || !isAuthorized) {
     return (
       <div className="flex h-screen items-center justify-center">
         <Loader2 className="h-16 w-16 animate-spin" />

@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link"
@@ -25,7 +26,8 @@ export function LoginForm() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { toast } = useToast();
-  const redirectUrl = searchParams.get('redirect') || '/dashboard/clients';
+  const defaultRedirect = '/dashboard/clients'; // Default redirect for clients
+  const redirectUrl = searchParams.get('redirect') || defaultRedirect;
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -62,10 +64,13 @@ export function LoginForm() {
         const user = result.user;
 
         // Check if user exists in Firestore, if not, create a new client document
-        const docRef = doc(db, "clients", user.uid);
-        const docSnap = await getDoc(docRef);
+        const clientDocRef = doc(db, "clients", user.uid);
+        const professionalDocRef = doc(db, "professionals", user.uid);
+        
+        const clientDocSnap = await getDoc(clientDocRef);
+        const professionalDocSnap = await getDoc(professionalDocRef);
 
-        if (!docSnap.exists()) {
+        if (!clientDocSnap.exists() && !professionalDocSnap.exists()) {
             await setDoc(doc(db, "clients", user.uid), {
                 fullName: user.displayName,
                 email: user.email,
@@ -82,7 +87,12 @@ export function LoginForm() {
             });
         }
         
-        router.push(redirectUrl);
+        // Redirect based on profile type
+        if (professionalDocSnap.exists()) {
+             router.push('/dashboard/services');
+        } else {
+             router.push('/dashboard/clients');
+        }
 
     } catch (error: any) {
         toast({
@@ -151,6 +161,10 @@ export function LoginForm() {
         Não tem uma conta?{" "}
         <Link href="/register/client" className="underline">
           Cadastre-se como Cliente
+        </Link>
+        {" ou "}
+        <Link href="/register/provider" className="underline">
+          Profissional
         </Link>
       </div>
     </div>

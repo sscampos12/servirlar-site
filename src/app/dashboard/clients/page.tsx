@@ -24,6 +24,7 @@ import { useEffect, useState } from "react";
 import { doc, getDoc, collection, query, where, getDocs, DocumentData } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 
 interface Appointment {
     id: string;
@@ -54,15 +55,20 @@ const DetailRow = ({ icon: Icon, label, value }: { icon: React.ElementType, labe
 
 
 export default function ClientHistoryPage() {
-    const { user } = useAuth();
+    const { user, loading: authLoading } = useAuth();
+    const router = useRouter();
     const [clientData, setClientData] = useState<DocumentData | null>(null);
     const [appointments, setAppointments] = useState<Appointment[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
+        if (!authLoading && !user) {
+            router.push('/login?redirect=/dashboard/clients');
+            return;
+        }
+
         const fetchData = async () => {
             if (user) {
-                setIsLoading(true);
                 try {
                     // Fetch client profile
                     const clientDocRef = doc(db, "clients", user.uid);
@@ -82,17 +88,17 @@ export default function ClientHistoryPage() {
                 } finally {
                     setIsLoading(false);
                 }
-            } else {
-                 setIsLoading(false);
             }
         };
 
-        fetchData();
-    }, [user]);
+        if (!authLoading && user) {
+            fetchData();
+        }
+    }, [user, authLoading, router]);
 
     const totalSpent = appointments.reduce((sum, app) => sum + (app.value || 0), 0);
 
-     if (isLoading) {
+     if (isLoading || authLoading) {
         return (
             <div className="flex h-full items-center justify-center">
                 <Loader2 className="h-16 w-16 animate-spin" />
@@ -100,19 +106,10 @@ export default function ClientHistoryPage() {
         );
     }
     
-    if (!user) {
-         return (
-             <div className="text-center text-muted-foreground p-8">
-                <p>Por favor, faça login para ver seu histórico.</p>
-                <Button onClick={() => window.location.href = '/login'} className="mt-4">Ir para Login</Button>
-            </div>
-        )
-    }
-
     if (!clientData) {
          return (
              <div className="text-center text-muted-foreground p-8">
-                Cliente não encontrado.
+                Cliente não encontrado ou você não tem permissão para ver esta página.
             </div>
         )
     }
@@ -211,5 +208,3 @@ export default function ClientHistoryPage() {
         </div>
     )
 }
-
-    

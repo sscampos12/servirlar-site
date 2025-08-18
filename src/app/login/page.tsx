@@ -4,7 +4,6 @@ import { MarketingLayout } from "@/components/marketing-layout"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { LoginForm } from '@/components/login-form';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Separator } from '@/components/ui/separator';
 
 function LoginSkeleton() {
   return (
@@ -29,9 +28,9 @@ export default function LoginPage() {
       <div className="flex items-center justify-center py-12 px-4">
         <Card className="w-full max-w-sm">
           <CardHeader>
-            <CardTitle className="font-headline text-2xl">Acesso do Cliente</CardTitle>
+            <CardTitle className="font-headline text-2xl">Acesso do Cliente e Profissional</CardTitle>
             <CardDescription>
-              Acesse sua conta para agendar serviços ou ver seu histórico.
+              Acesse sua conta para agendar ou ofertar serviços.
             </CardDescription>
           </CardHeader>
           <CardContent>
