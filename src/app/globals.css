@@ -1,71 +1,64 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=PT+Sans:wght@400;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 body {
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Inter', sans-serif;
 }
 
 h1, h2, h3, h4, h5, h6, .font-headline {
-  font-family: 'Poppins', sans-serif;
+  font-family: 'PT Sans', sans-serif;
   font-weight: 700;
 }
 
 @layer base {
   :root {
-    --background: 210 20% 98%; /* Light grey/blue background */
-    --foreground: 210 100% 10%; 
+    --background: 204 20% 98%; /* #f0f4f5 - Light gray */
+    --foreground: 210 10% 23%;
     --card: 0 0% 100%;
-    --card-foreground: 210 100% 10%;
+    --card-foreground: 210 10% 23%;
     --popover: 0 0% 100%;
-    --popover-foreground: 210 100% 10%;
-    --primary: 210 100% 20%; /* #003366 */
+    --popover-foreground: 210 10% 23%;
+    --primary: 195 35% 41%; /* #468499 - Rich Teal */
     --primary-foreground: 0 0% 98%;
-    --secondary: 158 58% 90%; /* Lighter version of #A8E6CF */
-    --secondary-foreground: 210 100% 10%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 195 35% 41%;
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 45 100% 51%; /* #FFC107 */
-    --accent-foreground: 210 100% 20%;
+    --accent: 39 44% 63%; /* #B5A281 - Muted Gold */
+    --accent-foreground: 195 35% 41%;
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 0 0% 98%;
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 210 100% 20%;
-    --chart-1: 158 58% 68%; /* #A8E6CF */
-    --chart-2: 210 100% 20%; /* #003366 */
-    --chart-3: 45 100% 51%; /* #FFC107 */
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
+    --ring: 195 35% 41%;
     --radius: 0.5rem;
+    --chart-1: 195 35% 41%;
+    --chart-2: 39 44% 63%;
   }
+
   .dark {
-    --background: 210 100% 10%;
+    --background: 210 10% 23%;
     --foreground: 0 0% 98%;
-    --card: 210 100% 10%;
+    --card: 210 10% 23%;
     --card-foreground: 0 0% 98%;
-    --popover: 210 100% 10%;
+    --popover: 210 10% 23%;
     --popover-foreground: 0 0% 98%;
-    --primary: 158 58% 68%; /* #A8E6CF */
-    --primary-foreground: 210 100% 10%;
-    --secondary: 210 100% 20%;
+    --primary: 39 44% 63%;
+    --primary-foreground: 195 35% 21%;
+    --secondary: 210 40% 20%;
     --secondary-foreground: 0 0% 98%;
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
-    --accent: 45 100% 51%;
-    --accent-foreground: 210 100% 10%;
+    --accent: 195 35% 41%;
+    --accent-foreground: 0 0% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 158 58% 68%;
-    --chart-1: 0 0% 98%;
-    --chart-2: 158 58% 68%;
-    --chart-3: 45 100% 51%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
+    --ring: 39 44% 63%;
   }
 }
 
@@ -75,5 +68,6 @@ h1, h2, h3, h4, h5, h6, .font-headline {
   }
   body {
     @apply bg-background text-foreground;
+    font-family: 'Inter', sans-serif;
   }
 }

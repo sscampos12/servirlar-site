@@ -6,19 +6,17 @@ import { Logo } from "./logo";
 export function LandingHeader() {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-14 items-center">
+      <div className="container flex h-16 items-center">
         <div className="mr-4 flex items-center">
           <Link href="/" className="mr-6 flex items-center space-x-2">
             <Logo className="h-8 w-auto" />
-            <span className="font-bold text-lg">
-                <span className="text-primary">Ajuda</span>
-                <span className="text-[#A8E6CF]">em</span>
-                <span className="text-primary">Casa</span>
+            <span className="font-bold text-lg text-primary font-headline">
+                Lar Seguro
             </span>
           </Link>
           <nav className="hidden space-x-6 text-sm font-medium md:flex">
-            <Link href="/pricing" className="transition-colors hover:text-foreground/80 text-foreground uppercase">Preços e Serviços</Link>
-            <Link href="/register/provider" className="transition-colors hover:text-foreground/80 text-foreground uppercase">Para Profissionais</Link>
+            <Link href="/pricing" className="transition-colors hover:text-foreground/80 text-foreground">Preços e Serviços</Link>
+            <Link href="/register/provider" className="transition-colors hover:text-foreground/80 text-foreground">Para Profissionais</Link>
           </nav>
         </div>
         <div className="flex flex-1 items-center justify-end space-x-4">

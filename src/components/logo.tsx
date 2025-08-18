@@ -4,24 +4,24 @@ import React from "react";
 export function Logo({ className, ...props }: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
-      width="53"
+      width="40"
       height="40"
-      viewBox="0 0 53 40"
+      viewBox="0 0 40 40"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={cn(className)}
       {...props}
     >
       <path
-        d="M29.9521 7.1527C31.5451 5.91836 33.6849 5.86804 35.3283 7.02613L45.8392 14.6468C46.8837 15.3942 47.5 16.5843 47.5 17.8597V30.5C47.5 32.7091 45.7091 34.5 43.5 34.5H9.5C7.29086 34.5 5.5 32.7091 5.5 30.5V17.8597C5.5 16.5843 6.11631 15.3942 7.16082 14.6468L17.6717 7.02613C19.3151 5.86804 21.4549 5.91836 23.0479 7.1527L26.5 10.0244"
-        stroke="#A8E6CF"
+        d="M6.66667 16.6667L20 5L33.3333 16.6667V33.3333C33.3333 34.2538 32.9821 35.1373 32.357 35.7624C31.7319 36.3875 30.8484 36.7388 30 36.7388H10C9.15162 36.7388 8.26811 36.3875 7.64299 35.7624C7.01787 35.1373 6.66667 34.2538 6.66667 33.3333V16.6667Z"
+        stroke="#468499"
         strokeWidth="3"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
       <path
-        d="M17.5 22.5L22.5 27.5L32.5 17.5"
-        stroke="#A8E6CF"
+        d="M15 36.6667V20H25V36.6667"
+        stroke="#B5A281"
         strokeWidth="3"
         strokeLinecap="round"
         strokeLinejoin="round"

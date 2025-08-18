@@ -28,7 +28,7 @@ export default function Home() {
   const testimonials = [
     {
       name: 'Ana Silva',
-      quote: 'Contratei uma diarista pelo Ajuda em Casa e o serviço foi impecável! A profissional foi pontual, educada e muito eficiente. Recomendo!',
+      quote: 'Contratei uma diarista pelo Lar Seguro e o serviço foi impecável! A profissional foi pontual, educada e muito eficiente. Recomendo!',
       avatar: 'AS',
     },
     {
@@ -42,13 +42,13 @@ export default function Home() {
     <MarketingLayout>
       <div className="flex flex-col">
         {/* Hero Section */}
-        <section className="bg-secondary/50 py-16 px-8 text-center">
-          <div className="max-w-4xl mx-auto">
-            <h2 className="font-headline font-bold text-4xl text-primary mb-4">
-              Como Funciona o Ajuda em Casa
-            </h2>
-            <p className="text-lg text-primary/80 leading-relaxed mb-8">
-              O Ajuda em Casa conecta você a profissionais qualificados, como diaristas, passadeiras, cozinheiras, jardineiros e personal organizers. Agendar um serviço é rápido, simples e seguro, com preços fixos por pacotes de horas. Tudo sem surpresas, garantindo confiança e comodidade para o seu lar.
+        <section className="bg-secondary/30 py-20 px-4 text-center">
+          <div className="container mx-auto">
+            <h1 className="font-headline font-bold text-4xl md:text-5xl text-primary mb-4">
+              A ajuda que seu lar precisa, com a confiança que você merece.
+            </h1>
+            <p className="text-lg text-primary/80 max-w-3xl mx-auto leading-relaxed mb-8">
+              Encontre diaristas, passadeiras e cozinheiras qualificadas em poucos cliques. Simples, rápido e seguro.
             </p>
 
             <div className="flex justify-center gap-4">
@@ -57,7 +57,7 @@ export default function Home() {
                   Agendar um Serviço
                 </Link>
               </Button>
-              <Button asChild size="lg" className="bg-accent text-accent-foreground hover:bg-accent/90 shadow-md">
+              <Button asChild size="lg" variant="outline" className="shadow-md">
                 <Link href="/register/provider">
                   Seja um Profissional
                 </Link>
@@ -75,18 +75,18 @@ export default function Home() {
             <div className="grid md:grid-cols-3 gap-8">
               <Card>
                 <CardHeader>
-                  <CardTitle className="font-headline">1. Busque</CardTitle>
+                  <CardTitle className="font-headline">1. Descreva</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p>Escolha o serviço que você precisa e veja os perfis dos profissionais disponíveis na sua região.</p>
+                  <p>Informe o serviço que você precisa e os detalhes do agendamento. É rápido e fácil.</p>
                 </CardContent>
               </Card>
                <Card>
                 <CardHeader>
-                  <CardTitle className="font-headline">2. Agende</CardTitle>
+                  <CardTitle className="font-headline">2. Receba Confirmação</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p>Selecione a melhor data e horário, e pague com total segurança diretamente pela plataforma.</p>
+                  <p>Um profissional qualificado aceitará seu pedido. Você será notificado em tempo real.</p>
                 </CardContent>
               </Card>
                <Card>
@@ -94,7 +94,7 @@ export default function Home() {
                   <CardTitle className="font-headline">3. Relaxe</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p>Uma profissional qualificada e verificada chegará no horário combinado para realizar o serviço.</p>
+                  <p>O profissional chegará no horário combinado para realizar o serviço com excelência.</p>
                 </CardContent>
               </Card>
             </div>
@@ -102,9 +102,9 @@ export default function Home() {
         </section>
 
         {/* Features Section */}
-        <section className="py-16 bg-muted px-4">
+        <section className="py-16 bg-muted/50 px-4">
           <div className="container mx-auto text-center" id="features">
-            <h2 className="text-3xl font-bold mb-12 font-headline">Por que escolher o Ajuda em Casa?</h2>
+            <h2 className="text-3xl font-bold mb-12 font-headline">Por que escolher o Lar Seguro?</h2>
             <div className="grid md:grid-cols-3 gap-8">
               {features.map((feature, index) => (
                 <div key={index} className="flex flex-col items-center p-4">
