@@ -9,7 +9,8 @@ import { ClientContract } from '@/components/contracts/client-contract';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import { auth, db } from '@/lib/firebase';
+import { doc, setDoc } from 'firebase/firestore';
 
 
 export function ClientRegistrationForm() {
@@ -17,7 +18,9 @@ export function ClientRegistrationForm() {
   const { toast } = useToast();
   const router = useRouter();
 
+  const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
+  const [address, setAddress] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -45,12 +48,23 @@ export function ClientRegistrationForm() {
     setIsLoading(true);
 
     try {
-        await createUserWithEmailAndPassword(auth, email, password);
+        // 1. Create user in Firebase Auth
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+
+        // 2. Save additional user info to Firestore
+        await setDoc(doc(db, "clients", user.uid), {
+            fullName: fullName,
+            email: user.email,
+            address: address,
+        });
+
         toast({
             title: "Cadastro Realizado!",
             description: "Sua conta foi criada com sucesso. Faça o login para começar.",
         });
         router.push('/login');
+
     } catch (error: any) {
         toast({
             variant: "destructive",
@@ -67,7 +81,7 @@ export function ClientRegistrationForm() {
         <div className="grid md:grid-cols-2 gap-4">
         <div className="space-y-2">
             <Label htmlFor="fullName">Nome Completo</Label>
-            <Input id="fullName" placeholder="Seu nome" required />
+            <Input id="fullName" placeholder="Seu nome" required value={fullName} onChange={e => setFullName(e.target.value)}/>
         </div>
             <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
@@ -76,7 +90,7 @@ export function ClientRegistrationForm() {
         </div>
         <div className="space-y-2">
             <Label htmlFor="address">Endereço Principal</Label>
-            <Input id="address" placeholder="Rua, Número, Bairro" required />
+            <Input id="address" placeholder="Rua, Número, Bairro" required value={address} onChange={e => setAddress(e.target.value)} />
         </div>
         <div className="grid md:grid-cols-2 gap-4">
         <div className="space-y-2">
