@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,10 +16,15 @@ export default function AdminLoginPage() {
   const router = useRouter();
   const { toast } = useToast();
 
+  useEffect(() => {
+    // Clear any existing session storage on page load
+    localStorage.removeItem("isAdmin");
+  }, []);
+
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    // Simple hardcoded check for prototype purposes
-    if (email === "admin@ajudaemcasa.com" && password === "admin123") {
+    if (email === "contato@ajudaemcasa.com" && password === "Admin123") {
+      localStorage.setItem("isAdmin", "true");
       toast({
         title: "Login bem-sucedido!",
         description: "Redirecionando para o painel de controle.",
@@ -51,7 +56,7 @@ export default function AdminLoginPage() {
                 <Input
                   id="email"
                   type="email"
-                  placeholder="admin@ajudaemcasa.com"
+                  placeholder="contato@ajudaemcasa.com"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
