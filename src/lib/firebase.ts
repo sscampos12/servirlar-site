@@ -1,15 +1,16 @@
+
 // src/lib/firebase.ts
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
-    projectId: "lar-seguro-76fan",
-    appId: "1:951306744726:web:d57961e8dc59a8648fe3b7",
-    storageBucket: "lar-seguro-76fan.firebasestorage.app",
-    apiKey: "AIzaSyAFrH7XH1JtVUGB6RWnNOwC4izUTmIKBgg",
-    authDomain: "lar-seguro-76fan.firebaseapp.com",
-    messagingSenderId: "951306744726",
+    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+    authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+    messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
 };
 
 // Initialize Firebase
