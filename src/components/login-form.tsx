@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label"
 import { useSearchParams, useRouter } from "next/navigation"
 import { useToast } from "@/hooks/use-toast";
 import React, { useState } from "react";
-import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
+import { signInWithEmailAndPassword, signInWithPopup, signOut } from "firebase/auth";
 import { auth, db, googleProvider } from "@/lib/firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { Loader2 } from "lucide-react";
@@ -29,24 +29,30 @@ export function LoginForm() {
   const { toast } = useToast();
   const requestedRedirect = searchParams.get('redirect');
 
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('cliente@exemplo.com');
+  const [password, setPassword] = useState('123456');
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   const redirectToPanel = async (userId: string) => {
       // Check for Professional
-      const profDoc = await getDoc(doc(db, "professionals", userId));
-      if (profDoc.exists()) {
-          router.push(requestedRedirect || '/dashboard/services');
-          return;
-      }
+      const userDocRef = doc(db, "users", userId);
+      const userDocSnap = await getDoc(userDocRef);
 
-      // Check for Client
-      const clientDoc = await getDoc(doc(db, "clients", userId));
-      if (clientDoc.exists()) {
+      if (userDocSnap.exists()) {
+        const userData = userDocSnap.data();
+        if (userData.role === 'professional') {
+           router.push(requestedRedirect || '/dashboard/services');
+           return;
+        }
+        if (userData.role === 'client') {
            router.push(requestedRedirect || '/dashboard/clients');
            return;
+        }
+        if (userData.role === 'admin') {
+           router.push(requestedRedirect || '/dashboard/providers');
+           return;
+        }
       }
       
       // Fallback if user exists in Auth but not in DB collections (should not happen in normal flow)
@@ -55,7 +61,7 @@ export function LoginForm() {
           title: "Erro de Perfil",
           description: "Não foi possível encontrar um perfil associado a esta conta.",
       });
-      signOut(auth);
+      await signOut(auth);
   }
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -69,11 +75,35 @@ export function LoginForm() {
       });
       await redirectToPanel(userCredential.user.uid);
     } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Erro no Login",
-        description: "Credenciais inválidas. Por favor, verifique seu e-mail e senha.",
-      });
+      // If user not found, create a dummy client user for demo purposes
+      if (error.code === 'auth/user-not-found') {
+        try {
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
+            await setDoc(doc(db, "users", user.uid), {
+                role: "client",
+                name: "Cliente de Teste",
+                email: user.email,
+            });
+            toast({
+                title: "Conta de Teste Criada!",
+                description: "Redirecionando...",
+            });
+            await redirectToPanel(user.uid);
+        } catch (creationError: any) {
+            toast({
+                variant: "destructive",
+                title: "Erro no Login",
+                description: "Não foi possível criar uma conta de teste.",
+          });
+        }
+      } else {
+        toast({
+            variant: "destructive",
+            title: "Erro no Login",
+            description: "Credenciais inválidas. Por favor, verifique seu e-mail e senha.",
+        });
+      }
     } finally {
       setIsLoading(false);
     }
@@ -82,25 +112,19 @@ export function LoginForm() {
   const handleGoogleSignIn = async () => {
     setIsGoogleLoading(true);
     try {
-        googleProvider.addScope('profile');
-        googleProvider.addScope('email');
         const result = await signInWithPopup(auth, googleProvider);
         const user = result.user;
 
         // Check if user exists in Firestore, if not, create a new client document
-        const clientDocRef = doc(db, "clients", user.uid);
-        const professionalDocRef = doc(db, "professionals", user.uid);
-        
-        const clientDocSnap = await getDoc(clientDocRef);
-        const professionalDocSnap = await getDoc(professionalDocRef);
+        const userDocRef = doc(db, "users", user.uid);
+        const userDocSnap = await getDoc(userDocRef);
 
-        if (!clientDocSnap.exists() && !professionalDocSnap.exists()) {
-            await setDoc(doc(db, "clients", user.uid), {
+        if (!userDocSnap.exists()) {
+            await setDoc(doc(db, "users", user.uid), {
                 uid: user.uid,
-                fullName: user.displayName,
+                role: "client",
+                name: user.displayName,
                 email: user.email,
-                address: "", // Google sign-in doesn't provide address
-                createdAt: serverTimestamp(),
             });
              toast({
                 title: "Conta Criada!",
@@ -131,7 +155,7 @@ export function LoginForm() {
     <div className="grid gap-4">
       <form onSubmit={handleLogin} className="grid gap-4">
         <div className="grid gap-2">
-          <Label htmlFor="email">Email</Label>
+          <Label htmlFor="email">Email (use <code className="bg-muted px-1 rounded-sm">cliente@exemplo.com</code>)</Label>
           <Input
             id="email"
             type="email"
@@ -144,7 +168,7 @@ export function LoginForm() {
         </div>
         <div className="grid gap-2">
           <div className="flex items-center">
-            <Label htmlFor="password">Senha</Label>
+            <Label htmlFor="password">Senha (use <code className="bg-muted px-1 rounded-sm">123456</code>)</Label>
             <Link
               href="#"
               className="ml-auto inline-block text-sm underline"
@@ -162,7 +186,7 @@ export function LoginForm() {
           />
         </div>
         <Button type="submit" className="w-full" disabled={isLoading || isGoogleLoading}>
-          {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Entrar"}
+          {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Acessar como Cliente"}
         </Button>
       </form>
       <div className="relative">
