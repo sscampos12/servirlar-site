@@ -6,7 +6,7 @@ export const firebaseConfig = {
     apiKey: "AIzaSyAFrH7XH1JtVUGB6RWnNOwC4izUTmIKBgg",
     authDomain: "lar-seguro-76fan.firebaseapp.com",
     projectId: "lar-seguro-76fan",
-    storageBucket: "lar-seguro-76fan.firebasestorage.app",
+    storageBucket: "lar-seguro-76fan.appspot.com",
     messagingSenderId: "951306744726",
     appId: "1:951306744726:web:d57961e8dc59a8648fe3b7",
 };
