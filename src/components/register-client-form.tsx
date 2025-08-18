@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from 'react';
@@ -54,6 +55,15 @@ export function ClientRegistrationForm() {
         });
         return;
     }
+    if (password.length < 6) {
+      toast({
+        variant: "destructive",
+        title: "Erro de Validação",
+        description: "A senha deve ter pelo menos 6 caracteres.",
+      });
+      return;
+    }
+
 
     setIsLoading(true);
 
@@ -76,10 +86,27 @@ export function ClientRegistrationForm() {
         router.push('/login');
 
     } catch (error: any) {
+        let errorMessage = "Ocorreu um erro ao criar sua conta. Tente novamente.";
+      
+        switch (error.code) {
+          case 'auth/email-already-in-use':
+            errorMessage = "Este email já está em uso. Tente fazer login ou use outro email.";
+            break;
+          case 'auth/invalid-email':
+            errorMessage = "Email inválido. Por favor, verifique o formato do email.";
+            break;
+          case 'auth/weak-password':
+            errorMessage = "Senha muito fraca. Use pelo menos 6 caracteres.";
+            break;
+          case 'auth/network-request-failed':
+            errorMessage = "Erro de conexão. Verifique sua internet e tente novamente.";
+            break;
+        }
+
         toast({
             variant: "destructive",
             title: "Erro no Cadastro",
-            description: "Ocorreu um erro ao criar sua conta. Tente novamente.",
+            description: errorMessage,
         });
     } finally {
         setIsLoading(false);
@@ -141,25 +168,25 @@ export function ClientRegistrationForm() {
           <div className="grid md:grid-cols-2 gap-4">
           <div className="space-y-2">
               <Label htmlFor="fullName">Nome Completo</Label>
-              <Input id="fullName" placeholder="Seu nome" required value={fullName} onChange={e => setFullName(e.target.value)} disabled={isGoogleLoading} />
+              <Input id="fullName" name="fullName" placeholder="Seu nome" required value={fullName} onChange={e => setFullName(e.target.value)} disabled={isGoogleLoading} />
           </div>
               <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" placeholder="seu@email.com" required value={email} onChange={e => setEmail(e.target.value)} disabled={isGoogleLoading} />
+              <Input id="email" name="email" type="email" placeholder="seu@email.com" required value={email} onChange={e => setEmail(e.target.value)} disabled={isGoogleLoading} />
           </div>
           </div>
           <div className="space-y-2">
               <Label htmlFor="address">Endereço Principal</Label>
-              <Input id="address" placeholder="Rua, Número, Bairro" required value={address} onChange={e => setAddress(e.target.value)} disabled={isGoogleLoading} />
+              <Input id="address" name="address" placeholder="Rua, Número, Bairro" required value={address} onChange={e => setAddress(e.target.value)} disabled={isGoogleLoading} />
           </div>
           <div className="grid md:grid-cols-2 gap-4">
           <div className="space-y-2">
               <Label htmlFor="password">Senha</Label>
-              <Input id="password" type="password" required value={password} onChange={e => setPassword(e.target.value)} disabled={isGoogleLoading} />
+              <Input id="password" name="password" type="password" required value={password} onChange={e => setPassword(e.target.value)} disabled={isGoogleLoading} />
           </div>
           <div className="space-y-2">
               <Label htmlFor="confirmPassword">Confirmar Senha</Label>
-              <Input id="confirmPassword" type="password" required value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} disabled={isGoogleLoading} />
+              <Input id="confirmPassword" name="confirmPassword" type="password" required value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} disabled={isGoogleLoading} />
           </div>
           </div>
           
