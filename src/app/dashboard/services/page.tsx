@@ -30,7 +30,7 @@ import { useToast } from "@/hooks/use-toast"
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { db } from '@/lib/firebase';
-import { collection, query, where, getDocs, doc, updateDoc, DocumentData, getDoc } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc, updateDoc, DocumentData, getDoc, onSnapshot } from 'firebase/firestore';
 import { useAuth } from '@/hooks/use-auth';
 
 interface Service {
@@ -60,21 +60,20 @@ const InfoRow = ({ icon: Icon, label, value }: { icon: React.ElementType, label:
 );
 
 
-const ServiceCard = ({ service, onAccept, onDecline, accepted, declined }: { service: Service, onAccept: (id: string) => void, onDecline: (id: string) => void, accepted: boolean, declined: boolean }) => {
+const ServiceCard = ({ service, onAccept, onDecline, accepted, declined }: { service: Service, onAccept: (id: string) => Promise<void>, onDecline: (id: string) => void, accepted: boolean, declined: boolean }) => {
     const [isAccepting, setIsAccepting] = useState(false);
     const [isDeclining, setIsDeclining] = useState(false);
     
-    const handleAccept = () => {
+    const handleAccept = async () => {
         setIsAccepting(true);
-        onAccept(service.id);
+        await onAccept(service.id);
+        // No need to set isAccepting to false, as the component will be removed from the list
     }
     
     const handleDecline = () => {
         setIsDeclining(true);
-        setTimeout(() => {
-            onDecline(service.id);
-            setIsDeclining(false);
-        }, 1000);
+        onDecline(service.id);
+        setIsDeclining(false);
     }
     
   return (
@@ -105,11 +104,11 @@ const ServiceCard = ({ service, onAccept, onDecline, accepted, declined }: { ser
         ) : (
           <>
             <Button variant="outline" size="sm" onClick={handleDecline} disabled={isAccepting || isDeclining}>
-                {isDeclining ? <Loader2 className="animate-spin" /> : <ThumbsDown />}
+                {isDeclining ? <Loader2 className="animate-spin h-4 w-4" /> : <ThumbsDown className="h-4 w-4" />}
                 <span className="ml-2 hidden sm:inline">Recusar</span>
             </Button>
             <Button size="sm" onClick={handleAccept} disabled={isAccepting || isDeclining}>
-                {isAccepting ? <Loader2 className="animate-spin" /> : <ThumbsUp />}
+                {isAccepting ? <Loader2 className="animate-spin h-4 w-4" /> : <ThumbsUp className="h-4 w-4" />}
                 <span className="ml-2 hidden sm:inline">Aceitar</span>
             </Button>
           </>
@@ -124,40 +123,52 @@ export default function ServicesPage() {
     const { user } = useAuth();
     const [availableServices, setAvailableServices] = useState<Service[]>([]);
     const [myServices, setMyServices] = useState<Service[]>([]);
-    const [acceptedServices, setAcceptedServices] = useState<string[]>([]);
     const [declinedServices, setDeclinedServices] = useState<string[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        const fetchServices = async () => {
-            setIsLoading(true);
-            try {
-                // Fetch available services (Pendente)
-                const availableQuery = query(collection(db, "schedules"), where("status", "==", "Pendente"));
-                const availableSnapshot = await getDocs(availableQuery);
-                const availableData = availableSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Service));
-                setAvailableServices(availableData);
+        if (!user) {
+            setIsLoading(false);
+            return;
+        }
 
-                // Fetch professional's services
-                if (user) {
-                    const myServicesQuery = query(collection(db, "schedules"), where("professionalId", "==", user.uid));
-                    const myServicesSnapshot = await getDocs(myServicesQuery);
-                    const myServicesData = myServicesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Service));
-                    setMyServices(myServicesData);
-                }
+        setIsLoading(true);
 
-            } catch (error) {
-                 toast({
-                    variant: "destructive",
-                    title: "Erro ao buscar serviços",
-                    description: "Não foi possível carregar os dados. Tente novamente mais tarde.",
-                });
-            } finally {
-                setIsLoading(false);
-            }
+        // Listener for available services
+        const availableQuery = query(collection(db, "schedules"), where("status", "==", "Pendente"));
+        const unsubscribeAvailable = onSnapshot(availableQuery, (snapshot) => {
+            const availableData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Service));
+            setAvailableServices(availableData);
+            setIsLoading(false);
+        }, (error) => {
+            console.error("Error fetching available services:", error);
+            toast({
+                variant: "destructive",
+                title: "Erro ao buscar serviços",
+                description: "Não foi possível carregar os serviços disponíveis.",
+            });
+            setIsLoading(false);
+        });
+
+        // Listener for professional's services
+        const myServicesQuery = query(collection(db, "schedules"), where("professionalId", "==", user.uid));
+        const unsubscribeMyServices = onSnapshot(myServicesQuery, (snapshot) => {
+            const myServicesData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Service));
+            setMyServices(myServicesData);
+        }, (error) => {
+            console.error("Error fetching my services:", error);
+            toast({
+                variant: "destructive",
+                title: "Erro ao buscar seus serviços",
+                description: "Não foi possível carregar os seus serviços agendados.",
+            });
+        });
+
+        return () => {
+            unsubscribeAvailable();
+            unsubscribeMyServices();
         };
 
-        fetchServices();
     }, [user, toast]);
 
     const handleAcceptService = async (id: string) => {
@@ -167,34 +178,27 @@ export default function ServicesPage() {
         }
 
         const professionalDocRef = doc(db, "professionals", user.uid);
-        const professionalDoc = await getDoc(professionalDocRef);
-
-        if (!professionalDoc.exists()) {
-             toast({ variant: "destructive", title: "Erro", description: "Perfil de profissional não encontrado." });
-            return;
-        }
-
-        const professionalName = professionalDoc.data().fullName;
-
-        const serviceRef = doc(db, "schedules", id);
+        
         try {
+            const professionalDoc = await getDoc(professionalDocRef);
+            if (!professionalDoc.exists()) {
+                 toast({ variant: "destructive", title: "Erro", description: "Perfil de profissional não encontrado." });
+                return;
+            }
+
+            const professionalName = professionalDoc.data().fullName;
+            const serviceRef = doc(db, "schedules", id);
+            
             await updateDoc(serviceRef, {
                 status: "Confirmado",
                 professionalId: user.uid,
                 professionalName: professionalName
             });
-            setAcceptedServices(prev => [...prev, id]);
+            
             toast({
                 title: "Serviço Aceito!",
                 description: "O agendamento foi adicionado à sua lista de 'Meus Serviços'.",
             });
-            // Refetch or update state locally
-             setAvailableServices(prev => prev.filter(s => s.id !== id));
-             const acceptedService = availableServices.find(s => s.id === id);
-             if (acceptedService) {
-                setMyServices(prev => [...prev, {...acceptedService, status: 'Confirmado', professionalId: user.uid, professionalName: professionalName}]);
-             }
-
         } catch (error) {
              toast({
                 variant: "destructive",
@@ -208,7 +212,8 @@ export default function ServicesPage() {
         setDeclinedServices(prev => [...prev, id]);
          toast({
             title: "Serviço Recusado",
-            description: "O serviço não será mais exibido para você nesta sessão.",
+            description: "O serviço não será mais exibido para você.",
+            duration: 3000,
         });
     };
 
@@ -226,14 +231,14 @@ export default function ServicesPage() {
             Painel de Serviços
         </h1>
         <Tabs defaultValue="available">
-            <TabsList className="mb-6">
+            <TabsList className="mb-6 grid w-full grid-cols-2">
                 <TabsTrigger value="available">Serviços Disponíveis</TabsTrigger>
                 <TabsTrigger value="mine">Meus Serviços</TabsTrigger>
             </TabsList>
             <TabsContent value="available">
                 <Card>
                     <CardHeader>
-                        <CardTitle className="font-headline">Serviços Próximos a Você</CardTitle>
+                        <CardTitle className="font-headline">Marketplace de Serviços</CardTitle>
                         <CardDescription>
                             Visualize, aceite ou recuse os serviços disponíveis em tempo real.
                         </CardDescription>
@@ -243,7 +248,7 @@ export default function ServicesPage() {
                              <div className="flex justify-center items-center h-48">
                                 <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
                             </div>
-                        ) : availableServices.length > 0 ? (
+                        ) : availableServices.filter(s => !declinedServices.includes(s.id)).length > 0 ? (
                             availableServices
                             .filter(service => !declinedServices.includes(service.id))
                             .map(service => (
@@ -252,18 +257,13 @@ export default function ServicesPage() {
                                     service={service} 
                                     onAccept={handleAcceptService}
                                     onDecline={handleDeclineService}
-                                    accepted={acceptedServices.includes(service.id)}
+                                    accepted={false}
                                     declined={declinedServices.includes(service.id)}
                                 />
                             ))
                         ) : (
                             <div className="text-center text-muted-foreground p-8">
-                                Nenhum serviço disponível no momento.
-                            </div>
-                        )}
-                         {availableServices.filter(service => !declinedServices.includes(service.id)).length === 0 && !isLoading && availableServices.length > 0 && (
-                             <div className="text-center text-muted-foreground p-8">
-                                Todos os serviços disponíveis foram recusados nesta sessão.
+                                Nenhum serviço disponível no momento. Volte em breve!
                             </div>
                         )}
                     </CardContent>
@@ -295,9 +295,9 @@ export default function ServicesPage() {
                                         </div>
                                     </CardHeader>
                                     <CardContent className="space-y-3">
+                                        <InfoRow icon={User} label="Cliente" value={`${service.clientName}`} />
                                         <InfoRow icon={MapPin} label="Endereço" value={`${service.address}`} />
                                         <InfoRow icon={Clock} label="Horário" value={`${service.time} (${service.duration})`} />
-                                         <InfoRow icon={User} label="Cliente" value={`${service.clientName}`} />
                                     </CardContent>
                                 </Card>
                             ))
@@ -313,3 +313,4 @@ export default function ServicesPage() {
     </div>
   )
 }
+
