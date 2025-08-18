@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label"
 import { useSearchParams, useRouter } from "next/navigation"
 import { useToast } from "@/hooks/use-toast";
 import React, { useState } from "react";
-import { signInWithEmailAndPassword, signInWithPopup, signOut } from "firebase/auth";
+import { signInWithEmailAndPassword, signInWithPopup, signOut, createUserWithEmailAndPassword } from "firebase/auth";
 import { auth, db, googleProvider } from "@/lib/firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { Loader2 } from "lucide-react";
@@ -29,44 +29,21 @@ export function LoginForm() {
   const { toast } = useToast();
   const requestedRedirect = searchParams.get('redirect');
 
-  const [email, setEmail] = useState('cliente@exemplo.com');
-  const [password, setPassword] = useState('123456');
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   const redirectToPanel = async (userId: string) => {
-      // Check for Professional
-      const userDocRef = doc(db, "users", userId);
-      const userDocSnap = await getDoc(userDocRef);
-
-      if (userDocSnap.exists()) {
-        const userData = userDocSnap.data();
-        if (userData.role === 'professional') {
-           router.push(requestedRedirect || '/dashboard/services');
-           return;
-        }
-        if (userData.role === 'client') {
-           router.push(requestedRedirect || '/dashboard/clients');
-           return;
-        }
-        if (userData.role === 'admin') {
-           router.push(requestedRedirect || '/dashboard/providers');
-           return;
-        }
-      }
-      
-      // Fallback if user exists in Auth but not in DB collections (should not happen in normal flow)
-      toast({
-          variant: "destructive",
-          title: "Erro de Perfil",
-          description: "Não foi possível encontrar um perfil associado a esta conta.",
-      });
-      await signOut(auth);
+      // This logic should now be handled by the dashboard layout guard
+      router.push(requestedRedirect || '/dashboard');
   }
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+
+    const email = 'cliente@exemplo.com';
+    const password = '123456';
+
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       toast({
@@ -76,14 +53,20 @@ export function LoginForm() {
       await redirectToPanel(userCredential.user.uid);
     } catch (error: any) {
       // If user not found, create a dummy client user for demo purposes
-      if (error.code === 'auth/user-not-found') {
+      if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
         try {
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
             await setDoc(doc(db, "users", user.uid), {
+                uid: user.uid,
                 role: "client",
                 name: "Cliente de Teste",
                 email: user.email,
+            });
+             await setDoc(doc(db, "clients", user.uid), {
+                fullName: "Cliente de Teste",
+                email: user.email,
+                address: "Endereço de Teste"
             });
             toast({
                 title: "Conta de Teste Criada!",
@@ -120,11 +103,16 @@ export function LoginForm() {
         const userDocSnap = await getDoc(userDocRef);
 
         if (!userDocSnap.exists()) {
-            await setDoc(doc(db, "users", user.uid), {
+             await setDoc(userDocRef, {
                 uid: user.uid,
                 role: "client",
                 name: user.displayName,
                 email: user.email,
+            });
+            await setDoc(doc(db, "clients", user.uid), {
+                fullName: user.displayName,
+                email: user.email,
+                address: ""
             });
              toast({
                 title: "Conta Criada!",
@@ -153,42 +141,9 @@ export function LoginForm() {
 
   return (
     <div className="grid gap-4">
-      <form onSubmit={handleLogin} className="grid gap-4">
-        <div className="grid gap-2">
-          <Label htmlFor="email">Email (use <code className="bg-muted px-1 rounded-sm">cliente@exemplo.com</code>)</Label>
-          <Input
-            id="email"
-            type="email"
-            placeholder="seu@email.com"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            disabled={isGoogleLoading || isLoading}
-          />
-        </div>
-        <div className="grid gap-2">
-          <div className="flex items-center">
-            <Label htmlFor="password">Senha (use <code className="bg-muted px-1 rounded-sm">123456</code>)</Label>
-            <Link
-              href="#"
-              className="ml-auto inline-block text-sm underline"
-            >
-              Esqueceu sua senha?
-            </Link>
-          </div>
-          <Input 
-              id="password" 
-              type="password" 
-              required 
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              disabled={isGoogleLoading || isLoading}
-          />
-        </div>
-        <Button type="submit" className="w-full" disabled={isLoading || isGoogleLoading}>
-          {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Acessar como Cliente"}
+       <Button onClick={handleLogin} className="w-full" disabled={isLoading || isGoogleLoading}>
+          {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Acessar como Cliente (Acesso Livre)"}
         </Button>
-      </form>
       <div className="relative">
         <div className="absolute inset-0 flex items-center">
           <span className="w-full border-t" />

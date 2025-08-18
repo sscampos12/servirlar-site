@@ -8,15 +8,13 @@ import { Skeleton } from '@/components/ui/skeleton';
 function LoginSkeleton() {
   return (
     <div className="grid gap-4">
-      <div className="grid gap-2">
-        <Skeleton className="h-4 w-20" />
-        <Skeleton className="h-10 w-full" />
-      </div>
-      <div className="grid gap-2">
-        <Skeleton className="h-4 w-20" />
-        <Skeleton className="h-10 w-full" />
-      </div>
       <Skeleton className="h-10 w-full mt-2" />
+       <div className="relative py-4">
+        <div className="absolute inset-0 flex items-center">
+          <span className="w-full border-t" />
+        </div>
+      </div>
+      <Skeleton className="h-12 w-full" />
       <Skeleton className="h-4 w-full mt-2" />
     </div>
   )
