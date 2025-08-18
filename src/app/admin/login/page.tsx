@@ -33,7 +33,7 @@ export default function AdminLoginPage() {
       router.push("/dashboard/providers");
     } catch (error: any) {
       // If user not found, create the admin user
-      if (error.code === 'auth/user-not-found') {
+      if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
         try {
           const newUserCredential = await createUserWithEmailAndPassword(auth, ADMIN_EMAIL, ADMIN_PASS);
           const user = newUserCredential.user;
@@ -58,12 +58,6 @@ export default function AdminLoginPage() {
             description: creationError.message,
           });
         }
-      } else if (error.code === 'auth/wrong-password') {
-          toast({
-            variant: "destructive",
-            title: "Erro no Login",
-            description: `Senha incorreta. A senha padrão é: ${ADMIN_PASS}`,
-          });
       } else {
           toast({
             variant: "destructive",
