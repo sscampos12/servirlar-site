@@ -62,7 +62,12 @@ export default function SchedulePage() {
   const handleConfirm = async () => {
     if (!isFormComplete) return;
     if (!user) {
-        router.push('/login?redirect=/schedule/confirm');
+        toast({
+            title: "Login Necessário",
+            description: "Você precisa estar logado para agendar um serviço. Estamos te redirecionando.",
+            variant: "destructive"
+        });
+        router.push('/login?redirect=/schedule');
         return;
     }
 
@@ -73,7 +78,12 @@ export default function SchedulePage() {
         const clientDocSnap = await getDoc(clientDocRef);
 
         if (!clientDocSnap.exists()) {
-             toast({ variant: "destructive", title: "Erro", description: "Perfil de cliente não encontrado." });
+             toast({ 
+                title: "Perfil Incompleto",
+                description: "Complete seu cadastro de cliente para agendar.",
+                variant: "destructive" 
+             });
+             router.push('/register/client'); // Redirect to complete profile
              setIsLoading(false);
              return;
         }
@@ -84,6 +94,8 @@ export default function SchedulePage() {
             clientId: user.uid,
             clientName: clientData.fullName,
             clientEmail: user.email,
+            clientCpf: clientData.cpf || "", // Add CPF if available
+            clientPhone: clientData.phone || "", // Add phone if available
             service: selectedService,
             date: format(date, 'yyyy-MM-dd'),
             time: selectedTime,
@@ -93,11 +105,13 @@ export default function SchedulePage() {
             value: estimatedValue,
             status: "Pendente",
             createdAt: serverTimestamp(),
+            professionalId: null,
+            professionalName: null
         });
         
         toast({
             title: "Agendamento Criado!",
-            description: "Agora, confirme o pagamento para finalizar.",
+            description: "Seu pedido foi enviado aos profissionais. Agora, confirme o pagamento para finalizar.",
         });
         router.push('/schedule/confirm');
 
@@ -105,8 +119,8 @@ export default function SchedulePage() {
         console.error("Error creating schedule: ", error);
         toast({
             variant: "destructive",
-            title: "Erro",
-            description: "Não foi possível criar o agendamento. Tente novamente.",
+            title: "Erro ao Agendar",
+            description: "Não foi possível criar o agendamento. Verifique se seu perfil de cliente está completo ou tente novamente.",
         });
     } finally {
         setIsLoading(false);
@@ -279,7 +293,7 @@ export default function SchedulePage() {
           </Card>
           
           <Button size="lg" className="w-full" disabled={!isFormComplete || isLoading} onClick={handleConfirm}>
-              {isLoading ? <Loader2 className="animate-spin" /> : "Confirmar e Ir para Pagamento"}
+              {isLoading ? <Loader2 className="animate-spin" /> : "Publicar Serviço e Pagar"}
           </Button>
 
           <p className="text-xs text-muted-foreground text-center">

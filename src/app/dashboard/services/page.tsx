@@ -1,5 +1,4 @@
 
-
 "use client"
 
 import { useState, useEffect } from 'react';
@@ -31,7 +30,7 @@ import { useToast } from "@/hooks/use-toast"
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { db } from '@/lib/firebase';
-import { collection, query, where, getDocs, doc, updateDoc, DocumentData } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc, updateDoc, DocumentData, getDoc } from 'firebase/firestore';
 import { useAuth } from '@/hooks/use-auth';
 
 interface Service {
@@ -208,9 +207,8 @@ export default function ServicesPage() {
     const handleDeclineService = (id: string) => {
         setDeclinedServices(prev => [...prev, id]);
          toast({
-            variant: "destructive",
             title: "Serviço Recusado",
-            description: "O serviço não será mais exibido para você.",
+            description: "O serviço não será mais exibido para você nesta sessão.",
         });
     };
 
@@ -246,7 +244,9 @@ export default function ServicesPage() {
                                 <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
                             </div>
                         ) : availableServices.length > 0 ? (
-                            availableServices.map(service => (
+                            availableServices
+                            .filter(service => !declinedServices.includes(service.id))
+                            .map(service => (
                                 <ServiceCard 
                                     key={service.id} 
                                     service={service} 
@@ -259,6 +259,11 @@ export default function ServicesPage() {
                         ) : (
                             <div className="text-center text-muted-foreground p-8">
                                 Nenhum serviço disponível no momento.
+                            </div>
+                        )}
+                         {availableServices.filter(service => !declinedServices.includes(service.id)).length === 0 && !isLoading && availableServices.length > 0 && (
+                             <div className="text-center text-muted-foreground p-8">
+                                Todos os serviços disponíveis foram recusados nesta sessão.
                             </div>
                         )}
                     </CardContent>
@@ -292,6 +297,7 @@ export default function ServicesPage() {
                                     <CardContent className="space-y-3">
                                         <InfoRow icon={MapPin} label="Endereço" value={`${service.address}`} />
                                         <InfoRow icon={Clock} label="Horário" value={`${service.time} (${service.duration})`} />
+                                         <InfoRow icon={User} label="Cliente" value={`${service.clientName}`} />
                                     </CardContent>
                                 </Card>
                             ))
