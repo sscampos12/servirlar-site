@@ -4,11 +4,12 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { Home, Calendar, Bot, Users, LineChart, Banknote, Briefcase, User } from "lucide-react"
+import { Home, Calendar, Bot, Users, LineChart, Banknote, Briefcase, User, CheckSquare } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 
 const allNavItems = [
     { href: "/dashboard", label: "Painel", icon: Home, roles: ["admin"] },
+    { href: "/dashboard/getting-started", label: "Primeiros Passos", icon: CheckSquare, roles: ["admin"] },
     { href: "/dashboard/providers", label: "Profissionais", icon: Users, roles: ["admin"] },
     { href: "/dashboard/financial", label: "Financeiro", icon: Banknote, roles: ["admin"] },
     { href: "/dashboard/reports", label: "Relatórios", icon: LineChart, roles: ["admin"] },
@@ -39,8 +40,7 @@ export function SidebarNav({ role }: { role: 'admin' | 'client' | 'professional'
           href={item.href}
           className={cn(
             "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary",
-            pathname.startsWith(item.href) && item.href !== "/" && "bg-muted text-primary",
-            pathname === item.href && item.href === "/" && "bg-muted text-primary"
+            pathname === item.href && "bg-muted text-primary",
           )}
         >
           <item.icon className="h-4 w-4" />
