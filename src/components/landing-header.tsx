@@ -30,7 +30,6 @@ export function LandingHeader() {
         <nav className="hidden space-x-6 text-sm font-medium md:flex ml-auto">
           <Link href="/pricing" className="transition-colors hover:text-foreground/80 text-foreground uppercase">PREÇOS E SERVIÇOS</Link>
           <Link href="/register/provider" className="transition-colors hover:text-foreground/80 text-foreground uppercase">PROFISSIONAIS</Link>
-          <Link href="/faq" className="transition-colors hover:text-foreground/80 text-foreground uppercase">FAQ</Link>
         </nav>
         <div className="flex items-center justify-end space-x-4 ml-6">
            <Button asChild variant="ghost">
