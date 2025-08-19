@@ -64,11 +64,8 @@ export default function Home() {
         <section className="py-20 px-4 bg-background">
             <div className="container mx-auto text-center">
                 <h2 className="font-headline text-3xl font-bold mb-4">Como Funciona?</h2>
-                <p className="text-muted-foreground mb-12 max-w-2xl mx-auto">Em três passos simples, seu lar está cuidado.</p>
+                <p className="text-muted-foreground mb-8 max-w-2xl mx-auto">Em três passos simples, seu lar está cuidado.</p>
                 <div className="relative">
-                    <div className="hidden md:block absolute top-10 left-0 w-full h-0.5">
-                        <div className="h-full w-full border-t-2 border-dashed border-muted-foreground/20"></div>
-                    </div>
                     <div className="relative grid md:grid-cols-3 gap-y-12 md:gap-x-8">
                         <HowItWorksStep 
                             icon={PenSquare}
