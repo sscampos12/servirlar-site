@@ -65,6 +65,7 @@ export function Footer() {
               <LinkItem href="/">Início</LinkItem>
               <LinkItem href="/about">Sobre Nós</LinkItem>
               <LinkItem href="/pricing">Serviços</LinkItem>
+              <LinkItem href="/testimonials">Depoimentos</LinkItem>
               <LinkItem href="/faq">FAQ</LinkItem>
             </div>
           </div>
@@ -76,7 +77,7 @@ export function Footer() {
             </p>
             <div className="flex flex-col gap-2">
               <LinkItem href="/legal">Termos de Serviço</LinkItem>
-              <LinkItem href="/legal">Política de Privacidade</LinkItem>
+              <LinkItem href="/legal#privacy">Política de Privacidade</LinkItem>
             </div>
           </div>
 
@@ -107,7 +108,7 @@ export function Footer() {
           <div className="flex items-center gap-4">
             <LinkItem href="/legal">Termos de Serviço</LinkItem>
             <span className="text-muted-foreground/50">|</span>
-            <LinkItem href="/legal">Política de Privacidade</LinkItem>
+            <LinkItem href="/legal#privacy">Política de Privacidade</LinkItem>
             <span className="text-muted-foreground/50">|</span>
             <LinkItem href="/faq">FAQ</LinkItem>
           </div>
