@@ -13,29 +13,27 @@ export function Logo({ className, ...props }: React.SVGProps<SVGSVGElement>) {
       className={cn(className)}
       {...props}
     >
-      {/* Icon Path */}
       <g>
         <path
           d="M28.45 6.36364L15.3 15.9091L8 10.9091L2 15V34C2 35.1046 2.89543 36 4 36H34C35.1046 36 36 35.1046 36 34V15L28.45 6.36364Z"
-          fill="hsl(var(--secondary))"
-          stroke="hsl(var(--secondary))"
+          fill="hsl(var(--primary))"
+          stroke="hsl(var(--primary))"
           strokeWidth="2.5"
           strokeLinecap="round"
           strokeLinejoin="round"
         />
         <path
           d="M14.5 22L19 26.5L27.5 18"
-          stroke="white"
+          stroke="hsl(var(--primary-foreground))"
           strokeWidth="3"
           strokeLinecap="round"
           strokeLinejoin="round"
         />
       </g>
-      {/* Text Elements */}
-      <text x="45" y="26" fontFamily="'Poppins', sans-serif" fontSize="20" fontWeight="bold" fill="hsl(var(--primary))">
+      <text x="45" y="26" fontFamily="'Poppins', sans-serif" fontSize="20" fontWeight="bold" fill="hsl(var(--foreground))">
         Ajuda
       </text>
-      <text x="115" y="26" fontFamily="'Poppins', sans-serif" fontSize="20" fontWeight="bold" fill="hsl(var(--secondary))">
+      <text x="115" y="26" fontFamily="'Poppins', sans-serif" fontSize="20" fontWeight="bold" fill="hsl(var(--primary))">
         em Casa
       </text>
     </svg>
