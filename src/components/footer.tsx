@@ -16,9 +16,9 @@ export function Footer() {
 
   return (
     <footer className="mt-16 border-t bg-card text-card-foreground">
-      {/* Call to action */}
-      <div className="mx-auto max-w-7xl px-6 container">
-        <div className="flex flex-col items-center justify-between gap-4 rounded-2xl bg-muted/50 p-6 text-center sm:flex-row sm:text-left my-8">
+      <div className="container mx-auto max-w-7xl px-6">
+        {/* Call to action */}
+        <div className="my-8 flex flex-col items-center justify-between gap-4 rounded-2xl bg-muted/50 p-6 text-center sm:flex-row sm:text-left">
           <div>
             <h3 className="text-lg font-semibold text-foreground font-headline">
               Precisa de ajuda hoje?
@@ -42,15 +42,13 @@ export function Footer() {
             </Link>
           </div>
         </div>
-      </div>
 
-      {/* Main footer content */}
-      <div className="mx-auto max-w-7xl px-6 py-12 container">
-        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
+        {/* Main footer content */}
+        <div className="grid gap-10 py-12 sm:grid-cols-2 lg:grid-cols-4">
           {/* Brand */}
           <div>
             <div className="flex items-center gap-3 mb-4">
-                <Logo className="h-8 w-auto" />
+                <Logo className="h-10 w-auto" />
             </div>
             <p className="text-sm leading-6 text-muted-foreground">
               Plataforma simples e segura para contratar limpeza, organização, babá,
@@ -102,9 +100,9 @@ export function Footer() {
         <div className="my-8 h-px w-full bg-border" />
 
         {/* Legal bottom bar */}
-        <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
+        <div className="flex flex-col items-center justify-between gap-4 py-8 sm:flex-row">
           <p className="text-xs text-muted-foreground">
-            © {year} Lar Seguro. Todos os direitos reservados.
+            © {year} Ajuda em Casa. Todos os direitos reservados.
           </p>
           <div className="flex items-center gap-4">
             <LinkItem href="/legal">Termos de Serviço</LinkItem>
