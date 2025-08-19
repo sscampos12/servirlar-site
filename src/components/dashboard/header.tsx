@@ -1,6 +1,9 @@
 
+"use client";
+
 import Link from "next/link"
 import {
+  ArrowLeft,
   Menu,
 } from "lucide-react"
 
@@ -16,10 +19,12 @@ import { Logo } from "@/components/logo"
 import { Notifications } from "./notifications"
 import React from "react"
 import { Role } from "@/app/dashboard/layout"
+import { useRouter } from "next/navigation"
 
 
 export function DashboardHeader() {
     const [role, setRole] = React.useState<Role | null>('admin');
+    const router = useRouter();
 
   return (
     <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6">
@@ -46,7 +51,10 @@ export function DashboardHeader() {
         </SheetContent>
       </Sheet>
       <div className="w-full flex-1">
-        {/* Can add search or other header elements here */}
+        <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => router.back()}>
+            <ArrowLeft className="h-4 w-4" />
+            <span className="sr-only">Voltar</span>
+        </Button>
       </div>
       <Notifications />
       <UserNav />
