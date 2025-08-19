@@ -30,8 +30,8 @@ const BenefitCard = ({ icon: Icon, title, description }: { icon: React.ElementTy
 );
 
 const TestimonialCard = ({ name, role, feedback, avatarSrc }: { name: string, role: string, feedback: string, avatarSrc: string }) => (
-    <Card className="flex flex-col h-full">
-        <CardContent className="p-6 flex-grow">
+    <Card className="flex flex-col">
+        <CardContent className="p-6">
             <p className="text-muted-foreground italic">"{feedback}"</p>
         </CardContent>
         <CardHeader className="flex-row items-center gap-4 pt-0">
