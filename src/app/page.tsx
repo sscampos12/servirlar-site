@@ -96,7 +96,7 @@ export default function Home() {
         {/* Why Choose Us Section */}
         <section className="py-20 px-4 bg-muted">
             <div className="container mx-auto text-center">
-                <h2 className="font-headline text-3xl font-bold mb-4">Por que escolher o Lar Seguro?</h2>
+                <h2 className="font-headline text-3xl font-bold mb-4">Por que escolher a Ajuda em Casa?</h2>
                 <p className="text-muted-foreground mb-12 max-w-2xl mx-auto">Sua tranquilidade é nossa prioridade. Oferecemos a melhor experiência com segurança e qualidade.</p>
                 <div className="grid md:grid-cols-3 gap-12">
                     <BenefitCard 
