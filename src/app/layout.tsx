@@ -1,13 +1,18 @@
 import type { Metadata } from 'next';
-import { Poppins } from 'next/font/google';
+import { Inter, PT_Sans } from 'next/font/google';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from '@/hooks/use-auth';
 
-const poppins = Poppins({
+const inter = Inter({ 
   subsets: ['latin'],
-  weight: ['400', '500', '600', '700', '900'],
-  variable: '--font-poppins',
+  variable: '--font-inter',
+});
+
+const ptSans = PT_Sans({
+  subsets: ['latin'],
+  weight: ['400', '700'],
+  variable: '--font-pt-sans',
 });
 
 export const metadata: Metadata = {
@@ -21,7 +26,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR" suppressHydrationWarning className={`${poppins.variable}`}>
+    <html lang="pt-BR" suppressHydrationWarning className={`${inter.variable} ${ptSans.variable}`}>
       <body>
         <AuthProvider>
             {children}

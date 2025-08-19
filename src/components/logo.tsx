@@ -16,11 +16,11 @@ export function Logo({ className, ...props }: React.SVGProps<SVGSVGElement>) {
       <g>
         <path
           d="M23.5 4.5L12.5 11.5L4 7.5L0 11V27C0 28.1046 0.89543 29 2 29H28C29.1046 29 30 28.1046 30 27V11L23.5 4.5Z"
-          fill="#A8E6CF"
+          fill="hsl(var(--primary))"
         />
         <path
           d="M9.5 19L13.5 23L21.5 15"
-          stroke="hsl(var(--primary))"
+          stroke="hsl(var(--primary-foreground))"
           strokeWidth="2.5"
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -30,7 +30,7 @@ export function Logo({ className, ...props }: React.SVGProps<SVGSVGElement>) {
       <text 
         x="38" 
         y="22" 
-        fontFamily="'Poppins', sans-serif" 
+        fontFamily="'PT Sans', sans-serif" 
         fontSize="18" 
         fontWeight="bold" 
         fill="hsl(var(--primary))">
@@ -39,10 +39,10 @@ export function Logo({ className, ...props }: React.SVGProps<SVGSVGElement>) {
       <text 
         x="95" 
         y="22" 
-        fontFamily="'Poppins', sans-serif" 
+        fontFamily="'PT Sans', sans-serif" 
         fontSize="18" 
         fontWeight="bold" 
-        fill="#A8E6CF">
+        fill="hsl(var(--muted-foreground))">
         em Casa
       </text>
     </svg>
