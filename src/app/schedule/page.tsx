@@ -3,18 +3,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { 
-  Home, 
-  Calendar, 
-  Clock, 
-  MapPin, 
-  User, 
-  Users,
-  DollarSign,
-  FileText,
-  ArrowLeft,
-  Check,
-  X,
-  Loader2
+  Loader2,
+  Lock,
+  ArrowLeft
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
@@ -28,6 +19,10 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { LoginForm } from '@/components/login-form';
+import { ClientRegistrationForm } from '@/components/register-client-form';
+
 
 const pricingData = {
     "faxina": { "4": 140, "6": 198, "8": 240 },
@@ -58,13 +53,15 @@ const SchedulePage = () => {
   });
   
   const [clientData, setClientData] = useState({ name: '', email: '', phone: '', cpf: '' });
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (authLoading) return;
+    
     if (!user) {
-      router.push('/login?redirect=/schedule');
-      return;
+        setIsLoading(false);
+        return;
     }
 
     const fetchClientData = async () => {
@@ -76,7 +73,7 @@ const SchedulePage = () => {
             setClientData({ 
                 name: data.fullName, 
                 email: data.email,
-                phone: data.phone || 'N/A', // Assuming phone and cpf might not be there
+                phone: data.phone || 'N/A',
                 cpf: data.cpf || 'N/A'
             });
         }
@@ -103,7 +100,7 @@ const SchedulePage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
-    setIsLoading(true);
+    setIsSubmitting(true);
 
     try {
         await addDoc(collection(db, "schedules"), {
@@ -136,19 +133,51 @@ const SchedulePage = () => {
             description: "Não foi possível criar seu agendamento. Tente novamente.",
         });
         console.error("Error creating schedule: ", error);
-        setIsLoading(false);
+        setIsSubmitting(false);
     }
   };
   
     if (authLoading || isLoading) {
-    return (
-      <ScheduleLayout>
-        <div className="flex items-center justify-center h-full">
-            <Loader2 className="h-16 w-16 animate-spin" />
-        </div>
-      </ScheduleLayout>
-    );
-  }
+        return (
+        <ScheduleLayout>
+            <div className="flex items-center justify-center h-full">
+                <Loader2 className="h-16 w-16 animate-spin" />
+            </div>
+        </ScheduleLayout>
+        );
+    }
+
+    if(!user) {
+        return (
+             <ScheduleLayout>
+                <div className="max-w-md mx-auto px-4 py-12">
+                    <Card className="w-full">
+                        <CardHeader className="text-center">
+                            <Lock className="w-12 h-12 text-primary mx-auto mb-4" />
+                            <CardTitle className="font-headline text-2xl">Acesso Restrito</CardTitle>
+                            <CardDescription>
+                                Para agendar serviços, você precisa fazer login ou criar uma conta.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                           <Tabs defaultValue="login" className="w-full">
+                            <TabsList className="grid w-full grid-cols-2">
+                                <TabsTrigger value="login">Fazer Login</TabsTrigger>
+                                <TabsTrigger value="register">Criar Conta</TabsTrigger>
+                            </TabsList>
+                            <TabsContent value="login" className="pt-6">
+                                <LoginForm />
+                            </TabsContent>
+                            <TabsContent value="register" className="pt-6">
+                                <ClientRegistrationForm />
+                            </TabsContent>
+                            </Tabs>
+                        </CardContent>
+                    </Card>
+                </div>
+             </ScheduleLayout>
+        )
+    }
 
   return (
     <ScheduleLayout>
@@ -222,8 +251,8 @@ const SchedulePage = () => {
                         </CardContent>
                     </Card>
 
-                    <Button type="submit" size="lg" className="w-full" disabled={isLoading}>
-                         {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Continuar para Pagamento'}
+                    <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
+                         {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Continuar para Pagamento'}
                     </Button>
 
                 </form>
