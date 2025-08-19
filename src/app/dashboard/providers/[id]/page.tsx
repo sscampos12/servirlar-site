@@ -10,15 +10,14 @@ import {
   Phone,
   Download,
   Play,
-  Check,
-  AlertTriangle,
   Users,
 } from 'lucide-react';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { AdminActions } from '@/components/dashboard/provider/admin-actions';
+import { revalidatePath } from 'next/cache';
 
 interface Professional {
     id: string;
@@ -34,12 +33,20 @@ interface Professional {
     status: 'Aprovado' | 'Pendente' | 'Rejeitado';
 }
 
-const getWhatsAppLink = (phone: string | undefined, fullName: string | undefined) => {
-    if (!phone) return '#';
-    const telefoneClean = phone.replace(/\D/g, '');
-    const mensagem = `Olá ${fullName}! Sou da equipe Ajuda em Casa. Como posso ajudá-lo(a)?`;
-    return `https://wa.me/55${telefoneClean}?text=${encodeURIComponent(mensagem)}`;
-};
+async function updateProfessionalStatus(id: string, newStatus: 'Aprovado' | 'Rejeitado') {
+    'use server';
+    try {
+        const docRef = doc(db, 'professionals', id);
+        await updateDoc(docRef, { status: newStatus });
+        revalidatePath(`/dashboard/providers/${id}`);
+        revalidatePath('/dashboard/providers');
+        return { success: true, message: `Status atualizado para ${newStatus}` };
+    } catch (error) {
+        console.error("Error updating status:", error);
+        return { success: false, message: 'Falha ao atualizar o status.' };
+    }
+}
+
 
 const StatusBadge = ({ status }: { status: string }) => {
     const configs: any = {
@@ -219,6 +226,7 @@ export default async function DetalheProfissionalAdminPage({ params }: { params:
                 currentStatus={professionalData.status}
                 phone={professionalData.phone}
                 fullName={professionalData.fullName}
+                updateStatusAction={updateProfessionalStatus}
               />
             </div>
           </div>

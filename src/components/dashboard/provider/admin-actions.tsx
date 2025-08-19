@@ -1,19 +1,17 @@
 
 "use client";
 
-import { useState } from 'react';
-import { doc, updateDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { useTransition } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Loader2, Check, AlertTriangle, Phone } from 'lucide-react';
-import { useRouter } from 'next/navigation';
 
 interface AdminActionsProps {
     professionalId: string;
     currentStatus: 'Aprovado' | 'Pendente' | 'Rejeitado';
     phone: string;
     fullName: string;
+    updateStatusAction: (id: string, newStatus: 'Aprovado' | 'Rejeitado') => Promise<{ success: boolean, message: string }>;
 }
 
 const getWhatsAppLink = (phone: string | undefined, fullName: string | undefined) => {
@@ -24,55 +22,49 @@ const getWhatsAppLink = (phone: string | undefined, fullName: string | undefined
 };
 
 
-export function AdminActions({ professionalId, currentStatus, phone, fullName }: AdminActionsProps) {
+export function AdminActions({ professionalId, currentStatus, phone, fullName, updateStatusAction }: AdminActionsProps) {
     const { toast } = useToast();
-    const router = useRouter();
-    const [status, setStatus] = useState(currentStatus);
-    const [isSaving, setIsSaving] = useState(false);
+    const [isPending, startTransition] = useTransition();
 
-    const handleStatusChange = async (newStatus: 'Aprovado' | 'Rejeitado') => {
+
+    const handleStatusChange = (newStatus: 'Aprovado' | 'Rejeitado') => {
         const confirmationText = newStatus === 'Aprovado' 
             ? 'Deseja realmente aprovar este cadastro?'
             : 'Deseja realmente rejeitar este cadastro?';
         
         if (window.confirm(confirmationText)) {
-            setIsSaving(true);
-            try {
-                const docRef = doc(db, 'professionals', professionalId);
-                await updateDoc(docRef, { status: newStatus });
-                setStatus(newStatus);
-                toast({ title: 'Sucesso', description: `Cadastro ${newStatus.toLowerCase()} com sucesso!` });
-                router.refresh(); // Re-fetches server-side data
-            } catch (error) {
-                console.error("Error updating status:", error);
-                toast({ variant: 'destructive', title: 'Erro', description: 'Falha ao atualizar o status.' });
-            } finally {
-                setIsSaving(false);
-            }
+            startTransition(async () => {
+                const result = await updateStatusAction(professionalId, newStatus);
+                 if (result.success) {
+                    toast({ title: 'Sucesso', description: `Cadastro ${newStatus.toLowerCase()} com sucesso!` });
+                } else {
+                    toast({ variant: 'destructive', title: 'Erro', description: result.message });
+                }
+            });
         }
     };
 
     return (
         <div className="space-y-3">
-            {status !== 'Aprovado' && (
+            {currentStatus !== 'Aprovado' && (
                 <Button 
                 onClick={() => handleStatusChange('Aprovado')}
-                disabled={isSaving}
+                disabled={isPending}
                 className="w-full bg-green-600 hover:bg-green-700"
                 >
-                {isSaving ? <Loader2 className="w-4 h-4 animate-spin"/> : <Check className="w-4 h-4" />}
+                {isPending ? <Loader2 className="w-4 h-4 animate-spin"/> : <Check className="w-4 h-4" />}
                 Aprovar Cadastro
                 </Button>
             )}
             
-            {status !== 'Rejeitado' && (
+            {currentStatus !== 'Rejeitado' && (
                 <Button 
                 onClick={() => handleStatusChange('Rejeitado')}
-                disabled={isSaving}
+                disabled={isPending}
                 variant="destructive"
                 className="w-full"
                 >
-                {isSaving ? <Loader2 className="w-4 h-4 animate-spin"/> : <AlertTriangle className="w-4 h-4" />}
+                {isPending ? <Loader2 className="w-4 h-4 animate-spin"/> : <AlertTriangle className="w-4 h-4" />}
                 Rejeitar Cadastro
                 </Button>
             )}
