@@ -11,11 +11,10 @@ import { ProviderContract } from '@/components/contracts/provider-contract';
 import { FileSignature, CheckCircle2, Upload, Loader2, User } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { db, auth } from '@/lib/firebase';
-import { doc, setDoc, serverTimestamp, GeoPoint, getDoc } from 'firebase/firestore';
+import { doc, setDoc, serverTimestamp, GeoPoint, getDoc, updateDoc } from 'firebase/firestore';
 import { useAuth } from '@/hooks/use-auth';
 import { useRouter } from 'next/navigation';
 import { geohashForLocation } from 'geofire-common';
-import { onAuthStateChanged } from 'firebase/auth';
 
 const FileUploadField = ({ id, label }: { id: string, label: string }) => (
     <div className="space-y-2">
@@ -40,7 +39,7 @@ export default function CompleteProviderProfilePage() {
    useEffect(() => {
     if (authLoading) return;
     if (!user) {
-        router.push('/login?redirect=/dashboard/profile');
+        router.push('/login?redirect=/dashboard/providers/profile');
         return;
     };
 
@@ -114,15 +113,15 @@ export default function CompleteProviderProfilePage() {
       // TODO: Handle file uploads to Firebase Storage
 
       // Merge new data with existing professional document
-      await setDoc(doc(db, "professionals", user.uid), professionalData, { merge: true });
+      await updateDoc(doc(db, "professionals", user.uid), professionalData);
       
       setSubmitted(true);
       toast({
         title: "Cadastro Enviado!",
         description: "Seu perfil foi enviado para análise. Entraremos em contato em breve.",
       });
-      // Don't redirect immediately, show the success message
-      // User can then navigate to their (now pending) profile page.
+      
+      router.push('/dashboard/profile');
 
     } catch (error) {
       console.error("Error updating document: ", error);
@@ -143,28 +142,6 @@ export default function CompleteProviderProfilePage() {
         </div>
     )
   }
-
-  if (submitted) {
-    return (
-        <div className="flex h-screen w-full items-center justify-center bg-background p-4">
-            <Card className="max-w-md w-full">
-                <CardContent className="pt-6">
-                     <div className="text-center py-8">
-                        <CheckCircle2 className="mx-auto h-16 w-16 text-green-500 mb-4" />
-                        <h3 className="font-headline text-2xl font-semibold">Cadastro enviado com sucesso!</h3>
-                        <p className="text-muted-foreground mt-2 mb-6">
-                        Entraremos em contato em breve após a análise dos seus dados.
-                        </p>
-                         <Button asChild>
-                            <a href="/dashboard/profile">Ver Meu Perfil</a>
-                        </Button>
-                    </div>
-                </CardContent>
-            </Card>
-        </div>
-    )
-  }
-
 
   return (
     <div className="bg-muted min-h-screen">
