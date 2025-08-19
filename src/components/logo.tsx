@@ -14,29 +14,29 @@ export function Logo({ className, ...props }: React.SVGProps<SVGSVGElement>) {
       {...props}
     >
       {/* Icon Path */}
-      <path
-        d="M6.66667 16.6667L20 5L33.3333 16.6667V33.3333C33.3333 34.2538 32.9821 35.1373 32.357 35.7624C31.7319 36.3875 30.8484 36.7388 30 36.7388H10C9.15162 36.7388 8.26811 36.3875 7.64299 35.7624C7.01787 35.1373 6.66667 34.2538 6.66667 33.3333V16.6667Z"
-        stroke="hsl(var(--primary))"
-        strokeWidth="3"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M15 36.6667V20H25V36.6667"
-        stroke="hsl(var(--accent))"
-        strokeWidth="3"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+      <g>
+        <path
+          d="M28.45 6.36364L15.3 15.9091L8 10.9091L2 15V34C2 35.1046 2.89543 36 4 36H34C35.1046 36 36 35.1046 36 34V15L28.45 6.36364Z"
+          fill="hsl(var(--secondary))"
+          stroke="hsl(var(--secondary))"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M14.5 22L19 26.5L27.5 18"
+          stroke="white"
+          strokeWidth="3"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </g>
       {/* Text Elements */}
       <text x="45" y="26" fontFamily="'Poppins', sans-serif" fontSize="20" fontWeight="bold" fill="hsl(var(--primary))">
         Ajuda
       </text>
-      <text x="110" y="26" fontFamily="'Poppins', sans-serif" fontSize="20" fontWeight="bold" fill="hsl(var(--secondary-foreground))">
-        em
-      </text>
-      <text x="145" y="26" fontFamily="'Poppins', sans-serif" fontSize="20" fontWeight="bold" fill="hsl(var(--primary))">
-        Casa
+      <text x="110" y="26" fontFamily="'Poppins', sans-serif" fontSize="20" fontWeight="bold" fill="hsl(var(--secondary))">
+        em Casa
       </text>
     </svg>
   );
