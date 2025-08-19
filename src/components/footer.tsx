@@ -66,7 +66,6 @@ export function Footer() {
               <LinkItem href="/about">Sobre Nós</LinkItem>
               <LinkItem href="/pricing">Serviços</LinkItem>
               <LinkItem href="/testimonials">Depoimentos</LinkItem>
-              <LinkItem href="/faq">FAQ</LinkItem>
             </div>
           </div>
 
