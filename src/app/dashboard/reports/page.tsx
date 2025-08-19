@@ -124,28 +124,6 @@ export default function ReportsPage() {
     <div className="flex flex-col gap-8">
       <div>
         <h1 className="font-headline text-lg font-semibold md:text-2xl mb-4">
-          Relatórios Gerenciais
-        </h1>
-        <Tabs defaultValue="weekly">
-            <TabsList className="mb-4">
-            <TabsTrigger value="daily">Diário</TabsTrigger>
-            <TabsTrigger value="weekly">Semanal</TabsTrigger>
-            <TabsTrigger value="monthly">Mensal</TabsTrigger>
-            </TabsList>
-            <TabsContent value="daily">
-            <ReportChart title="Relatório Diário" data={dailyData} dataKey="date" />
-            </TabsContent>
-            <TabsContent value="weekly">
-            <ReportChart title="Relatório Semanal" data={weeklyData} dataKey="week" />
-            </TabsContent>
-            <TabsContent value="monthly">
-            <ReportChart title="Relatório Mensal" data={monthlyData} dataKey="month" />
-            </TabsContent>
-        </Tabs>
-      </div>
-
-      <div>
-        <h1 className="font-headline text-lg font-semibold md:text-2xl mb-4">
           Relatório Operacional de Agendamentos
         </h1>
         <Card>
@@ -283,6 +261,28 @@ export default function ReportsPage() {
         </Card>
       </div>
 
+       <div>
+        <h1 className="font-headline text-lg font-semibold md:text-2xl mb-4">
+          Relatórios Gerenciais
+        </h1>
+        <Tabs defaultValue="weekly">
+            <TabsList className="mb-4">
+            <TabsTrigger value="daily">Diário</TabsTrigger>
+            <TabsTrigger value="weekly">Semanal</TabsTrigger>
+            <TabsTrigger value="monthly">Mensal</TabsTrigger>
+            </TabsList>
+            <TabsContent value="daily">
+            <ReportChart title="Relatório Diário" data={dailyData} dataKey="date" />
+            </TabsContent>
+            <TabsContent value="weekly">
+            <ReportChart title="Relatório Semanal" data={weeklyData} dataKey="week" />
+            </TabsContent>
+            <TabsContent value="monthly">
+            <ReportChart title="Relatório Mensal" data={monthlyData} dataKey="month" />
+            </TabsContent>
+        </Tabs>
+      </div>
+
     </div>
   )
 }
@@ -296,10 +296,10 @@ function ReportChart({ title, data, dataKey }: { title: string, data: any[], dat
           Visualize a receita e o número de agendamentos.
         </CardDescription>
       </CardHeader>
-      <CardContent className="grid gap-8">
+      <CardContent className="grid gap-6">
         <div>
-          <h3 className="font-semibold mb-4">Receita</h3>
-           <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
+          <h3 className="font-semibold mb-2 text-sm">Receita</h3>
+           <ChartContainer config={chartConfig} className="min-h-[150px] w-full">
             <BarChart accessibilityLayer data={data}>
               <CartesianGrid vertical={false} />
               <XAxis
@@ -307,11 +307,13 @@ function ReportChart({ title, data, dataKey }: { title: string, data: any[], dat
                 tickLine={false}
                 tickMargin={10}
                 axisLine={false}
+                fontSize={12}
               />
                <YAxis
                 tickLine={false}
                 axisLine={false}
-                tickFormatter={(value) => `R$ ${value}`}
+                tickFormatter={(value) => `R$ ${value / 1000}k`}
+                fontSize={12}
               />
               <ChartTooltip
                 cursor={false}
@@ -322,8 +324,8 @@ function ReportChart({ title, data, dataKey }: { title: string, data: any[], dat
           </ChartContainer>
         </div>
         <div>
-          <h3 className="font-semibold mb-4">Agendamentos</h3>
-           <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
+          <h3 className="font-semibold mb-2 text-sm">Agendamentos</h3>
+           <ChartContainer config={chartConfig} className="min-h-[150px] w-full">
             <RechartsLineChart accessibilityLayer data={data}>
               <CartesianGrid vertical={false} />
               <XAxis
@@ -331,10 +333,12 @@ function ReportChart({ title, data, dataKey }: { title: string, data: any[], dat
                 tickLine={false}
                 tickMargin={10}
                 axisLine={false}
+                 fontSize={12}
               />
               <YAxis
                 tickLine={false}
                 axisLine={false}
+                fontSize={12}
               />
               <ChartTooltip
                 cursor={false}
