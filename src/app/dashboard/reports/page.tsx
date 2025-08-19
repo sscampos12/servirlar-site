@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/chart"
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Line, LineChart as RechartsLineChart } from "recharts"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Calendar as CalendarIcon, DollarSign, Users, Clock, Home, Tag, Info, User, CheckCircle } from "lucide-react"
+import { Calendar as CalendarIcon, DollarSign, Users, Clock, Home, Tag, Info, Loader2 } from "lucide-react"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Button } from "@/components/ui/button"
@@ -27,6 +27,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { cn } from "@/lib/utils"
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { db } from '@/lib/firebase';
+import { collection, query, where, onSnapshot, DocumentData, getDocs } from 'firebase/firestore';
 
 const dailyData = [
   { date: "Seg", revenue: 250, appointments: 5 },
@@ -65,27 +67,18 @@ const chartConfig = {
 }
 
 interface Appointment {
-    id: number;
-    client: string;
+    id: string;
+    clientName: string;
     service: string;
-    date: Date;
+    date: string;
     time: string;
     duration: string;
     address: string;
     status: "Confirmado" | "Pendente" | "Finalizado";
-    professional: string;
+    professionalName: string;
     value: number;
 }
 
-const mockAppointments: Appointment[] = [
-    { id: 1, client: "Carlos Mendes", service: "Faxina Padrão", date: new Date(), time: "09:00", duration: "4 horas", address: "Rua das Flores, 123", status: "Confirmado", professional: "Maria Aparecida", value: 140.00 },
-    { id: 2, client: "Ana Silva", service: "Passadoria", date: new Date(), time: "14:00", duration: "2 horas", address: "Av. Principal, 456", status: "Confirmado", professional: "João da Silva", value: 74.00 },
-    { id: 3, client: "Pedro Souza", service: "Cozinheira", date: new Date(new Date().setDate(new Date().getDate() + 1)), time: "10:00", duration: "6 horas", address: "Praça Central, 789", status: "Pendente", professional: "Maria Aparecida", value: 228.00 },
-    { id: 4, client: "Juliana Costa", service: "Faxina Padrão", date: new Date(), time: "08:00", duration: "8 horas", address: "Rua das Palmeiras, 321", status: "Finalizado", professional: "Ana Paula", value: 240.00 },
-    { id: 5, client: "Fernanda Lima", service: "Faxina Padrão", date: new Date(), time: "10:00", duration: "6 horas", address: "Rua dos Sonhos, 555", status: "Confirmado", professional: "Maria Aparecida", value: 198.00 },
-]
-
-const mockProfessionals = ["Maria Aparecida", "João da Silva", "Ana Paula", "Carlos de Souza"];
 
 const DetailRow = ({ icon: Icon, label, value }: { icon: React.ElementType, label: string, value: React.ReactNode }) => (
     <div className="flex items-center gap-3">
@@ -100,26 +93,49 @@ const DetailRow = ({ icon: Icon, label, value }: { icon: React.ElementType, labe
 );
 
 export default function ReportsPage() {
-    const [date, setDate] = useState<Date | undefined>(undefined);
+    const [date, setDate] = useState<Date | undefined>(new Date());
     const [selectedProfessional, setSelectedProfessional] = useState<string>("todos");
     const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
+    const [appointments, setAppointments] = useState<Appointment[]>([]);
+    const [professionals, setProfessionals] = useState<DocumentData[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        setDate(new Date());
+        const fetchProfessionals = async () => {
+            const profQuery = query(collection(db, "professionals"), where("status", "==", "Aprovado"));
+            const profSnap = await getDocs(profQuery);
+            setProfessionals(profSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+        }
+        fetchProfessionals();
     }, []);
 
-    const filteredAppointments = mockAppointments.filter(app => {
-        const isSameDay = format(app.date, 'yyyy-MM-dd') === (date ? format(date, 'yyyy-MM-dd') : '');
-        const isSameProfessional = selectedProfessional === 'todos' || app.professional === selectedProfessional;
+    useEffect(() => {
+        setIsLoading(true);
+        const q = query(collection(db, "schedules"));
+        
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+            const schedulesData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Appointment));
+            setAppointments(schedulesData);
+            setIsLoading(false);
+        });
+
+        return () => unsubscribe();
+    }, []);
+
+    const filteredAppointments = appointments.filter(app => {
+        if (!date) return false;
+        const appDate = new Date(app.date + 'T00:00:00'); // Ensure correct date parsing without timezone issues
+        const isSameDay = format(appDate, 'yyyy-MM-dd') === format(date, 'yyyy-MM-dd');
+        const isSameProfessional = selectedProfessional === 'todos' || app.professionalName === selectedProfessional;
         return isSameDay && isSameProfessional;
     });
 
     const paymentSummary = filteredAppointments.reduce((acc, app) => {
         if (app.status === 'Finalizado' || app.status === 'Confirmado') {
-            if (!acc[app.professional]) {
-                acc[app.professional] = 0;
+            if (!acc[app.professionalName]) {
+                acc[app.professionalName] = 0;
             }
-            acc[app.professional] += app.value;
+            acc[app.professionalName] += app.value;
         }
         return acc;
     }, {} as Record<string, number>);
@@ -166,8 +182,8 @@ export default function ReportsPage() {
                         </SelectTrigger>
                         <SelectContent>
                             <SelectItem value="todos">Todos os Profissionais</SelectItem>
-                            {mockProfessionals.map(prof => (
-                                <SelectItem key={prof} value={prof}>{prof}</SelectItem>
+                            {professionals.map(prof => (
+                                <SelectItem key={prof.id} value={prof.fullName}>{prof.fullName}</SelectItem>
                             ))}
                         </SelectContent>
                     </Select>
@@ -209,16 +225,22 @@ export default function ReportsPage() {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {filteredAppointments.length > 0 ? (
+                                {isLoading ? (
+                                    <TableRow>
+                                        <TableCell colSpan={7} className="h-24 text-center">
+                                            <Loader2 className="h-8 w-8 animate-spin" />
+                                        </TableCell>
+                                    </TableRow>
+                                ) : filteredAppointments.length > 0 ? (
                                     filteredAppointments.map((app) => (
                                         <DialogTrigger asChild key={app.id}>
                                             <TableRow onClick={() => setSelectedAppointment(app)} className="cursor-pointer">
-                                                <TableCell className="font-medium">{app.client}</TableCell>
+                                                <TableCell className="font-medium">{app.clientName}</TableCell>
                                                 <TableCell>
                                                     <div>{app.service}</div>
                                                     <div className="text-xs text-muted-foreground">{app.duration}</div>
                                                 </TableCell>
-                                                <TableCell>{app.professional}</TableCell>
+                                                <TableCell>{app.professionalName}</TableCell>
                                                 <TableCell>{app.time}</TableCell>
                                                 <TableCell>{app.address}</TableCell>
                                                 <TableCell className="text-right font-mono">{app.value.toFixed(2).replace('.', ',')}</TableCell>
@@ -244,14 +266,14 @@ export default function ReportsPage() {
                                 <DialogHeader>
                                 <DialogTitle>Detalhes do Agendamento</DialogTitle>
                                 <DialogDescription>
-                                    Informações completas do serviço agendado para {selectedAppointment.client}.
+                                    Informações completas do serviço agendado para {selectedAppointment.clientName}.
                                 </DialogDescription>
                                 </DialogHeader>
                                 <div className="grid gap-4 py-4">
-                                    <DetailRow icon={User} label="Cliente" value={selectedAppointment.client} />
+                                    <DetailRow icon={User} label="Cliente" value={selectedAppointment.clientName} />
                                     <DetailRow icon={Tag} label="Serviço" value={`${selectedAppointment.service} - ${selectedAppointment.duration}`} />
-                                    <DetailRow icon={Users} label="Profissional" value={selectedAppointment.professional} />
-                                    <DetailRow icon={CalendarIcon} label="Data" value={format(selectedAppointment.date, "PPP", { locale: ptBR })} />
+                                    <DetailRow icon={Users} label="Profissional" value={selectedAppointment.professionalName} />
+                                    <DetailRow icon={CalendarIcon} label="Data" value={format(new Date(selectedAppointment.date + 'T00:00:00'), "PPP", { locale: ptBR })} />
                                     <DetailRow icon={Clock} label="Horário" value={selectedAppointment.time} />
                                     <DetailRow icon={Home} label="Endereço" value={selectedAppointment.address} />
                                     <DetailRow icon={DollarSign} label="Valor" value={`R$ ${selectedAppointment.value.toFixed(2).replace('.', ',')}`} />
@@ -358,6 +380,3 @@ function ReportChart({ title, data, dataKey }: { title: string, data: any[], dat
 }
 
     
-
-    
-

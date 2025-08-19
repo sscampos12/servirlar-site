@@ -1,7 +1,7 @@
 
 "use client"
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Card,
   CardContent,
@@ -17,32 +17,24 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { Calendar as CalendarIcon, DollarSign, Users, TrendingUp } from "lucide-react"
+import { Calendar as CalendarIcon, DollarSign, Users, TrendingUp, Loader2 } from "lucide-react"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { db } from '@/lib/firebase';
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
 
 interface Appointment {
-    id: number;
-    client: string;
+    id: string;
+    clientName: string;
     service: string;
-    date: Date;
-    professional: string;
+    date: string;
+    professionalName: string;
     value: number;
 }
-
-const mockAppointments: Appointment[] = [
-    { id: 1, client: "Carlos Mendes", service: "Faxina Padrão", date: new Date(), professional: "Maria Aparecida", value: 140.00 },
-    { id: 2, client: "Ana Silva", service: "Passadoria", date: new Date(), professional: "João da Silva", value: 74.00 },
-    { id: 3, client: "Pedro Souza", service: "Cozinheira", date: new Date(new Date().setDate(new Date().getDate() + 1)), professional: "Maria Aparecida", value: 228.00 },
-    { id: 4, client: "Juliana Costa", service: "Faxina Padrão", date: new Date(), professional: "Ana Paula", value: 240.00 },
-    { id: 5, client: "Fernanda Lima", service: "Faxina Padrão", date: new Date(), professional: "Maria Aparecida", value: 198.00 },
-    { id: 6, client: "Marcos Rocha", service: "Faxina Padrão", date: new Date(new Date().setDate(new Date().getDate() - 1)), professional: "Ana Paula", value: 140.00 },
-    { id: 7, client: "Beatriz Almeida", service: "Passadoria", date: new Date(new Date().setDate(new Date().getDate() - 1)), professional: "João da Silva", value: 148.00 },
-]
 
 const COMMISSION_RATE = 0.25;
 
@@ -60,10 +52,27 @@ const StatCard = ({ title, value, icon: Icon }: { title: string, value: string, 
 
 export default function FinancialPage() {
     const [date, setDate] = useState<Date | undefined>(new Date());
+    const [appointments, setAppointments] = useState<Appointment[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
 
-    const filteredAppointments = mockAppointments.filter(app => 
-        date && format(app.date, 'yyyy-MM-dd') === format(date, 'yyyy-MM-dd')
-    );
+    useEffect(() => {
+        setIsLoading(true);
+        const q = query(collection(db, "schedules"));
+        
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+            const schedulesData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Appointment));
+            setAppointments(schedulesData);
+            setIsLoading(false);
+        });
+
+        return () => unsubscribe();
+    }, []);
+
+    const filteredAppointments = appointments.filter(app => {
+        if (!date) return false;
+        const appDate = new Date(app.date + 'T00:00:00'); // Ensure correct date parsing
+        return format(appDate, 'yyyy-MM-dd') === format(date, 'yyyy-MM-dd');
+    });
 
     const dailySummary = filteredAppointments.reduce((acc, app) => {
         const commission = app.value * COMMISSION_RATE;
@@ -160,14 +169,20 @@ export default function FinancialPage() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {filteredAppointments.length > 0 ? (
+                            {isLoading ? (
+                                <TableRow>
+                                    <TableCell colSpan={6} className="h-24 text-center">
+                                        <Loader2 className="h-8 w-8 animate-spin" />
+                                    </TableCell>
+                                </TableRow>
+                            ) : filteredAppointments.length > 0 ? (
                                 filteredAppointments.map((app) => {
                                     const commission = app.value * COMMISSION_RATE;
                                     const professionalPayment = app.value - commission;
                                     return (
                                         <TableRow key={app.id}>
-                                            <TableCell className="font-medium">{app.client}</TableCell>
-                                            <TableCell>{app.professional}</TableCell>
+                                            <TableCell className="font-medium">{app.clientName}</TableCell>
+                                            <TableCell>{app.professionalName}</TableCell>
                                             <TableCell>{app.service}</TableCell>
                                             <TableCell className="text-right font-mono">{app.value.toFixed(2).replace('.', ',')}</TableCell>
                                             <TableCell className="text-right font-mono text-blue-600">{professionalPayment.toFixed(2).replace('.', ',')}</TableCell>
@@ -192,3 +207,5 @@ export default function FinancialPage() {
     </div>
   )
 }
+
+    
