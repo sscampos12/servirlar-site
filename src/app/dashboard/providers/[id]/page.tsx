@@ -1,6 +1,4 @@
 
-"use client"
-
 import React, { useState, useEffect } from 'react';
 import { 
   ArrowLeft,
@@ -536,6 +534,3 @@ const DetalheProfissionalAdmin = ({ params }: { params: { id: string } }) => {
 };
 
 export default DetalheProfissionalAdmin;
-
-
-    
