@@ -83,11 +83,14 @@ export default function DashboardPage() {
                     setRole(userRole);
                     if (userRole === 'client') {
                         router.replace('/dashboard/my-account');
-                    } else {
+                    } else if (userRole === 'professional') {
+                        router.replace('/dashboard/services');
+                    }
+                    else {
                         setIsCheckingRole(false);
                     }
                 } else {
-                    // Default to client if no specific role doc is found but they are in 'clients'
+                     // Default to client if no specific role doc is found but they are in 'clients'
                      const clientDocRef = doc(db, "clients", user.uid);
                      const clientDocSnap = await getDoc(clientDocRef);
                      if (clientDocSnap.exists()) {
@@ -117,7 +120,7 @@ export default function DashboardPage() {
     }
 
     // Only admins or other roles will see this page. Clients are redirected.
-    if (role === 'client') {
+    if (role === 'client' || role === 'professional') {
         // This is a fallback while redirecting
         return null; 
     }
