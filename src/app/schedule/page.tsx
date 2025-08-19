@@ -1,7 +1,7 @@
 
 "use client"
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Card,
   CardContent,
@@ -14,14 +14,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Loader2, Send } from "lucide-react"
+import { Loader2, Send, User, Users } from "lucide-react"
 import { useRouter } from 'next/navigation';
 import { ScheduleLayout } from './layout';
 import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/hooks/use-auth';
 import { db } from '@/lib/firebase';
-import { collection, addDoc, serverTimestamp, doc, getDoc } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, getDocs, query, where, DocumentData } from 'firebase/firestore';
 
 const packages: Record<string, number> = {
   "4h": 140.00,
@@ -33,10 +31,13 @@ const serviceOptions = [
   "Faxina Padrão", "Passadoria", "Cozinheira",
 ];
 
-const propertyTypes = ["Residência", "Empresa", "Apartamento", "Casa"];
+interface Selectable {
+    id: string;
+    name: string;
+    [key: string]: any;
+}
 
 export default function SchedulePage() {
-  const { user } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
 
@@ -47,43 +48,72 @@ export default function SchedulePage() {
   const [address, setAddress] = useState('');
   const [observations, setObservations] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isDataLoading, setIsDataLoading] = useState(true);
+
+  const [clients, setClients] = useState<Selectable[]>([]);
+  const [professionals, setProfessionals] = useState<Selectable[]>([]);
+  const [selectedClientId, setSelectedClientId] = useState('');
+  const [selectedProfessionalId, setSelectedProfessionalId] = useState('');
+
+  useEffect(() => {
+    const fetchData = async () => {
+        setIsDataLoading(true);
+        try {
+            // Fetch Clients
+            const clientsSnapshot = await getDocs(collection(db, "clients"));
+            const clientsData = clientsSnapshot.docs.map(doc => ({ id: doc.id, name: doc.data().fullName, ...doc.data() }));
+            setClients(clientsData);
+
+            // Fetch Approved Professionals
+            const professionalsQuery = query(collection(db, "professionals"), where("status", "==", "Aprovado"));
+            const professionalsSnapshot = await getDocs(professionalsQuery);
+            const professionalsData = professionalsSnapshot.docs.map(doc => ({ id: doc.id, name: doc.data().fullName, ...doc.data() }));
+            setProfessionals(professionalsData);
+        } catch (error) {
+            console.error("Error fetching data: ", error);
+            toast({
+                variant: "destructive",
+                title: "Erro ao carregar dados",
+                description: "Não foi possível carregar a lista de clientes e profissionais."
+            });
+        } finally {
+            setIsDataLoading(false);
+        }
+    };
+    fetchData();
+  }, [toast]);
 
   const handleSubmit = async () => {
-    if (!user) {
-        toast({
-            title: "Login Necessário",
-            description: "Você precisa estar logado para agendar um serviço.",
-            variant: "destructive"
-        });
-        router.push('/login?redirect=/schedule');
-        return;
-    }
-     if (!service || !duration || !date || !time || !address) {
-        toast({
-            title: "Campos Obrigatórios",
-            description: "Por favor, preencha todos os campos obrigatórios.",
-            variant: "destructive"
-        });
-        return;
-    }
+    if (!selectedClientId || !selectedProfessionalId || !service || !duration || !date || !time || !address) {
+       toast({
+           title: "Campos Obrigatórios",
+           description: "Por favor, selecione cliente, profissional e preencha todos os campos de agendamento.",
+           variant: "destructive"
+       });
+       return;
+   }
 
     setIsLoading(true);
 
     try {
-        const clientDocRef = doc(db, "clients", user.uid);
-        const clientDocSnap = await getDoc(clientDocRef);
+        const selectedClient = clients.find(c => c.id === selectedClientId);
+        const selectedProfessional = professionals.find(p => p.id === selectedProfessionalId);
 
-        if (!clientDocSnap.exists()) {
-            throw new Error("Perfil de cliente não encontrado.");
+        if(!selectedClient || !selectedProfessional) {
+            throw new Error("Cliente ou profissional selecionado não encontrado.");
         }
-        const clientData = clientDocSnap.data();
 
         await addDoc(collection(db, "schedules"), {
-            clientId: user.uid,
-            clientName: clientData.fullName,
-            clientEmail: clientData.email,
-            clientPhone: clientData.phone || '', // assuming phone is in client data
-            clientCpf: clientData.cpf || '', // assuming cpf is in client data
+            // Client info
+            clientId: selectedClient.id,
+            clientName: selectedClient.name,
+            clientEmail: selectedClient.email,
+            clientPhone: selectedClient.phone || '',
+            clientCpf: selectedClient.cpf || '', 
+            // Professional info
+            professionalId: selectedProfessional.id,
+            professionalName: selectedProfessional.name,
+            // Schedule info
             service,
             duration,
             date,
@@ -91,15 +121,17 @@ export default function SchedulePage() {
             address,
             observations,
             value: packages[duration],
-            status: "Pendente",
+            status: "Pendente", // Admin creates it as pending for client payment
             createdAt: serverTimestamp(),
+            createdBy: 'admin', // Flag to know who created it
         });
         
         toast({
-            title: "Agendamento quase lá!",
-            description: "Sua solicitação foi criada. Finalize o pagamento para confirmar.",
+            title: "Agendamento Criado!",
+            description: "A cobrança foi enviada ao cliente para confirmação do pagamento.",
         });
-        router.push('/schedule/confirm');
+        // Redirect to a relevant admin page, e.g., the main dashboard
+        router.push('/dashboard');
 
     } catch (error) {
         console.error("Error creating schedule: ", error);
@@ -118,61 +150,86 @@ export default function SchedulePage() {
       <div className="max-w-2xl mx-auto">
           <Card>
             <CardHeader>
-              <CardTitle className="font-headline text-3xl">Agendar um Serviço</CardTitle>
+              <CardTitle className="font-headline text-3xl">Agendar um Novo Serviço (Admin)</CardTitle>
               <CardDescription>
-                Preencha os detalhes abaixo para encontrarmos o profissional perfeito para você.
+                Preencha os detalhes abaixo para criar um agendamento para um cliente.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-                <div className="space-y-2">
-                    <Label>Qual serviço você precisa?</Label>
-                     <Select onValueChange={setService} value={service}>
-                        <SelectTrigger><SelectValue placeholder="Selecione um serviço..." /></SelectTrigger>
-                        <SelectContent>
-                            {serviceOptions.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-                        </SelectContent>
-                    </Select>
-                </div>
+                {isDataLoading ? <Loader2 className="mx-auto h-8 w-8 animate-spin" /> : (
+                    <>
+                        <div className="grid md:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label className="flex items-center gap-2"><User className="h-4 w-4" /> Cliente</Label>
+                                <Select onValueChange={setSelectedClientId} value={selectedClientId}>
+                                    <SelectTrigger><SelectValue placeholder="Selecione um cliente..." /></SelectTrigger>
+                                    <SelectContent>
+                                        {clients.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="space-y-2">
+                                <Label className="flex items-center gap-2"><Users className="h-4 w-4" /> Profissional</Label>
+                                <Select onValueChange={setSelectedProfessionalId} value={selectedProfessionalId}>
+                                    <SelectTrigger><SelectValue placeholder="Selecione um profissional..." /></SelectTrigger>
+                                    <SelectContent>
+                                        {professionals.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
 
-                <div className="space-y-2">
-                     <Label>Qual a duração do serviço?</Label>
-                     <Select onValueChange={setDuration} value={duration}>
-                        <SelectTrigger><SelectValue placeholder="Selecione um pacote de horas..." /></SelectTrigger>
-                        <SelectContent>
-                             {Object.entries(packages).map(([key, value]) => (
-                                <SelectItem key={key} value={key}>{key} - R${' '} {value.toFixed(2).replace('.', ',')}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </div>
-                
-                 <div className="grid md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                        <Label htmlFor="date">Data</Label>
-                        <Input id="date" type="date" value={date} onChange={e => setDate(e.target.value)} required />
-                    </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="time">Horário de Início</Label>
-                        <Input id="time" type="time" value={time} onChange={e => setTime(e.target.value)} required />
-                    </div>
-                 </div>
+                        <div className="space-y-2">
+                            <Label>Qual serviço você precisa?</Label>
+                            <Select onValueChange={setService} value={service}>
+                                <SelectTrigger><SelectValue placeholder="Selecione um serviço..." /></SelectTrigger>
+                                <SelectContent>
+                                    {serviceOptions.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                                </SelectContent>
+                            </Select>
+                        </div>
 
-                <div className="space-y-2">
-                    <Label htmlFor="address">Endereço Completo</Label>
-                    <Input id="address" value={address} onChange={e => setAddress(e.target.value)} placeholder="Rua, Número, Bairro, Cidade - Estado" required />
-                </div>
-              
-                <div className="space-y-2">
-                    <Label htmlFor="observations">Observações (opcional)</Label>
-                    <Textarea id="observations" value={observations} onChange={e => setObservations(e.target.value)} placeholder="Ex: Tenho um cachorro dócil. Por favor, trazer produto para limpar porcelanato." />
-                </div>
+                        <div className="space-y-2">
+                            <Label>Qual a duração do serviço?</Label>
+                            <Select onValueChange={setDuration} value={duration}>
+                                <SelectTrigger><SelectValue placeholder="Selecione um pacote de horas..." /></SelectTrigger>
+                                <SelectContent>
+                                    {Object.entries(packages).map(([key, value]) => (
+                                        <SelectItem key={key} value={key}>{key} - R${' '} {value.toFixed(2).replace('.', ',')}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        
+                        <div className="grid md:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="date">Data</Label>
+                                <Input id="date" type="date" value={date} onChange={e => setDate(e.target.value)} required />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="time">Horário de Início</Label>
+                                <Input id="time" type="time" value={time} onChange={e => setTime(e.target.value)} required />
+                            </div>
+                        </div>
 
-                <div className="flex justify-end pt-4">
-                    <Button size="lg" onClick={handleSubmit} disabled={isLoading}>
-                         {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
-                        {isLoading ? "Criando Agendamento..." : "Continuar para Pagamento"}
-                    </Button>
-                </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="address">Endereço Completo</Label>
+                            <Input id="address" value={address} onChange={e => setAddress(e.target.value)} placeholder="Rua, Número, Bairro, Cidade - Estado" required />
+                        </div>
+                    
+                        <div className="space-y-2">
+                            <Label htmlFor="observations">Observações (opcional)</Label>
+                            <Textarea id="observations" value={observations} onChange={e => setObservations(e.target.value)} placeholder="Ex: Tenho um cachorro dócil. Por favor, trazer produto para limpar porcelanato." />
+                        </div>
+
+                        <div className="flex justify-end pt-4">
+                            <Button size="lg" onClick={handleSubmit} disabled={isLoading || isDataLoading}>
+                                {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
+                                {isLoading ? "Criando Agendamento..." : "Agendar e Enviar Cobrança"}
+                            </Button>
+                        </div>
+                    </>
+                )}
             </CardContent>
           </Card>
       </div>
