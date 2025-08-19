@@ -12,6 +12,7 @@ import { useRouter } from 'next/navigation';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { auth, db } from '@/lib/firebase';
 import { doc, setDoc } from 'firebase/firestore';
+import { Loader2 } from 'lucide-react';
 
 export function ClientRegistrationForm() {
   const [agreedToContract, setAgreedToContract] = useState(false);
@@ -21,6 +22,7 @@ export function ClientRegistrationForm() {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [address, setAddress] = useState('');
+  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -65,6 +67,7 @@ export function ClientRegistrationForm() {
         await setDoc(doc(db, "clients", user.uid), {
             fullName: fullName,
             email: user.email,
+            phone: phone,
             address: address,
         });
 
@@ -126,19 +129,23 @@ export function ClientRegistrationForm() {
         </div>
       </div>
       <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid md:grid-cols-2 gap-4">
           <div className="space-y-2">
               <Label htmlFor="fullName">Nome Completo</Label>
               <Input id="fullName" name="fullName" placeholder="Seu nome" required value={fullName} onChange={e => setFullName(e.target.value)} />
           </div>
+          <div className="grid md:grid-cols-2 gap-4">
               <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input id="email" name="email" type="email" placeholder="seu@email.com" required value={email} onChange={e => setEmail(e.target.value)} />
-          </div>
+            </div>
+             <div className="space-y-2">
+                <Label htmlFor="phone">Telefone</Label>
+                <Input id="phone" name="phone" placeholder="(00) 00000-0000" required value={phone} onChange={e => setPhone(e.target.value)} />
+            </div>
           </div>
           <div className="space-y-2">
               <Label htmlFor="address">Endereço Principal</Label>
-              <Input id="address" name="address" placeholder="Rua, Número, Bairro" required value={address} onChange={e => setAddress(e.target.value)} />
+              <Input id="address" name="address" placeholder="Rua, Número, Bairro, Cidade, Estado" required value={address} onChange={e => setAddress(e.target.value)} />
           </div>
           <div className="grid md:grid-cols-2 gap-4">
           <div className="space-y-2">
@@ -166,7 +173,7 @@ export function ClientRegistrationForm() {
 
           <div className="text-center pt-4">
           <Button type="submit" size="lg" disabled={!agreedToContract || isLoading}>
-              {isLoading ? "Criando Conta..." : "Criar Conta"}
+              {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : "Criar Conta"}
           </Button>
           </div>
       </form>
