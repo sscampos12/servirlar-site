@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from 'react';
@@ -140,9 +139,6 @@ export default function PricingPage() {
                   (Equivalente a R$ {pricePerHour.toFixed(2).replace('.', ',')}/hora)
                 </p>
               )}
-              <Button asChild size="lg" className="w-full mt-6 bg-secondary hover:bg-secondary/90 text-secondary-foreground">
-                <Link href="/login">Agendar Agora</Link>
-              </Button>
             </div>
           </CardContent>
         </Card>
