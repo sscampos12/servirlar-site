@@ -5,9 +5,9 @@ import React from "react";
 export function Logo({ className, ...props }: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
-      width="160" // Adjusted width to fit the text
+      width="180" // Adjusted width to fit the text
       height="40"
-      viewBox="0 0 160 40"
+      viewBox="0 0 180 40"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={cn(className)}
@@ -32,10 +32,10 @@ export function Logo({ className, ...props }: React.SVGProps<SVGSVGElement>) {
       <text x="45" y="26" fontFamily="'Poppins', sans-serif" fontSize="20" fontWeight="bold" fill="hsl(var(--primary))">
         Ajuda
       </text>
-      <text x="100" y="26" fontFamily="'Poppins', sans-serif" fontSize="20" fontWeight="bold" fill="hsl(var(--secondary-foreground))">
+      <text x="105" y="26" fontFamily="'Poppins', sans-serif" fontSize="20" fontWeight="bold" fill="hsl(var(--secondary-foreground))">
         em
       </text>
-      <text x="125" y="26" fontFamily="'Poppins', sans-serif" fontSize="20" fontWeight="bold" fill="hsl(var(--primary))">
+      <text x="135" y="26" fontFamily="'Poppins', sans-serif" fontSize="20" fontWeight="bold" fill="hsl(var(--primary))">
         Casa
       </text>
     </svg>
