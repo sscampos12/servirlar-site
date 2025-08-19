@@ -84,7 +84,7 @@ export default function DashboardPage() {
                     if (userRole === 'client') {
                         router.replace('/dashboard/my-account');
                     } else if (userRole === 'professional') {
-                        router.replace('/dashboard/services');
+                        router.replace('/dashboard/profile');
                     }
                     else {
                         setIsCheckingRole(false);

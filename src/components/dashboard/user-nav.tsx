@@ -51,7 +51,7 @@ import { useRouter } from "next/navigation"
         <DropdownMenuContent className="w-56" align="end" forceMount>
           <DropdownMenuLabel className="font-normal">
             <div className="flex flex-col space-y-1">
-              <p className="text-sm font-medium leading-none">Cliente</p>
+              <p className="text-sm font-medium leading-none">Usuário</p>
               <p className="text-xs leading-none text-muted-foreground">
                 {user.email}
               </p>
@@ -59,14 +59,11 @@ import { useRouter } from "next/navigation"
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={() => router.push('/dashboard')}>
+              Painel
+            </DropdownMenuItem>
+             <DropdownMenuItem onClick={() => router.push('/dashboard/profile')}>
               Perfil
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              Meus Agendamentos
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              Configurações
             </DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
