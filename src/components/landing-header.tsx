@@ -17,10 +17,10 @@ export function LandingHeader() {
           <Link href="/register/provider" className="transition-colors hover:text-primary/80 text-primary uppercase">Profissionais</Link>
         </nav>
         <div className="flex flex-1 items-center justify-end space-x-2">
-           <Button asChild variant="ghost">
+           <Button asChild variant="ghost" className="uppercase">
             <Link href="/login">Entrar</Link>
           </Button>
-          <Button asChild className="bg-secondary text-secondary-foreground hover:bg-secondary/90 rounded-full">
+          <Button asChild className="bg-secondary text-secondary-foreground hover:bg-secondary/90 rounded-full uppercase">
             <Link href="/register">Cadastre-se</Link>
           </Button>
         </div>
