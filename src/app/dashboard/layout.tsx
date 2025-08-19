@@ -4,8 +4,11 @@
 import { DashboardHeader } from "@/components/dashboard/header";
 import { SidebarNav } from "@/components/dashboard/sidebar-nav";
 import { Logo } from "@/components/logo";
+import { useAuth } from "@/hooks/use-auth";
+import { db } from "@/lib/firebase";
+import { doc, getDoc } from "firebase/firestore";
 import Link from "next/link";
-import React from "react";
+import React, { useState, useEffect } from "react";
 
 export type Role = "admin" | "client" | "professional";
 
@@ -15,8 +18,33 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // Para o protótipo, vamos assumir a role de admin para ver todos os menus.
-  const role: Role = 'admin';
+  const { user, loading } = useAuth();
+  const [role, setRole] = useState<Role | null>(null);
+
+  useEffect(() => {
+    const fetchUserRole = async () => {
+        if (user) {
+            const userDocRef = doc(db, "users", user.uid);
+            const userDocSnap = await getDoc(userDocRef);
+            if (userDocSnap.exists()) {
+                setRole(userDocSnap.data().role as Role);
+            } else {
+                 const professionalDocRef = doc(db, "professionals", user.uid);
+                 const professionalDocSnap = await getDoc(professionalDocRef);
+                 if (professionalDocSnap.exists()){
+                     setRole("professional");
+                 } else {
+                     setRole("client");
+                 }
+            }
+        }
+    };
+
+    if (!loading) {
+        fetchUserRole();
+    }
+  }, [user, loading]);
+
 
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">

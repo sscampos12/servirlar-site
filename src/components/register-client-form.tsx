@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from 'react';
@@ -8,7 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { ClientContract } from '@/components/contracts/client-contract';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
-import { createUserWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
+import { createUserWithEmailAndPassword, signInWithPopup, signInWithEmailAndPassword } from 'firebase/auth';
 import { auth, db, googleProvider } from '@/lib/firebase';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 
@@ -78,11 +79,22 @@ export function ClientRegistrationForm() {
             address: address,
         });
 
+        await setDoc(doc(db, "users", user.uid), {
+            uid: user.uid,
+            role: "client",
+            name: fullName,
+            email: user.email,
+        });
+
+
         toast({
             title: "Cadastro Realizado!",
-            description: "Sua conta foi criada com sucesso. Faça o login para começar.",
+            description: "Sua conta foi criada com sucesso. Redirecionando...",
         });
-        router.push('/login');
+        
+        // Sign in the user automatically and redirect
+        await signInWithEmailAndPassword(auth, email, password);
+        router.push('/dashboard/my-account');
 
     } catch (error: any) {
         let errorMessage = "Ocorreu um erro ao criar sua conta. Tente novamente.";
@@ -129,13 +141,19 @@ export function ClientRegistrationForm() {
                 email: user.email,
                 address: "",
             });
+             await setDoc(doc(db, "users", user.uid), {
+                uid: user.uid,
+                role: "client",
+                name: user.displayName,
+                email: user.email,
+            });
         }
         
         toast({
             title: "Login bem-sucedido!",
             description: "Sua conta foi acessada com sucesso. Redirecionando...",
         });
-        router.push('/dashboard/clients');
+        router.push('/dashboard/my-account');
 
     } catch (error: any) {
         toast({

@@ -24,8 +24,8 @@ const navConfig: Record<Role, { href: string; label: string; icon: React.Element
         { href: "/dashboard/providers/profile", label: "Meu Perfil", icon: User },
     ],
     client: [
-        { href: "/dashboard/clients", label: "Meus Agendamentos", icon: Calendar },
-        { href: "/schedule", label: "Novo Agendamento", icon: Home },
+        { href: "/dashboard/my-account", label: "Minha Conta", icon: User },
+        { href: "/schedule", label: "Novo Agendamento", icon: Calendar },
     ]
 };
 
