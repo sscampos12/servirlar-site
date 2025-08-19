@@ -1,6 +1,7 @@
 
 "use client"
 
+import withAuth from "@/components/auth/with-auth";
 import { useState, useEffect } from 'react';
 import {
   Card,
@@ -92,7 +93,7 @@ const DetailRow = ({ icon: Icon, label, value }: { icon: React.ElementType, labe
     </div>
 );
 
-export default function ReportsPage() {
+function ReportsPage() {
     const [date, setDate] = useState<Date | undefined>(new Date());
     const [selectedProfessional, setSelectedProfessional] = useState<string>("todos");
     const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
@@ -379,4 +380,4 @@ function ReportChart({ title, data, dataKey }: { title: string, data: any[], dat
   )
 }
 
-    
+export default withAuth(ReportsPage, ['admin']);

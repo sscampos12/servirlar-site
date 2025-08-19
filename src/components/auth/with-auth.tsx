@@ -51,7 +51,7 @@ const withAuth = (WrappedComponent: React.ComponentType, allowedRoles: string[])
     return <WrappedComponent {...props} />;
   };
   
-  AuthComponent.displayName = `withAuth(${WrappedComponent.displayName || WrappedComponent.name || 'Component'})`;
+  AuthComponent.displayName = `withAuth(${(WrappedComponent.displayName || WrappedComponent.name || 'Component')})`;
 
 
   return AuthComponent;

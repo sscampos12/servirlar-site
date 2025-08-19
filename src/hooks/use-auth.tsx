@@ -19,6 +19,7 @@ export interface UserProfile {
   uid: string;
   email: string | null;
   name: string | null;
+  photoURL?: string | null;
   role: 'admin' | 'client' | 'professional' | null;
 }
 
@@ -53,11 +54,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             email: fbUser.email,
             name: userDoc.data().name,
             role: userDoc.data().role,
+            photoURL: fbUser.photoURL,
           });
         } else {
-          // Usuário autenticado mas sem perfil no Firestore.
-          // Isso pode acontecer se o cadastro falhar na metade ou se for de outra coleção.
-          // Verificamos a coleção 'professionals' como fallback
+          // Usuário autenticado mas sem perfil na coleção 'users'.
+          // Verificamos a coleção 'professionals' como fallback.
           const professionalDocRef = doc(db, 'professionals', fbUser.uid);
           const professionalDoc = await getDoc(professionalDocRef);
           if (professionalDoc.exists()) {
@@ -65,10 +66,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 uid: fbUser.uid,
                 email: fbUser.email,
                 name: professionalDoc.data().fullName,
-                role: 'professional'
+                role: 'professional',
+                photoURL: fbUser.photoURL
               });
           } else {
-             // Verificamos a coleção 'clients' como fallback
+             // Verificamos a coleção 'clients' como fallback final.
             const clientDocRef = doc(db, 'clients', fbUser.uid);
             const clientDoc = await getDoc(clientDocRef);
              if (clientDoc.exists()) {
@@ -76,7 +78,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                     uid: fbUser.uid,
                     email: fbUser.email,
                     name: clientDoc.data().fullName,
-                    role: 'client'
+                    role: 'client',
+                    photoURL: fbUser.photoURL
                 });
              } else {
                 console.warn("Usuário sem perfil correspondente no Firestore. Deslogando.");

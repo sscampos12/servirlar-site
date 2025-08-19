@@ -1,6 +1,7 @@
 
 "use client";
 
+import withAuth from "@/components/auth/with-auth";
 import React, { useState, useEffect } from 'react';
 import { 
   Search,
@@ -274,4 +275,4 @@ const DashboardClientes = () => {
   );
 };
 
-export default DashboardClientes;
+export default withAuth(DashboardClientes, ['admin']);

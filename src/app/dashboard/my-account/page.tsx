@@ -1,6 +1,7 @@
 
 "use client";
 
+import withAuth from "@/components/auth/with-auth";
 import React, { useState, useEffect } from 'react';
 import { 
   User,
@@ -203,6 +204,8 @@ const DetalhesCliente = () => {
 };
 
 
-export default function ClientAccountPage() {
+function ClientAccountPage() {
     return <DetalhesCliente />
 }
+
+export default withAuth(ClientAccountPage, ['client']);

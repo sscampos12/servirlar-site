@@ -1,6 +1,7 @@
 
 "use client"
 
+import withAuth from "@/components/auth/with-auth";
 import React, { useState, useEffect } from 'react';
 import { 
   Loader2,
@@ -154,7 +155,7 @@ const SchedulePage = () => {
             clientName: selectedClient.fullName,
             professionalId: formData.professionalId,
             professionalName: selectedProfessional.fullName,
-            service: serviceNames[formData.service],
+            service: serviceNames[formData.service] || formData.service,
             duration: `${formData.duration} horas`,
             date: formData.date.toISOString().split('T')[0],
             time: formData.time,
@@ -395,6 +396,4 @@ const SchedulePage = () => {
   );
 };
 
-export default SchedulePage;
-
-    
+export default withAuth(SchedulePage, ['admin', 'client']);

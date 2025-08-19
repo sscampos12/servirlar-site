@@ -1,6 +1,7 @@
 
 "use client";
 
+import withAuth from "@/components/auth/with-auth";
 import {
   Card,
   CardContent,
@@ -67,7 +68,7 @@ const mockActivityFeed = [
     { text: "Novo agendamento", detail: "João P. agendou uma faxina.", time: "3h atrás" },
 ]
 
-export default function DashboardPage() {
+function DashboardPage() {
     const { user, loading } = useAuth();
     const router = useRouter();
     const [role, setRole] = useState<Role | null>(null);
@@ -217,3 +218,5 @@ export default function DashboardPage() {
     </div>
   );
 }
+
+export default withAuth(DashboardPage, ['admin']);

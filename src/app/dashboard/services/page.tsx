@@ -1,6 +1,7 @@
 
 "use client"
 
+import withAuth from "@/components/auth/with-auth";
 import { useState, useEffect } from 'react';
 import {
   Card,
@@ -100,7 +101,7 @@ const ServiceCard = ({ service, onAccept, onDecline, isAccepting, isDeclining }:
   )
 }
 
-export default function ServicesPage() {
+function ServicesPage() {
     const { toast } = useToast();
     const { user } = useAuth();
     const [availableServices, setAvailableServices] = useState<Service[]>([]);
@@ -316,4 +317,5 @@ export default function ServicesPage() {
   )
 }
 
-    
+
+export default withAuth(ServicesPage, ['professional']);

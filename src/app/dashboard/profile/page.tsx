@@ -1,6 +1,7 @@
 
 "use client";
 
+import withAuth from "@/components/auth/with-auth";
 import React, { useState, useEffect } from 'react';
 import { 
   User,
@@ -91,7 +92,7 @@ const StatusAlert = ({ status }: { status: ProfessionalProfile['status'] }) => {
     );
 }
 
-export default function ProfessionalProfilePage() {
+function ProfessionalProfilePage() {
     const { user, loading: authLoading } = useAuth();
     const router = useRouter();
     const [profile, setProfile] = useState<ProfessionalProfile | null>(null);
@@ -192,3 +193,5 @@ export default function ProfessionalProfilePage() {
 const toast = ({title, description}: {title: string, description: string}) => {
     alert(`${title}\n${description}`);
 }
+
+export default withAuth(ProfessionalProfilePage, ['professional']);

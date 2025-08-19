@@ -1,6 +1,7 @@
 
 "use client";
 
+import withAuth from "@/components/auth/with-auth";
 import {
     Card,
     CardContent,
@@ -34,7 +35,7 @@ interface Professional {
 
 const PAGE_SIZE = 10;
 
-export default function ProvidersPage() {
+function ProvidersPage() {
     const [professionals, setProfessionals] = useState<Professional[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [lastVisible, setLastVisible] = useState<DocumentData | null>(null);
@@ -199,4 +200,4 @@ export default function ProvidersPage() {
     )
 }
 
-    
+export default withAuth(ProvidersPage, ['admin']);
