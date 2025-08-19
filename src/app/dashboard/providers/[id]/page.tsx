@@ -19,9 +19,11 @@ import {
   AlertTriangle,
   Users
 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { use } from 'react';
 
-const DetalheProfissionalAdmin = () => {
+const DetalheProfissionalAdmin = ({ params }: { params: { id: string } }) => {
+  const { id } = use(params);
   const router = useRouter();
   const [editMode, setEditMode] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -67,8 +69,9 @@ const DetalheProfissionalAdmin = () => {
         telefone: '(11) 98765-4321',
         chavePix: 'maria.pix@banco.com',
         referenciasPessoais: [
-          'Maria Souza - (11) 91234-5678 (Ex-cliente)',
-          'José Lima - (21) 98765-4321 (Ex-vizinho)',
+          'Sra. Ana Silva - (11) 99999-1111 - Trabalhou por 2 anos',
+          'Sr. João Santos - (11) 88888-2222 - Trabalhou por 1 ano',
+          'Família Oliveira - (11) 77777-3333 - Trabalhou por 3 anos'
         ],
         servicosRealizados: 3,
         totalFaturado: 566.00,
@@ -161,11 +164,13 @@ const DetalheProfissionalAdmin = () => {
     }
   };
 
-  const contarViaWhatsApp = () => {
-    const telefoneClean = profissionalData.telefone.replace(/\D/g, '');
+  const getWhatsAppLink = (phone: string | undefined) => {
+    if (!phone) {
+        return '#';
+    }
+    const telefoneClean = phone.replace(/\D/g, '');
     const mensagem = `Olá ${profissionalData.nomeCompleto}! Sou da equipe Ajuda em Casa. Como posso ajudá-lo(a)?`;
-    const whatsappUrl = `https://wa.me/55${telefoneClean}?text=${encodeURIComponent(mensagem)}`;
-    window.open(whatsappUrl, '_blank');
+    return `https://wa.me/55${telefoneClean}?text=${encodeURIComponent(mensagem)}`;
   };
 
   // Componente de Status
@@ -515,7 +520,7 @@ const DetalheProfissionalAdmin = () => {
                 )}
                 
                 <button 
-                  onClick={contarViaWhatsApp}
+                  onClick={() => window.open(getWhatsAppLink(profissionalData.telefone), '_blank')}
                   className="w-full flex items-center justify-center gap-2 border border-input text-foreground py-3 px-4 rounded-lg hover:bg-muted"
                 >
                   <Phone className="w-4 h-4" />
@@ -531,3 +536,6 @@ const DetalheProfissionalAdmin = () => {
 };
 
 export default DetalheProfissionalAdmin;
+
+
+    
