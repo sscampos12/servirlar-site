@@ -1,22 +1,17 @@
 import type { Metadata } from 'next';
-import { Inter, PT_Sans } from 'next/font/google';
+import { Poppins } from 'next/font/google';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from '@/hooks/use-auth';
 
-const inter = Inter({
+const poppins = Poppins({
   subsets: ['latin'],
-  variable: '--font-inter',
-});
-
-const ptSans = PT_Sans({
-  subsets: ['latin'],
-  weight: ['400', '700'],
-  variable: '--font-pt-sans',
+  weight: ['400', '500', '600', '700', '900'],
+  variable: '--font-poppins',
 });
 
 export const metadata: Metadata = {
-  title: 'Lar Seguro',
+  title: 'Ajuda em Casa',
   description: 'Conectando você aos melhores profissionais domésticos.',
 };
 
@@ -26,7 +21,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR" suppressHydrationWarning className={`${inter.variable} ${ptSans.variable}`}>
+    <html lang="pt-BR" suppressHydrationWarning className={`${poppins.variable}`}>
       <body>
         <AuthProvider>
             {children}
