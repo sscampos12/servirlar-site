@@ -4,18 +4,8 @@ import Link from 'next/link';
 import { MarketingLayout } from '@/components/marketing-layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { CheckCircle, Shield, Star } from 'lucide-react';
+import { CheckCircle, Shield, Star, PenSquare, Smartphone, Sofa } from 'lucide-react';
 
-const FeatureCard = ({ title, description }: { title: string, description: string }) => (
-  <Card className="text-center shadow-sm hover:shadow-lg transition-shadow">
-    <CardHeader>
-      <CardTitle className="font-headline">{title}</CardTitle>
-    </CardHeader>
-    <CardContent>
-      <p className="text-muted-foreground">{description}</p>
-    </CardContent>
-  </Card>
-);
 
 const BenefitCard = ({ icon: Icon, title, description }: { icon: React.ElementType, title: string, description: string }) => (
     <div className="text-center">
@@ -28,6 +18,19 @@ const BenefitCard = ({ icon: Icon, title, description }: { icon: React.ElementTy
         <p className="text-muted-foreground">{description}</p>
     </div>
 );
+
+const HowItWorksStep = ({ icon: Icon, step, title, description }: { icon: React.ElementType, step: number, title: string, description: string }) => (
+    <div className="relative flex flex-col items-center text-center">
+        <div className="relative z-10">
+            <div className="flex items-center justify-center w-20 h-20 bg-muted rounded-full ring-8 ring-background">
+                <Icon className="w-10 h-10 text-primary"/>
+            </div>
+        </div>
+        <h3 className="text-xl font-headline font-bold mt-6 mb-2">{step}. {title}</h3>
+        <p className="text-muted-foreground max-w-xs">{description}</p>
+    </div>
+);
+
 
 export default function Home() {
   return (
@@ -61,20 +64,31 @@ export default function Home() {
         <section className="py-20 px-4 bg-background">
             <div className="container mx-auto text-center">
                 <h2 className="font-headline text-3xl font-bold mb-4">Como Funciona?</h2>
-                <p className="text-muted-foreground mb-12 max-w-2xl mx-auto">Em três passos simples, seu lar está cuidado.</p>
-                <div className="grid md:grid-cols-3 gap-8">
-                    <FeatureCard 
-                        title="1. Descreva"
-                        description="Informe o serviço que você precisa e os detalhes do agendamento. É rápido e fácil."
-                    />
-                    <FeatureCard 
-                        title="2. Receba Confirmação"
-                        description="Um profissional qualificado aceitará seu pedido. Você será notificado em tempo real."
-                    />
-                    <FeatureCard 
-                        title="3. Relaxe"
-                        description="O profissional chegará no horário combinado para realizar o serviço com excelência."
-                    />
+                <p className="text-muted-foreground mb-16 max-w-2xl mx-auto">Em três passos simples, seu lar está cuidado.</p>
+                <div className="relative">
+                    <div className="hidden md:block absolute top-1/2 left-0 w-full h-0.5 -translate-y-1/2">
+                        <div className="h-full w-full border-t-2 border-dashed border-muted-foreground/30"></div>
+                    </div>
+                    <div className="relative grid md:grid-cols-3 gap-y-12 md:gap-x-8">
+                        <HowItWorksStep 
+                            icon={PenSquare}
+                            step={1}
+                            title="Descreva o Serviço"
+                            description="Informe o serviço que você precisa, escolha a data, horário e duração. É rápido e fácil."
+                        />
+                        <HowItWorksStep 
+                            icon={Smartphone}
+                            step={2}
+                            title="Receba Confirmação"
+                            description="Um profissional qualificado aceitará seu pedido e você será notificado em tempo real."
+                        />
+                        <HowItWorksStep 
+                            icon={Sofa}
+                            step={3}
+                            title="Relaxe e Avalie"
+                            description="O profissional chegará na hora combinada para realizar o serviço. Depois, é só avaliar!"
+                        />
+                    </div>
                 </div>
             </div>
         </section>
