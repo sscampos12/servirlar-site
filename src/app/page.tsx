@@ -48,7 +48,7 @@ export default function Home() {
             </p>
             <div className="flex justify-center gap-4 flex-wrap">
               <Button asChild size="lg" className="shadow-md bg-secondary text-secondary-foreground hover:bg-secondary/90 text-lg py-7 px-8 rounded-full">
-                <Link href="/schedule">
+                <Link href="/login">
                   Agendar um Serviço
                 </Link>
               </Button>
