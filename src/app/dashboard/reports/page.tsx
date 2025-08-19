@@ -1,7 +1,7 @@
 
 "use client"
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Card,
   CardContent,
@@ -100,9 +100,13 @@ const DetailRow = ({ icon: Icon, label, value }: { icon: React.ElementType, labe
 );
 
 export default function ReportsPage() {
-    const [date, setDate] = useState<Date | undefined>(new Date());
+    const [date, setDate] = useState<Date | undefined>(undefined);
     const [selectedProfessional, setSelectedProfessional] = useState<string>("todos");
     const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
+
+    useEffect(() => {
+        setDate(new Date());
+    }, []);
 
     const filteredAppointments = mockAppointments.filter(app => {
         const isSameDay = format(app.date, 'yyyy-MM-dd') === (date ? format(date, 'yyyy-MM-dd') : '');
@@ -352,5 +356,7 @@ function ReportChart({ title, data, dataKey }: { title: string, data: any[], dat
     </Card>
   )
 }
+
+    
 
     
