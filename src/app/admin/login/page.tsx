@@ -77,12 +77,12 @@ export default function AdminLoginPage() {
           <CardHeader>
             <CardTitle className="font-headline text-2xl">Acesso Restrito</CardTitle>
             <CardDescription>
-              Clique no botão abaixo para acessar o painel de administração.
+              Esta área é destinada apenas para administradores da plataforma.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid gap-4">
-              <Button onClick={handleAdminAccess} className="w-full" disabled={isLoading}>
+            <div className="flex justify-end pt-4">
+              <Button onClick={handleAdminAccess} disabled={isLoading}>
                 {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : "Entrar como Admin"}
               </Button>
             </div>
