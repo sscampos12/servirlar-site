@@ -16,7 +16,6 @@ import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/com
 import { useAuth } from '@/hooks/use-auth';
 import { db } from '@/lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
-import DashboardLayout from '../layout';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -125,73 +124,67 @@ export default function ProfessionalProfilePage() {
 
     if (isLoading || authLoading) {
         return (
-             <DashboardLayout>
-                <div className="flex h-full items-center justify-center">
-                    <Loader2 className="h-16 w-16 animate-spin" />
-                </div>
-            </DashboardLayout>
+            <div className="flex h-full items-center justify-center">
+                <Loader2 className="h-16 w-16 animate-spin" />
+            </div>
         )
     }
 
     if (!profile) {
          return (
-             <DashboardLayout>
-                <Alert variant="destructive">
-                    <AlertTitle>Erro</AlertTitle>
-                    <AlertDescription>Não foi possível carregar seu perfil. Por favor, tente novamente.</AlertDescription>
-                </Alert>
-            </DashboardLayout>
+            <Alert variant="destructive">
+                <AlertTitle>Erro</AlertTitle>
+                <AlertDescription>Não foi possível carregar seu perfil. Por favor, tente novamente.</AlertDescription>
+            </Alert>
         )
     }
 
     if (profile.status === 'Incompleto') {
         return (
-             <DashboardLayout>
-                 <StatusAlert status={profile.status} />
-                 <div className="text-center mt-6">
-                    <Button onClick={() => router.push('/dashboard/providers/profile')}>
-                        Completar meu Cadastro
-                    </Button>
-                 </div>
-            </DashboardLayout>
+            <>
+                <StatusAlert status={profile.status} />
+                <div className="text-center mt-6">
+                <Button onClick={() => router.push('/dashboard/providers/profile')}>
+                    Completar meu Cadastro
+                </Button>
+                </div>
+            </>
         )
     }
 
 
     return (
-        <DashboardLayout>
-            <div className="space-y-6">
-                <StatusAlert status={profile.status} />
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between">
-                        <div>
-                            <CardTitle className="font-headline">Minhas Informações</CardTitle>
-                            <CardDescription>Estes são os seus dados cadastrados na plataforma.</CardDescription>
-                        </div>
-                        <Button variant="outline" size="sm" onClick={() => toast({ title: "Em breve!", description: "A edição de perfil estará disponível em breve."})}>
-                            <Edit className="mr-2 h-4 w-4" />
-                            Editar Perfil
-                        </Button>
-                    </CardHeader>
-                    <CardContent className="grid md:grid-cols-2 gap-6">
+        <div className="space-y-6">
+            <StatusAlert status={profile.status} />
+            <Card>
+                <CardHeader className="flex flex-row items-center justify-between">
+                    <div>
+                        <CardTitle className="font-headline">Minhas Informações</CardTitle>
+                        <CardDescription>Estes são os seus dados cadastrados na plataforma.</CardDescription>
+                    </div>
+                    <Button variant="outline" size="sm" onClick={() => toast({ title: "Em breve!", description: "A edição de perfil estará disponível em breve."})}>
+                        <Edit className="mr-2 h-4 w-4" />
+                        Editar Perfil
+                    </Button>
+                </CardHeader>
+                <CardContent className="grid md:grid-cols-2 gap-6">
+                    <div className="space-y-4">
+                            <h3 className="font-semibold text-lg">Dados Pessoais</h3>
+                            <DetailItem icon={User} label="Nome Completo" value={profile.fullName} />
+                            <DetailItem icon={Mail} label="Email" value={profile.email} />
+                            <DetailItem icon={Phone} label="Telefone" value={profile.phone} />
+                            <DetailItem icon={User} label="CPF" value={profile.cpf} />
+                    </div>
                         <div className="space-y-4">
-                             <h3 className="font-semibold text-lg">Dados Pessoais</h3>
-                             <DetailItem icon={User} label="Nome Completo" value={profile.fullName} />
-                             <DetailItem icon={Mail} label="Email" value={profile.email} />
-                             <DetailItem icon={Phone} label="Telefone" value={profile.phone} />
-                             <DetailItem icon={User} label="CPF" value={profile.cpf} />
-                        </div>
-                         <div className="space-y-4">
-                             <h3 className="font-semibold text-lg">Endereço</h3>
-                             <DetailItem icon={User} label="Endereço" value={profile.addressInfo?.street} />
-                             <DetailItem icon={Mail} label="Cidade" value={profile.addressInfo?.city} />
-                             <DetailItem icon={Phone} label="Estado" value={profile.addressInfo?.state} />
-                             <DetailItem icon={User} label="CEP" value={profile.addressInfo?.zip} />
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
-        </DashboardLayout>
+                            <h3 className="font-semibold text-lg">Endereço</h3>
+                            <DetailItem icon={User} label="Endereço" value={profile.addressInfo?.street} />
+                            <DetailItem icon={Mail} label="Cidade" value={profile.addressInfo?.city} />
+                            <DetailItem icon={Phone} label="Estado" value={profile.addressInfo?.state} />
+                            <DetailItem icon={User} label="CEP" value={profile.addressInfo?.zip} />
+                    </div>
+                </CardContent>
+            </Card>
+        </div>
     );
 }
 
