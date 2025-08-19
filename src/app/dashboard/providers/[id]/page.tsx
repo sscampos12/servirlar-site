@@ -46,6 +46,7 @@ const DetalheProfissionalAdmin = ({ params }: { params: { id: string } }) => {
     // Métricas
     servicosRealizados: 0,
     totalFaturado: 0,
+    totalPagoAoProfissional: 0,
     
     // Histórico
     historico: [] as any[],
@@ -75,6 +76,7 @@ const DetalheProfissionalAdmin = ({ params }: { params: { id: string } }) => {
         ],
         servicosRealizados: 3,
         totalFaturado: 566.00,
+        totalPagoAoProfissional: 424.50,
         historico: [
           {
             id: 1,
@@ -82,7 +84,8 @@ const DetalheProfissionalAdmin = ({ params }: { params: { id: string } }) => {
             servico: 'Faxina Padrão',
             data: '10/07/2024',
             status: 'Finalizado',
-            valor: 140.00
+            valor: 140.00,
+            valorProfissional: 105.00
           },
           {
             id: 2,
@@ -90,7 +93,8 @@ const DetalheProfissionalAdmin = ({ params }: { params: { id: string } }) => {
             servico: 'Cozinheira',
             data: '11/07/2024',
             status: 'Finalizado',
-            valor: 228.00
+            valor: 228.00,
+            valorProfissional: 171.00
           },
           {
             id: 3,
@@ -98,7 +102,8 @@ const DetalheProfissionalAdmin = ({ params }: { params: { id: string } }) => {
             servico: 'Faxina Padrão',
             data: '15/07/2024',
             status: 'Confirmado',
-            valor: 198.00
+            valor: 198.00,
+            valorProfissional: 148.50
           }
         ],
         status: 'aprovado'
@@ -400,7 +405,7 @@ const DetalheProfissionalAdmin = ({ params }: { params: { id: string } }) => {
               </div>
               
               {/* Métricas */}
-              <div className="grid grid-cols-2 gap-4 mb-6">
+              <div className="grid grid-cols-3 gap-4 mb-6">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-secondary rounded-lg flex items-center justify-center">
                     <Calendar className="w-5 h-5 text-secondary-foreground" />
@@ -420,6 +425,16 @@ const DetalheProfissionalAdmin = ({ params }: { params: { id: string } }) => {
                     <p className="text-xl font-bold">R$ {profissionalData.totalFaturado.toFixed(2)}</p>
                   </div>
                 </div>
+
+                 <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
+                    <DollarSign className="w-5 h-5 text-emerald-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Repassado ao Profissional</p>
+                    <p className="text-xl font-bold text-emerald-600">R$ {profissionalData.totalPagoAoProfissional.toFixed(2)}</p>
+                  </div>
+                </div>
               </div>
               
               {/* Tabela de Histórico */}
@@ -431,7 +446,8 @@ const DetalheProfissionalAdmin = ({ params }: { params: { id: string } }) => {
                       <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">Serviço</th>
                       <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">Data</th>
                       <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">Status</th>
-                      <th className="text-right py-3 px-2 text-sm font-medium text-muted-foreground">Valor (R$)</th>
+                      <th className="text-right py-3 px-2 text-sm font-medium text-muted-foreground">Valor Total</th>
+                      <th className="text-right py-3 px-2 text-sm font-medium text-muted-foreground">Valor Repassado</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -449,7 +465,8 @@ const DetalheProfissionalAdmin = ({ params }: { params: { id: string } }) => {
                             {item.status}
                           </span>
                         </td>
-                        <td className="py-3 px-2 text-right font-medium">{item.valor.toFixed(2)}</td>
+                        <td className="py-3 px-2 text-right font-medium">R$ {item.valor.toFixed(2)}</td>
+                        <td className="py-3 px-2 text-right font-medium text-emerald-600">R$ {item.valorProfissional.toFixed(2)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -536,3 +553,5 @@ const DetalheProfissionalAdmin = ({ params }: { params: { id: string } }) => {
 };
 
 export default DetalheProfissionalAdmin;
+
+    
