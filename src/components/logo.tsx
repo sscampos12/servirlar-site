@@ -35,7 +35,7 @@ export function Logo({ className, ...props }: React.SVGProps<SVGSVGElement>) {
       <text x="45" y="26" fontFamily="'Poppins', sans-serif" fontSize="20" fontWeight="bold" fill="hsl(var(--primary))">
         Ajuda
       </text>
-      <text x="110" y="26" fontFamily="'Poppins', sans-serif" fontSize="20" fontWeight="bold" fill="hsl(var(--secondary))">
+      <text x="115" y="26" fontFamily="'Poppins', sans-serif" fontSize="20" fontWeight="bold" fill="hsl(var(--secondary))">
         em Casa
       </text>
     </svg>
