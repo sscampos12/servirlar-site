@@ -300,5 +300,3 @@ const DetalheProfissionalAdmin = ({ params }: { params: { id: string } }) => {
 };
 
 export default DetalheProfissionalAdmin;
-
-    
