@@ -14,10 +14,8 @@ import {
   AlertTriangle,
   Users,
 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { AdminActions } from '@/components/dashboard/provider/admin-actions';
