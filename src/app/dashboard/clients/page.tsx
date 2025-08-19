@@ -1,297 +1,416 @@
 
-"use client"
+"use client";
 
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card"
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/components/ui/table"
-import { User, Mail, Phone, Calendar, DollarSign, Bell, Loader2, Home, MessageSquare, CheckCircle, Ban } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { useAuth } from "@/hooks/use-auth";
-import { useEffect, useState } from "react";
-import { doc, getDoc, collection, query, where, getDocs, DocumentData, runTransaction, serverTimestamp } from "firebase/firestore";
-import { db } from "@/lib/firebase";
-import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { useToast } from "@/hooks/use-toast";
+import React, { useState } from 'react';
+import { 
+  Search,
+  ChevronRight,
+  User,
+  Mail,
+  Phone,
+  Calendar,
+  DollarSign,
+  MapPin,
+  Plus,
+  Loader2
+} from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 
-interface Appointment {
-    id: string;
-    professionalName?: string;
-    service: string;
-    date: string;
-    status: string;
-    value: number;
-    chatId?: string;
-}
+const DashboardClientes = () => {
+  const [clienteSelecionado, setClienteSelecionado] = useState<any>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filtroStatus, setFiltroStatus] = useState('todos');
 
-const mockNotifications = [
-    { id: 1, title: "Agendamento Confirmado", description: "Sua faxina com Maria Aparecida foi confirmada para 10/07." },
-    { id: 2, title: "Lembrete de Serviço", description: "Seu serviço de passadoria com Ana Paula é amanhã." },
-    { id: 3, title: "Pagamento Recebido", description: "O pagamento de R$ 140,00 foi processado com sucesso." },
-];
+  // Lista de clientes (simulada)
+  const clientes = [
+    {
+      id: 1,
+      nome: 'Carlos Mendes',
+      email: 'carlos.mendes@example.com',
+      telefone: '(11) 91234-5678',
+      endereco: 'Rua das Flores, 123 - São Paulo, SP',
+      totalGasto: 750.00,
+      totalAgendamentos: 5,
+      ultimoServico: '10/07/2024',
+      status: 'ativo',
+      historico: [
+        {
+          id: 1,
+          servico: 'Faxina Padrão',
+          valor: 140.00,
+          profissional: 'Maria Aparecida',
+          data: '10/07/2024',
+          status: 'Finalizado'
+        },
+        {
+          id: 2,
+          servico: 'Passadoria',
+          valor: 74.00,
+          profissional: 'Ana Paula',
+          data: '25/06/2024',
+          status: 'Finalizado'
+        },
+        {
+          id: 3,
+          servico: 'Faxina Padrão',
+          valor: 140.00,
+          profissional: 'Maria Aparecida',
+          data: '10/06/2024',
+          status: 'Finalizado'
+        },
+        {
+          id: 4,
+          servico: 'Passadoria',
+          valor: 148.00,
+          profissional: 'Ana Paula',
+          data: '25/05/2024',
+          status: 'Finalizado'
+        },
+        {
+          id: 5,
+          servico: 'Cozinheira',
+          valor: 248.00,
+          profissional: 'João da Silva',
+          data: '11/05/2024',
+          status: 'Finalizado'
+        }
+      ]
+    },
+    {
+      id: 2,
+      nome: 'Ana Silva',
+      email: 'ana.silva@example.com',
+      telefone: '(11) 99876-5432',
+      endereco: 'Av. Paulista, 456 - São Paulo, SP',
+      totalGasto: 420.00,
+      totalAgendamentos: 3,
+      ultimoServico: '15/07/2024',
+      status: 'ativo',
+      historico: [
+        {
+          id: 1,
+          servico: 'Faxina Completa',
+          valor: 180.00,
+          profissional: 'Maria Aparecida',
+          data: '15/07/2024',
+          status: 'Finalizado'
+        },
+        {
+          id: 2,
+          servico: 'Cozinheira',
+          valor: 240.00,
+          profissional: 'João da Silva',
+          data: '01/07/2024',
+          status: 'Finalizado'
+        }
+      ]
+    },
+    {
+      id: 3,
+      nome: 'Pedro Souza',
+      email: 'pedro.souza@example.com',
+      telefone: '(11) 98765-4321',
+      endereco: 'Rua Augusta, 789 - São Paulo, SP',
+      totalGasto: 890.00,
+      totalAgendamentos: 6,
+      ultimoServico: '20/07/2024',
+      status: 'ativo',
+      historico: [
+        {
+          id: 1,
+          servico: 'Faxina Padrão',
+          valor: 140.00,
+          profissional: 'Maria Aparecida',
+          data: '20/07/2024',
+          status: 'Finalizado'
+        },
+        {
+          id: 2,
+          servico: 'Cozinheira',
+          valor: 250.00,
+          profissional: 'João da Silva',
+          data: '15/07/2024',
+          status: 'Finalizado'
+        }
+      ]
+    },
+    {
+      id: 4,
+      nome: 'Fernanda Lima',
+      email: 'fernanda.lima@example.com',
+      telefone: '(11) 97654-3210',
+      endereco: 'Rua Oscar Freire, 321 - São Paulo, SP',
+      totalGasto: 320.00,
+      totalAgendamentos: 2,
+      ultimoServico: '18/07/2024',
+      status: 'inativo',
+      historico: [
+        {
+          id: 1,
+          servico: 'Faxina Padrão',
+          valor: 140.00,
+          profissional: 'Maria Aparecida',
+          data: '18/07/2024',
+          status: 'Finalizado'
+        },
+        {
+          id: 2,
+          servico: 'Passadoria',
+          valor: 180.00,
+          profissional: 'Ana Paula',
+          data: '10/07/2024',
+          status: 'Finalizado'
+        }
+      ]
+    },
+    {
+      id: 5,
+      nome: 'Roberto Costa',
+      email: 'roberto.costa@example.com',
+      telefone: '(11) 96543-2109',
+      endereco: 'Alameda Santos, 654 - São Paulo, SP',
+      totalGasto: 660.00,
+      totalAgendamentos: 4,
+      ultimoServico: '22/07/2024',
+      status: 'ativo',
+      historico: [
+        {
+          id: 1,
+          servico: 'Cozinheira',
+          valor: 260.00,
+          profissional: 'João da Silva',
+          data: '22/07/2024',
+          status: 'Finalizado'
+        },
+        {
+          id: 2,
+          servico: 'Faxina Completa',
+          valor: 200.00,
+          profissional: 'Maria Aparecida',
+          data: '15/07/2024',
+          status: 'Finalizado'
+        }
+      ]
+    }
+  ];
 
-const DetailRow = ({ icon: Icon, label, value }: { icon: React.ElementType, label: string, value: React.ReactNode }) => (
-    <div className="flex items-center gap-3">
-        <div className="flex items-center justify-center bg-muted rounded-md h-8 w-8">
-            <Icon className="h-4 w-4 text-muted-foreground" />
+  // Filtrar clientes
+  const clientesFiltrados = clientes.filter(cliente => {
+    const matchSearch = cliente.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                       cliente.email.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchStatus = filtroStatus === 'todos' || cliente.status === filtroStatus;
+    return matchSearch && matchStatus;
+  });
+
+  // Componente da lista de clientes
+  const ListaClientes = () => (
+    <div className="w-96 bg-card border-r border-border h-full overflow-y-auto flex flex-col">
+      <div className="p-4 border-b border-border">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-headline text-foreground">Clientes</h2>
+          <Button size="icon">
+            <Plus className="w-4 h-4" />
+          </Button>
         </div>
-        <div>
-            <div className="text-sm text-muted-foreground">{label}</div>
-            <div className="font-medium">{value}</div>
+        
+        <div className="relative mb-4">
+          <Search className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
+          <input
+            type="text"
+            placeholder="Buscar clientes..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 border border-input bg-background rounded-lg focus:ring-2 focus:ring-ring focus:border-ring"
+          />
         </div>
+        
+        <div className="flex gap-2">
+           <Button
+            onClick={() => setFiltroStatus('todos')}
+            variant={filtroStatus === 'todos' ? 'secondary' : 'ghost'}
+            size="sm"
+          >
+            Todos
+          </Button>
+           <Button
+            onClick={() => setFiltroStatus('ativo')}
+             variant={filtroStatus === 'ativo' ? 'secondary' : 'ghost'}
+            size="sm"
+          >
+            Ativos
+          </Button>
+           <Button
+            onClick={() => setFiltroStatus('inativo')}
+            variant={filtroStatus === 'inativo' ? 'secondary' : 'ghost'}
+            size="sm"
+          >
+            Inativos
+          </Button>
+        </div>
+      </div>
+      
+      <div className="p-2 flex-1 overflow-y-auto">
+        {clientesFiltrados.length > 0 ? clientesFiltrados.map((cliente) => (
+          <div
+            key={cliente.id}
+            onClick={() => setClienteSelecionado(cliente)}
+            className={`p-3 rounded-lg cursor-pointer transition-colors mb-2 ${
+              clienteSelecionado?.id === cliente.id
+                ? 'bg-muted'
+                : 'hover:bg-muted/50 border border-transparent'
+            }`}
+          >
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="font-medium text-foreground">{cliente.nome}</h3>
+              <ChevronRight className="w-4 h-4 text-muted-foreground" />
+            </div>
+            <p className="text-sm text-muted-foreground mb-1">{cliente.email}</p>
+            <p className="text-sm text-muted-foreground">{cliente.telefone}</p>
+            <div className="flex items-center justify-between mt-3">
+              <Badge variant={cliente.status === 'ativo' ? 'default' : 'destructive'}>
+                {cliente.status === 'ativo' ? 'Ativo' : 'Inativo'}
+              </Badge>
+              <span className="text-sm font-medium text-foreground">
+                R$ {cliente.totalGasto.toFixed(2).replace('.',',')}
+              </span>
+            </div>
+          </div>
+        )) : (
+            <div className="text-center p-8 text-muted-foreground">Nenhum cliente encontrado.</div>
+        )}
+      </div>
     </div>
-);
+  );
 
-
-export default function ClientHistoryPage() {
-    const { user, loading: authLoading } = useAuth();
-    const router = useRouter();
-    const { toast } = useToast();
-    const [clientData, setClientData] = useState<DocumentData | null>(null);
-    const [appointments, setAppointments] = useState<Appointment[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [isActionLoading, setIsActionLoading] = useState<string | null>(null);
-
-    const fetchData = async () => {
-        if (user) {
-            try {
-                // Fetch client profile
-                const clientDocRef = doc(db, "clients", user.uid);
-                const clientDocSnap = await getDoc(clientDocRef);
-                if (clientDocSnap.exists()) {
-                    setClientData(clientDocSnap.data());
-                }
-
-                // Fetch client appointments
-                const q = query(collection(db, "schedules"), where("clientId", "==", user.uid));
-                const querySnapshot = await getDocs(q);
-                const appointmentsData: Appointment[] = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Appointment)).sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-                setAppointments(appointmentsData);
-
-            } catch (error) {
-                console.error("Error fetching client data:", error);
-            } finally {
-                setIsLoading(false);
-            }
-        }
-    };
-
-    useEffect(() => {
-        if (!authLoading && !user) {
-            router.push('/login?redirect=/dashboard/clients');
-            return;
-        }
-
-        if (!authLoading && user) {
-            fetchData();
-        }
-    }, [user, authLoading, router]);
-
-    const handleCompleteService = async (appointment: Appointment) => {
-        setIsActionLoading(appointment.id);
-        try {
-            const scheduleRef = doc(db, "schedules", appointment.id);
+  // Componente de detalhes do cliente
+  const DetalhesCliente = ({ cliente }: { cliente: any }) => (
+    <div className="flex-1 bg-background overflow-y-auto">
+       <div className="p-6">
+        <div className="grid lg:grid-cols-2 gap-6">
+          
+          {/* Informações do Cliente */}
+          <div className="bg-card rounded-lg shadow-sm border p-6">
+            <h2 className="text-lg font-headline mb-4">Informações do Cliente</h2>
             
-            await runTransaction(db, async (transaction) => {
-                const scheduleSnap = await transaction.get(scheduleRef);
-                if (!scheduleSnap.exists()) {
-                    throw new Error("Agendamento não encontrado.");
-                }
-                
-                const scheduleData = scheduleSnap.data();
-                if(scheduleData.status !== 'Confirmado') {
-                    throw new Error("Apenas agendamentos confirmados podem ser finalizados.");
-                }
-
-                // 1. Update schedule status
-                transaction.update(scheduleRef, { status: "Finalizado", completedAt: serverTimestamp() });
-
-                // 2. Create financial transaction record
-                const commissionRate = 0.25; // 25%
-                const totalValue = scheduleData.value;
-                const platformFee = totalValue * commissionRate;
-                const professionalAmount = totalValue - platformFee;
-                
-                const financialTxRef = doc(collection(db, "financialTransactions"));
-                transaction.set(financialTxRef, {
-                    scheduleId: appointment.id,
-                    clientId: scheduleData.clientId,
-                    professionalId: scheduleData.professionalId,
-                    professionalName: scheduleData.professionalName,
-                    clientName: scheduleData.clientName,
-                    service: scheduleData.service,
-                    totalValue: totalValue,
-                    platformFee: platformFee,
-                    professionalAmount: professionalAmount,
-                    status: "pending_payout",
-                    createdAt: serverTimestamp()
-                });
-            });
-
-            toast({
-                title: "Serviço Finalizado!",
-                description: "O pagamento foi liberado para o profissional."
-            });
-            await fetchData(); // Refresh data
-        } catch (error: any) {
-            toast({
-                variant: "destructive",
-                title: "Erro ao finalizar serviço",
-                description: error.message
-            });
-        } finally {
-            setIsActionLoading(null);
-        }
-    };
-
-
-    const totalSpent = appointments.reduce((sum, app) => sum + (app.value || 0), 0);
-
-     if (isLoading || authLoading) {
-        return (
-            <div className="flex h-full items-center justify-center">
-                <Loader2 className="h-16 w-16 animate-spin" />
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <User className="w-5 h-5 text-muted-foreground" />
+                <div>
+                  <p className="text-sm text-muted-foreground">Nome</p>
+                  <p className="font-medium">{cliente.nome}</p>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-3">
+                <Mail className="w-5 h-5 text-muted-foreground" />
+                <div>
+                  <p className="text-sm text-muted-foreground">Email</p>
+                  <p className="font-medium">{cliente.email}</p>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-3">
+                <Phone className="w-5 h-5 text-muted-foreground" />
+                <div>
+                  <p className="text-sm text-muted-foreground">Telefone</p>
+                  <p className="font-medium">{cliente.telefone}</p>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-3">
+                <MapPin className="w-5 h-5 text-muted-foreground" />
+                <div>
+                  <p className="text-sm text-muted-foreground">Endereço</p>
+                  <p className="font-medium">{cliente.endereco}</p>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-3">
+                <Calendar className="w-5 h-5 text-muted-foreground" />
+                <div>
+                  <p className="text-sm text-muted-foreground">Total de Agendamentos</p>
+                  <p className="font-medium">{cliente.totalAgendamentos} serviços</p>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-3">
+                <DollarSign className="w-5 h-5 text-muted-foreground" />
+                <div>
+                  <p className="text-sm text-muted-foreground">Valor Total Gasto</p>
+                  <p className="font-medium">R$ {cliente.totalGasto.toFixed(2).replace('.',',')}</p>
+                </div>
+              </div>
             </div>
-        );
-    }
-    
-    if (!clientData) {
-         return (
-             <div className="text-center text-muted-foreground p-8">
-                Cliente não encontrado ou você não tem permissão para ver esta página.
+          </div>
+          
+          {/* Histórico de Agendamentos */}
+          <div className="bg-card rounded-lg shadow-sm border p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-headline">Histórico de Agendamentos</h2>
             </div>
-        )
-    }
-
-    return (
-        <div className="flex flex-col gap-6">
-            <div className="flex items-center">
-                <h1 className="font-headline text-lg font-semibold md:text-2xl">
-                    Minha Conta e Histórico
-                </h1>
-            </div>
+            <p className="text-sm text-muted-foreground mb-4">Visualize todos os seus serviços passados e futuros.</p>
             
-            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-                <div className="space-y-6 xl:col-span-1">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="font-headline">Minhas Informações</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <DetailRow icon={User} label="Nome" value={clientData.fullName} />
-                            <DetailRow icon={Mail} label="Email" value={clientData.email} />
-                            <DetailRow icon={Home} label="Endereço" value={clientData.address || "Não informado"} />
-                            <Separator />
-                            <DetailRow icon={Calendar} label="Total de Agendamentos" value={`${appointments.length} serviços`} />
-                            <DetailRow icon={DollarSign} label="Valor Total Gasto" value={`R$ ${totalSpent.toFixed(2).replace('.', ',')}`} />
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="font-headline flex items-center gap-2">
-                                <Bell className="h-5 w-5" />
-                                Últimas Notificações
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            {mockNotifications.map(notification => (
-                                <div key={notification.id} className="flex items-start gap-3">
-                                     <div className="flex items-center justify-center bg-primary/10 rounded-full h-8 w-8 flex-shrink-0 mt-1">
-                                        <Bell className="h-4 w-4 text-primary" />
-                                    </div>
-                                    <div>
-                                        <p className="font-semibold text-sm">{notification.title}</p>
-                                        <p className="text-xs text-muted-foreground">{notification.description}</p>
-                                    </div>
-                                </div>
-                            ))}
-                        </CardContent>
-                    </Card>
-                </div>
-                <div className="space-y-4 xl:col-span-2">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="font-headline">Histórico de Agendamentos</CardTitle>
-                             <CardDescription>
-                                Visualize todos os seus serviços passados e futuros.
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="border rounded-md max-h-[600px] overflow-y-auto">
-                                {appointments.length > 0 ? (
-                                    <Table>
-                                        <TableHeader>
-                                            <TableRow>
-                                                <TableHead>Serviço</TableHead>
-                                                <TableHead>Profissional</TableHead>
-                                                <TableHead>Data</TableHead>
-                                                <TableHead>Status</TableHead>
-                                                <TableHead className="text-right">Ações</TableHead>
-                                            </TableRow>
-                                        </TableHeader>
-                                        <TableBody>
-                                            {appointments.map(app => (
-                                                <TableRow key={app.id}>
-                                                    <TableCell>
-                                                       <div className="font-medium">{app.service}</div>
-                                                       <div className="text-xs text-muted-foreground font-mono">R$ {app.value.toFixed(2).replace('.', ',')}</div>
-                                                    </TableCell>
-                                                    <TableCell>{app.professionalName || 'Aguardando'}</TableCell>
-                                                    <TableCell>{new Date(app.date).toLocaleDateString('pt-BR', {timeZone: 'UTC'})}</TableCell>
-                                                    <TableCell>
-                                                        <Badge variant={app.status === 'Finalizado' ? 'default' : app.status === 'Confirmado' ? 'secondary' : 'outline'}>{app.status}</Badge>
-                                                    </TableCell>
-                                                     <TableCell className="text-right">
-                                                         <div className="flex gap-2 justify-end">
-                                                            {app.chatId && app.status === 'Confirmado' && (
-                                                                <Button asChild variant="outline" size="icon">
-                                                                    <Link href={`/chat/${app.chatId}`}>
-                                                                        <MessageSquare className="h-4 w-4" />
-                                                                        <span className="sr-only">Abrir Chat</span>
-                                                                    </Link>
-                                                                </Button>
-                                                            )}
-                                                            {app.status === 'Confirmado' && (
-                                                                <Button 
-                                                                    variant="default" 
-                                                                    size="icon" 
-                                                                    onClick={() => handleCompleteService(app)}
-                                                                    disabled={isActionLoading === app.id}
-                                                                    title="Finalizar Serviço"
-                                                                >
-                                                                    {isActionLoading === app.id ? <Loader2 className="h-4 w-4 animate-spin"/> : <CheckCircle className="h-4 w-4" />}
-                                                                </Button>
-                                                            )}
-                                                        </div>
-                                                    </TableCell>
-                                                </TableRow>
-                                            ))}
-                                        </TableBody>
-                                    </Table>
-                                ) : (
-                                    <div className="text-center text-muted-foreground p-8">
-                                        Nenhum agendamento encontrado.
-                                    </div>
-                                )}
-                            </div>
-                        </CardContent>
-                    </Card>
-                </div>
+            <div className="overflow-y-auto max-h-96">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b">
+                    <th className="text-left py-2 font-medium text-muted-foreground">Serviço</th>
+                    <th className="text-left py-2 font-medium text-muted-foreground">Profissional</th>
+                    <th className="text-left py-2 font-medium text-muted-foreground">Data</th>
+                    <th className="text-left py-2 font-medium text-muted-foreground">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {cliente.historico.map((item: any) => (
+                    <tr key={item.id} className="border-b last:border-b-0">
+                      <td className="py-3">
+                        <div>
+                          <p className="font-medium">{item.servico}</p>
+                          <p className="text-sm text-muted-foreground">R$ {item.valor.toFixed(2).replace('.',',')}</p>
+                        </div>
+                      </td>
+                      <td className="py-3 text-muted-foreground">{item.profissional}</td>
+                      <td className="py-3 text-muted-foreground">{item.data}</td>
+                      <td className="py-3">
+                        <Badge variant="secondary">
+                          {item.status}
+                        </Badge>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
+          </div>
         </div>
-    )
-}
+      </div>
+    </div>
+  );
+
+  // Tela inicial quando nenhum cliente está selecionado
+  const TelaInicial = () => (
+    <div className="flex-1 bg-background flex items-center justify-center">
+      <div className="text-center text-muted-foreground">
+        <User className="w-16 h-16 mx-auto mb-4" />
+        <h2 className="text-xl font-semibold text-foreground mb-2">Selecione um cliente</h2>
+        <p>Escolha um cliente na lista ao lado para ver seus detalhes e histórico.</p>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="min-h-screen bg-background flex h-full">
+      <ListaClientes />
+      {clienteSelecionado ? (
+        <DetalhesCliente cliente={clienteSelecionado} />
+      ) : (
+        <TelaInicial />
+      )}
+    </div>
+  );
+};
+
+export default DashboardClientes;
+
+    
