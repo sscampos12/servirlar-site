@@ -3,7 +3,6 @@
 
 import Link from "next/link"
 import {
-  ArrowLeft,
   Menu,
 } from "lucide-react"
 
@@ -51,10 +50,7 @@ export function DashboardHeader() {
         </SheetContent>
       </Sheet>
       <div className="w-full flex-1">
-        <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => router.back()}>
-            <ArrowLeft className="h-4 w-4" />
-            <span className="sr-only">Voltar</span>
-        </Button>
+        {/* Search bar can go here */}
       </div>
       <Notifications />
       <UserNav />
