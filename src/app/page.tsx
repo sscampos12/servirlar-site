@@ -52,7 +52,7 @@ export default function Home() {
                   Agendar um Serviço
                 </Link>
               </Button>
-              <Button asChild size="lg" variant="outline" className="shadow-md text-lg py-7 px-8 rounded-full border-2 border-primary/50 text-primary hover:bg-primary/5 hover:text-primary">
+              <Button asChild size="lg" className="shadow-md text-lg py-7 px-8 bg-primary text-primary-foreground hover:bg-primary/90">
                 <Link href="/register/provider">
                   Seja um Profissional
                 </Link>
