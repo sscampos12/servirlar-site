@@ -20,8 +20,8 @@ const navConfig: Record<Role, { href: string; label: string; icon: React.Element
         { href: "/dashboard/insights", label: "AI Insights", icon: Bot, badge: "Beta" },
     ],
     professional: [
+        { href: "/dashboard/profile", label: "Meu Perfil", icon: User },
         { href: "/dashboard/services", label: "Serviços", icon: Briefcase },
-        { href: "/dashboard/providers/profile", label: "Meu Perfil", icon: User },
     ],
     client: [
         { href: "/dashboard/my-account", label: "Minha Conta", icon: User },

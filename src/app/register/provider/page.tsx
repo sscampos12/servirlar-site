@@ -70,7 +70,7 @@ export default function ProviderInitialRegistrationPage() {
       });
 
       // Redirect to the profile completion page
-      router.push('/dashboard/providers/profile');
+      router.push('/dashboard/profile');
 
     } catch (error: any) {
       console.error("Error creating professional account: ", error);
