@@ -10,7 +10,10 @@ import {
   Info,
   User,
   Briefcase,
-  DollarSign
+  DollarSign,
+  Soup,
+  Shirt,
+  UserPlus
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
@@ -39,18 +42,18 @@ const pricingData = {
     "cuidador": { "4": 168, "6": 240, "8": 304 }
 };
 
-const serviceNames = {
+const serviceNames: Record<string, string> = {
     faxina: 'Faxina Padrão',
     passadoria: 'Passadoria',
     cozinheira: 'Cozinheira',
     cuidador: 'Cuidador(a) de Idosos'
 };
 
-const serviceIcons = {
+const serviceIcons: Record<string, React.ElementType> = {
     faxina: HomeIcon,
-    passadoria: HomeIcon, // Placeholder, replace with correct icon if available
-    cozinheira: HomeIcon, // Placeholder
-    cuidador: HomeIcon, // Placeholder
+    passadoria: Shirt,
+    cozinheira: Soup,
+    cuidador: UserPlus,
 };
 
 
@@ -151,7 +154,7 @@ const SchedulePage = () => {
             clientName: selectedClient.fullName,
             professionalId: formData.professionalId,
             professionalName: selectedProfessional.fullName,
-            service: serviceNames[formData.service as keyof typeof serviceNames],
+            service: serviceNames[formData.service],
             duration: `${formData.duration} horas`,
             date: formData.date.toISOString().split('T')[0],
             time: formData.time,
@@ -246,7 +249,6 @@ const SchedulePage = () => {
                                         onClick={() => handleInputChange('service', key)}
                                         className="h-auto py-3 flex flex-col gap-2"
                                         >
-                                        {/* @ts-ignore */}
                                         {React.createElement(serviceIcons[key], { className: "w-6 h-6" })}
                                         <span>{name}</span>
                                         </Button>
