@@ -8,7 +8,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 function LoginSkeleton() {
   return (
     <div className="grid gap-4">
-      <Skeleton className="h-10 w-full mt-2" />
+      <Skeleton className="h-12 w-full" />
+      <Skeleton className="h-12 w-full" />
        <div className="relative py-4">
         <div className="absolute inset-0 flex items-center">
           <span className="w-full border-t" />
@@ -26,9 +27,9 @@ export default function LoginPage() {
       <div className="flex items-center justify-center py-12 px-4">
         <Card className="w-full max-w-sm">
           <CardHeader>
-            <CardTitle className="font-headline text-2xl">Acesso do Cliente e Profissional</CardTitle>
+            <CardTitle className="font-headline text-2xl">Acesso à Plataforma</CardTitle>
             <CardDescription>
-              Acesse sua conta para agendar ou ofertar serviços.
+              Selecione o seu tipo de perfil para continuar.
             </CardDescription>
           </CardHeader>
           <CardContent>

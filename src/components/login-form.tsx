@@ -11,7 +11,7 @@ import React, { useState } from "react";
 import { signInWithEmailAndPassword, signInWithPopup, signOut, createUserWithEmailAndPassword } from "firebase/auth";
 import { auth, db, googleProvider } from "@/lib/firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
-import { Loader2 } from "lucide-react";
+import { Loader2, User, Briefcase } from "lucide-react";
 
 const GoogleIcon = () => (
   <svg className="h-4 w-4" viewBox="0 0 48 48">
@@ -32,52 +32,48 @@ export function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
-  const redirectToPanel = async (userId: string) => {
+  const redirectToPanel = async () => {
       // This logic should now be handled by the dashboard layout guard
       router.push(requestedRedirect || '/dashboard');
   }
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleDemoLogin = async (role: 'client' | 'professional') => {
     setIsLoading(true);
 
-    const email = 'cliente@exemplo.com';
+    const email = role === 'client' ? 'cliente@exemplo.com' : 'profissional@exemplo.com';
     const password = '123456';
 
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      await signInWithEmailAndPassword(auth, email, password);
       toast({
         title: "Login bem-sucedido!",
         description: "Redirecionando...",
       });
-      await redirectToPanel(userCredential.user.uid);
+      await redirectToPanel();
     } catch (error: any) {
-      // If user not found, create a dummy client user for demo purposes
       if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
         try {
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
-            await setDoc(doc(db, "users", user.uid), {
-                uid: user.uid,
-                role: "client",
-                name: "Cliente de Teste",
-                email: user.email,
-            });
-             await setDoc(doc(db, "clients", user.uid), {
-                fullName: "Cliente de Teste",
-                email: user.email,
-                address: "Endereço de Teste"
-            });
+            
+            if (role === 'client') {
+                 await setDoc(doc(db, "users", user.uid), { uid: user.uid, role: "client", name: "Cliente de Teste", email: user.email });
+                 await setDoc(doc(db, "clients", user.uid), { fullName: "Cliente de Teste", email: user.email, address: "Endereço de Teste" });
+            } else {
+                 await setDoc(doc(db, "users", user.uid), { uid: user.uid, role: "professional", name: "Profissional de Teste", email: user.email });
+                 await setDoc(doc(db, "professionals", user.uid), { fullName: "Profissional de Teste", email: user.email, status: "Aprovado", createdAt: new Date() });
+            }
+
             toast({
-                title: "Conta de Teste Criada!",
+                title: `Conta de Teste (${role}) Criada!`,
                 description: "Redirecionando...",
             });
-            await redirectToPanel(user.uid);
+            await redirectToPanel();
         } catch (creationError: any) {
             toast({
                 variant: "destructive",
                 title: "Erro no Login",
-                description: "Não foi possível criar uma conta de teste.",
+                description: `Não foi possível criar uma conta de teste para ${role}.`,
           });
         }
       } else {
@@ -98,34 +94,19 @@ export function LoginForm() {
         const result = await signInWithPopup(auth, googleProvider);
         const user = result.user;
 
-        // Check if user exists in Firestore, if not, create a new client document
         const userDocRef = doc(db, "users", user.uid);
         const userDocSnap = await getDoc(userDocRef);
 
         if (!userDocSnap.exists()) {
-             await setDoc(userDocRef, {
-                uid: user.uid,
-                role: "client",
-                name: user.displayName,
-                email: user.email,
-            });
-            await setDoc(doc(db, "clients", user.uid), {
-                fullName: user.displayName,
-                email: user.email,
-                address: ""
-            });
-             toast({
-                title: "Conta Criada!",
-                description: "Seu perfil de cliente foi criado com sucesso.",
-            });
+             // Defaulting new Google sign-ins to client role
+             await setDoc(userDocRef, { uid: user.uid, role: "client", name: user.displayName, email: user.email });
+             await setDoc(doc(db, "clients", user.uid), { fullName: user.displayName, email: user.email, address: "" });
+             toast({ title: "Conta Criada!", description: "Seu perfil de cliente foi criado com sucesso." });
         } else {
-             toast({
-                title: "Login bem-sucedido!",
-                description: "Redirecionando...",
-            });
+             toast({ title: "Login bem-sucedido!", description: "Redirecionando..." });
         }
         
-        await redirectToPanel(user.uid);
+        await redirectToPanel();
 
     } catch (error: any) {
         toast({
@@ -141,16 +122,24 @@ export function LoginForm() {
 
   return (
     <div className="grid gap-4">
-       <Button onClick={handleLogin} className="w-full" disabled={isLoading || isGoogleLoading}>
-          {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Acessar como Cliente (Acesso Livre)"}
+       <Button onClick={() => handleDemoLogin('client')} className="w-full h-auto py-3 flex-col" disabled={isLoading || isGoogleLoading}>
+          <User />
+          <span>Acessar como Cliente</span>
+          <span className="text-xs font-normal text-primary-foreground/80">(Acesso de Demonstração)</span>
         </Button>
+        <Button onClick={() => handleDemoLogin('professional')} variant="secondary" className="w-full h-auto py-3 flex-col" disabled={isLoading || isGoogleLoading}>
+          <Briefcase />
+           <span>Acessar como Profissional</span>
+           <span className="text-xs font-normal text-secondary-foreground/80">(Acesso de Demonstração)</span>
+        </Button>
+
       <div className="relative">
         <div className="absolute inset-0 flex items-center">
           <span className="w-full border-t" />
         </div>
         <div className="relative flex justify-center text-xs uppercase">
           <span className="bg-background px-2 text-muted-foreground">
-            Ou continue com
+            Ou com sua conta
           </span>
         </div>
       </div>
@@ -159,12 +148,8 @@ export function LoginForm() {
       </Button>
       <div className="mt-4 text-center text-sm">
         Não tem uma conta?{" "}
-        <Link href="/register/client" className="underline">
-          Cadastre-se como Cliente
-        </Link>
-        {" ou "}
-        <Link href="/register/provider" className="underline">
-          Profissional
+        <Link href="/register" className="underline">
+          Cadastre-se
         </Link>
       </div>
     </div>
