@@ -16,7 +16,8 @@ import {
   Download,
   Play,
   Check,
-  AlertTriangle
+  AlertTriangle,
+  Users
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
@@ -36,9 +37,9 @@ const DetalheProfissionalAdmin = () => {
     email: '',
     telefone: '',
     
-    // Informações Financeiras
+    // Informações Financeiras e Pessoais
     chavePix: '',
-    referenciasBancarias: [] as string[],
+    referenciasPessoais: [] as string[],
     
     // Métricas
     servicosRealizados: 0,
@@ -65,10 +66,9 @@ const DetalheProfissionalAdmin = () => {
         email: 'maria.aparecida@example.com',
         telefone: '(11) 98765-4321',
         chavePix: 'maria.pix@banco.com',
-        referenciasBancarias: [
-          'Gerente João - Banco A',
-          'Gerente Ana - Banco B',
-          'Contato Silva - Banco C'
+        referenciasPessoais: [
+          'Maria Souza - (11) 91234-5678 (Ex-cliente)',
+          'José Lima - (21) 98765-4321 (Ex-vizinho)',
         ],
         servicosRealizados: 3,
         totalFaturado: 566.00,
@@ -368,16 +368,24 @@ const DetalheProfissionalAdmin = () => {
                   )}
                 </div>
                 
-                <div>
-                  <label className="block text-sm text-muted-foreground mb-2">Referências Bancárias</label>
-                  <ul className="list-disc list-inside space-y-1">
-                    {profissionalData.referenciasBancarias.map((ref: string, index: number) => (
+              </div>
+            </div>
+            
+            {/* Referências Pessoais */}
+             <div className="bg-card rounded-lg shadow-sm border p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <Users className="w-5 h-5 text-muted-foreground" />
+                <h2 className="text-lg font-semibold">Referências Pessoais</h2>
+              </div>
+              <div className="space-y-4">
+                 <ul className="list-disc list-inside space-y-1">
+                    {profissionalData.referenciasPessoais.map((ref: string, index: number) => (
                       <li key={index} className="text-sm">{ref}</li>
                     ))}
                   </ul>
-                </div>
               </div>
             </div>
+
 
             {/* Histórico de Serviços */}
             <div className="bg-card rounded-lg shadow-sm border p-6">
@@ -523,4 +531,3 @@ const DetalheProfissionalAdmin = () => {
 };
 
 export default DetalheProfissionalAdmin;
-
