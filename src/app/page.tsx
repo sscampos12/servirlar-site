@@ -8,15 +8,17 @@ import { CheckCircle, Shield, Star, PenSquare, Smartphone, Sofa } from 'lucide-r
 
 
 const BenefitCard = ({ icon: Icon, title, description }: { icon: React.ElementType, title: string, description: string }) => (
-    <div className="text-center">
-        <div className="flex justify-center mb-4">
-            <div className="p-4 bg-primary/10 rounded-full">
-                <Icon className="h-8 w-8 text-primary" />
+    <Card className="text-center flex flex-col">
+        <CardContent className="p-6 flex flex-col items-center flex-grow">
+            <div className="flex justify-center mb-4">
+                <div className="p-4 bg-primary/10 rounded-full">
+                    <Icon className="h-8 w-8 text-primary" />
+                </div>
             </div>
-        </div>
-        <h3 className="font-headline text-xl font-semibold mb-2">{title}</h3>
-        <p className="text-muted-foreground">{description}</p>
-    </div>
+            <h3 className="font-headline text-xl font-semibold mb-2">{title}</h3>
+            <p className="text-muted-foreground">{description}</p>
+        </CardContent>
+    </Card>
 );
 
 const HowItWorksStep = ({ icon: Icon, step, title, description }: { icon: React.ElementType, step: number, title: string, description: string }) => (
@@ -65,8 +67,7 @@ export default function Home() {
             <div className="container mx-auto text-center">
                 <h2 className="font-headline text-3xl font-bold mb-4">Como Funciona?</h2>
                 <p className="text-muted-foreground mb-8 max-w-2xl mx-auto">Em três passos simples, seu lar está cuidado.</p>
-                <div className="relative">
-                    <div className="relative grid md:grid-cols-3 gap-y-12 md:gap-x-8">
+                <div className="relative grid md:grid-cols-3 gap-y-12 md:gap-x-8">
                         <HowItWorksStep 
                             icon={PenSquare}
                             step={1}
@@ -86,7 +87,6 @@ export default function Home() {
                             description="O profissional chegará na hora combinada para realizar o serviço. Depois, é só avaliar!"
                         />
                     </div>
-                </div>
             </div>
         </section>
 
@@ -95,7 +95,7 @@ export default function Home() {
             <div className="container mx-auto text-center">
                 <h2 className="font-headline text-3xl font-bold mb-4">Por que escolher a Ajuda em Casa?</h2>
                 <p className="text-muted-foreground mb-12 max-w-2xl mx-auto">Sua tranquilidade é nossa prioridade. Oferecemos a melhor experiência com segurança e qualidade.</p>
-                <div className="grid md:grid-cols-3 gap-12">
+                <div className="grid md:grid-cols-3 gap-8">
                     <BenefitCard 
                         icon={Shield}
                         title="Segurança em Primeiro Lugar"
