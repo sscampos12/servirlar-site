@@ -4,27 +4,26 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Loader2,
-  Lock,
   Calendar as CalendarIcon,
   Clock,
   Home as HomeIcon,
-  Info
+  Info,
+  User,
+  Briefcase,
+  DollarSign
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { ScheduleLayout } from './layout';
 import { useAuth } from '@/hooks/use-auth';
 import { db } from '@/lib/firebase';
-import { addDoc, collection, serverTimestamp, doc, getDoc } from 'firebase/firestore';
+import { addDoc, collection, serverTimestamp, doc, getDocs, query, where, DocumentData } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { LoginForm } from '@/components/login-form';
-import { ClientRegistrationForm } from '@/components/register-client-form';
 import { cn } from '@/lib/utils';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
@@ -67,9 +66,13 @@ const SchedulePage = () => {
     time: '',
     address: '',
     observations: '',
+    professionalId: '',
+    clientId: '',
+    paymentStatus: 'Em Aberto',
   });
   
-  const [clientData, setClientData] = useState({ name: '', email: '', phone: '', cpf: '' });
+  const [professionals, setProfessionals] = useState<DocumentData[]>([]);
+  const [clients, setClients] = useState<DocumentData[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -77,33 +80,47 @@ const SchedulePage = () => {
     if (authLoading) return;
     
     if (!user) {
-        setIsLoading(false);
+        router.push('/login?redirect=/schedule');
         return;
     }
 
-    const fetchClientData = async () => {
-        const clientDocRef = doc(db, "clients", user.uid);
-        const clientDocSnap = await getDoc(clientDocRef);
-        if(clientDocSnap.exists()) {
-            const data = clientDocSnap.data();
-            setFormData(prev => ({...prev, address: data.address}));
-            setClientData({ 
-                name: data.fullName, 
-                email: data.email,
-                phone: data.phone || 'N/A',
-                cpf: data.cpf || 'N/A'
-            });
+    const fetchData = async () => {
+        try {
+            // Fetch approved professionals
+            const profQuery = query(collection(db, "professionals"), where("status", "==", "Aprovado"));
+            const profSnap = await getDocs(profQuery);
+            setProfessionals(profSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+
+            // Fetch clients
+            const clientQuery = query(collection(db, "clients"));
+            const clientSnap = await getDocs(clientQuery);
+            setClients(clientSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+        } catch (error) {
+            console.error("Error fetching data:", error);
+            toast({ variant: "destructive", title: "Erro ao carregar dados", description: "Não foi possível buscar a lista de clientes e profissionais." });
+        } finally {
+            setIsLoading(false);
         }
-        setIsLoading(false);
     };
 
-    fetchClientData();
-  }, [user, authLoading]);
+    fetchData();
+  }, [user, authLoading, router, toast]);
 
 
   const handleInputChange = (field: string, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
+
+  const handleClientChange = (clientId: string) => {
+      const selectedClient = clients.find(c => c.id === clientId);
+      if (selectedClient) {
+          setFormData(prev => ({
+              ...prev,
+              clientId: clientId,
+              address: selectedClient.address || '',
+          }));
+      }
+  }
 
   const calculateTotal = () => {
       const { service, duration } = formData;
@@ -119,13 +136,21 @@ const SchedulePage = () => {
     if (!user) return;
     setIsSubmitting(true);
 
+    const selectedClient = clients.find(c => c.id === formData.clientId);
+    const selectedProfessional = professionals.find(p => p.id === formData.professionalId);
+
+    if (!selectedClient || !selectedProfessional) {
+        toast({ variant: "destructive", title: "Erro de Validação", description: "Por favor, selecione um cliente e um profissional." });
+        setIsSubmitting(false);
+        return;
+    }
+
     try {
         await addDoc(collection(db, "schedules"), {
-            clientId: user.uid,
-            clientName: clientData.name,
-            clientEmail: clientData.email,
-            clientPhone: clientData.phone,
-            clientCpf: clientData.cpf,
+            clientId: formData.clientId,
+            clientName: selectedClient.fullName,
+            professionalId: formData.professionalId,
+            professionalName: selectedProfessional.fullName,
             service: serviceNames[formData.service as keyof typeof serviceNames],
             duration: `${formData.duration} horas`,
             date: formData.date.toISOString().split('T')[0],
@@ -133,23 +158,26 @@ const SchedulePage = () => {
             address: formData.address,
             observations: formData.observations,
             value: total,
-            status: "Pendente",
+            status: "Confirmado", // Admin schedules are auto-confirmed
+            paymentStatus: formData.paymentStatus,
             createdAt: serverTimestamp(),
+            scheduledBy: 'admin',
         });
         
         toast({
-            title: "Agendamento quase lá!",
-            description: "Agora, só falta confirmar o pagamento.",
+            title: "Agendamento Criado!",
+            description: "O agendamento manual foi criado com sucesso.",
         });
-        router.push('/schedule/confirm');
+        router.push('/dashboard/reports');
 
     } catch (error) {
         toast({
             variant: "destructive",
             title: "Erro ao agendar",
-            description: "Não foi possível criar seu agendamento. Tente novamente.",
+            description: "Não foi possível criar o agendamento. Tente novamente.",
         });
         console.error("Error creating schedule: ", error);
+    } finally {
         setIsSubmitting(false);
     }
   };
@@ -164,53 +192,51 @@ const SchedulePage = () => {
         );
     }
 
-    if(!user) {
-        return (
-             <ScheduleLayout>
-                <div className="max-w-md mx-auto px-4 py-12">
-                    <Card className="w-full">
-                        <CardHeader className="text-center">
-                            <Lock className="w-12 h-12 text-primary mx-auto mb-4" />
-                            <CardTitle className="font-headline text-2xl">Acesso Restrito</CardTitle>
-                            <CardDescription>
-                                Para agendar serviços, você precisa fazer login ou criar uma conta.
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                           <Tabs defaultValue="login" className="w-full">
-                            <TabsList className="grid w-full grid-cols-2">
-                                <TabsTrigger value="login">Fazer Login</TabsTrigger>
-                                <TabsTrigger value="register">Criar Conta</TabsTrigger>
-                            </TabsList>
-                            <TabsContent value="login" className="pt-6">
-                                <LoginForm />
-                            </TabsContent>
-                            <TabsContent value="register" className="pt-6">
-                                <ClientRegistrationForm />
-                            </TabsContent>
-                            </Tabs>
-                        </CardContent>
-                    </Card>
-                </div>
-             </ScheduleLayout>
-        )
-    }
-
   return (
     <ScheduleLayout>
-        <h1 className="font-headline text-3xl font-semibold mb-4">Agendar um Novo Serviço</h1>
+        <h1 className="font-headline text-3xl font-semibold mb-4">Agendamento Manual de Serviço</h1>
         <form onSubmit={handleSubmit}>
             <div className="grid lg:grid-cols-3 gap-8">
                 {/* Left Column: Form */}
                 <div className="lg:col-span-2 space-y-6">
                     <Card>
                         <CardHeader>
-                            <CardTitle>Detalhes do Serviço</CardTitle>
-                            <CardDescription>Preencha as informações abaixo para encontrar o profissional ideal.</CardDescription>
+                            <CardTitle>Detalhes do Agendamento</CardTitle>
+                            <CardDescription>Preencha as informações para criar um novo serviço.</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-6">
+                            
+                             <div className="grid md:grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="client">1. Selecione o Cliente</Label>
+                                    <Select onValueChange={handleClientChange} value={formData.clientId} required>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Selecione um cliente..." />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {clients.map(client => (
+                                                <SelectItem key={client.id} value={client.id}>{client.fullName}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="professional">2. Selecione o Profissional</Label>
+                                    <Select onValueChange={(value) => handleInputChange('professionalId', value)} value={formData.professionalId} required>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Selecione um profissional..." />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                             {professionals.map(prof => (
+                                                <SelectItem key={prof.id} value={prof.id}>{prof.fullName}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </div>
+
                             <div>
-                                <Label className="font-semibold">1. Qual serviço você precisa?</Label>
+                                <Label className="font-semibold">3. Qual serviço você precisa?</Label>
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-2">
                                     {Object.entries(serviceNames).map(([key, name]) => (
                                         <Button 
@@ -230,7 +256,7 @@ const SchedulePage = () => {
                             
                             <div className="grid md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <Label htmlFor="date">2. Escolha a data</Label>
+                                    <Label htmlFor="date">4. Escolha a data</Label>
                                     <Popover>
                                         <PopoverTrigger asChild>
                                         <Button
@@ -256,7 +282,7 @@ const SchedulePage = () => {
                                     </Popover>
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="time">3. Escolha o horário</Label>
+                                    <Label htmlFor="time">5. Escolha o horário</Label>
                                     <Select onValueChange={(value) => handleInputChange('time', value)} value={formData.time} required>
                                         <SelectTrigger>
                                             <SelectValue placeholder="Selecione..." />
@@ -274,7 +300,7 @@ const SchedulePage = () => {
                             
                             <div className="grid md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <Label htmlFor="duration">4. Qual a duração?</Label>
+                                    <Label htmlFor="duration">6. Qual a duração?</Label>
                                     <Select onValueChange={(value) => handleInputChange('duration', value)} value={formData.duration} required>
                                         <SelectTrigger>
                                             <SelectValue placeholder="Selecione..." />
@@ -287,7 +313,7 @@ const SchedulePage = () => {
                                     </Select>
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="address">5. Endereço do serviço</Label>
+                                    <Label htmlFor="address">7. Endereço do serviço</Label>
                                     <Input id="address" value={formData.address} onChange={(e) => handleInputChange('address', e.target.value)} required />
                                 </div>
                             </div>
@@ -303,18 +329,24 @@ const SchedulePage = () => {
                 <div className="lg:col-span-1">
                      <Card>
                         <CardHeader>
-                            <CardTitle>Resumo do Agendamento</CardTitle>
+                            <CardTitle>Resumo e Ações</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-6">
                             <div className="p-4 bg-muted/50 rounded-lg space-y-4">
-                                <h4 className="font-headline font-semibold">Seu Pedido</h4>
+                                <h4 className="font-headline font-semibold">Resumo do Agendamento</h4>
                                 <div className="flex items-center gap-3">
-                                    <Info className="h-4 w-4 text-muted-foreground" />
-                                    <p className="text-sm">
-                                        {formData.service ? serviceNames[formData.service as keyof typeof serviceNames] : 'Não selecionado'}
+                                    <User className="h-4 w-4 text-muted-foreground" />
+                                    <p className="text-sm truncate">
+                                        {formData.clientId ? clients.find(c => c.id === formData.clientId)?.fullName : 'Cliente não selecionado'}
                                     </p>
                                 </div>
                                 <div className="flex items-center gap-3">
+                                    <Briefcase className="h-4 w-4 text-muted-foreground" />
+                                    <p className="text-sm truncate">
+                                        {formData.professionalId ? professionals.find(p => p.id === formData.professionalId)?.fullName : 'Profissional não selecionado'}
+                                    </p>
+                                </div>
+                                 <div className="flex items-center gap-3">
                                     <CalendarIcon className="h-4 w-4 text-muted-foreground" />
                                     <p className="text-sm">
                                         {formData.date ? format(formData.date, "PPP", { locale: ptBR }) : 'N/A'}
@@ -326,24 +358,31 @@ const SchedulePage = () => {
                                         {formData.time && formData.duration ? `${formData.time} (${formData.duration}h)` : 'N/A - N/A'}
                                     </p>
                                 </div>
-                                <div className="flex items-center gap-3">
-                                    <HomeIcon className="h-4 w-4 text-muted-foreground" />
-                                    <p className="text-sm">
-                                        {formData.address || 'Não selecionado'}
-                                    </p>
-                                </div>
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="paymentStatus">8. Status do Pagamento</Label>
+                                <Select onValueChange={(value) => handleInputChange('paymentStatus', value)} value={formData.paymentStatus} required>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Selecione..." />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="Em Aberto">Em Aberto</SelectItem>
+                                        <SelectItem value="Pago">Pago</SelectItem>
+                                    </SelectContent>
+                                </Select>
                             </div>
                             
                             <div className="flex justify-between items-center pt-4 border-t">
-                                <span className="text-muted-foreground">Valor Estimado</span>
+                                <span className="text-muted-foreground">Valor Total do Serviço</span>
                                 <span className="font-bold text-xl">R$ {total.toFixed(2).replace('.', ',')}</span>
                             </div>
 
                             <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
-                                {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Confirmar e Ir para Pagamento'}
+                                {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Criar Agendamento Manual'}
                             </Button>
                             <p className="text-xs text-center text-muted-foreground">
-                                Ao continuar, você concorda com nossos <Link href="/legal" className="underline">Termos de Serviço</Link>.
+                                Ao continuar, você confirma que tem permissão para criar este agendamento.
                             </p>
                         </CardContent>
                     </Card>
