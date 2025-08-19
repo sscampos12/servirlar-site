@@ -1,4 +1,3 @@
-
 "use client"
 
 import Link from "next/link";
@@ -32,7 +31,6 @@ export function LandingHeader() {
           <Link href="/pricing" className="transition-colors hover:text-foreground/80 text-foreground uppercase">PREÇOS E SERVIÇOS</Link>
           <Link href="/register/provider" className="transition-colors hover:text-foreground/80 text-foreground uppercase">PROFISSIONAIS</Link>
           <Link href="/faq" className="transition-colors hover:text-foreground/80 text-foreground uppercase">FAQ</Link>
-          <Link href="/legal" className="transition-colors hover:text-foreground/80 text-foreground uppercase">LEGAL</Link>
         </nav>
         <div className="flex items-center justify-end space-x-4 ml-6">
            <Button asChild variant="ghost">
