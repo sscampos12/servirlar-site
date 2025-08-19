@@ -77,6 +77,7 @@ export function Footer() {
             <div className="flex flex-col gap-2">
               <LinkItem href="/legal">Termos de Serviço</LinkItem>
               <LinkItem href="/legal#privacy">Política de Privacidade</LinkItem>
+              <LinkItem href="/admin/login">Acesso Restrito</LinkItem>
             </div>
           </div>
 
