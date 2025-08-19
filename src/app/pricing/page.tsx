@@ -141,7 +141,7 @@ export default function PricingPage() {
                 </p>
               )}
               <Button asChild size="lg" className="w-full mt-6 bg-secondary hover:bg-secondary/90 text-secondary-foreground">
-                <Link href="/register/client">Agendar Agora</Link>
+                <Link href="/login">Agendar Agora</Link>
               </Button>
             </div>
           </CardContent>
