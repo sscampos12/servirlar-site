@@ -22,7 +22,7 @@ export function LandingHeader() {
             <Link href="/login">Entrar</Link>
           </Button>
           <Button asChild>
-            <Link href="/register/client">Cadastre-se</Link>
+            <Link href="/register">Cadastre-se</Link>
           </Button>
         </div>
       </div>
