@@ -47,7 +47,7 @@ export default function Home() {
               Encontre diaristas, passadeiras e cozinheiras qualificadas em poucos cliques. Simples, rápido e seguro.
             </p>
             <div className="flex justify-center gap-4 flex-wrap">
-              <Button asChild size="lg" className="shadow-md bg-secondary text-secondary-foreground hover:bg-secondary/90 text-lg py-7 px-8 rounded-full">
+              <Button asChild size="lg" className="shadow-md bg-secondary text-secondary-foreground hover:bg-secondary/90 text-lg py-7 px-8">
                 <Link href="/login">
                   Agendar um Serviço
                 </Link>
