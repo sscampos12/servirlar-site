@@ -303,7 +303,7 @@ function ReportChart({ title, data, dataKey }: { title: string, data: any[], dat
       <CardContent className="grid gap-6">
         <div>
           <h3 className="font-semibold mb-2 text-sm">Receita</h3>
-           <ChartContainer config={chartConfig} className="min-h-[150px] w-full">
+           <ChartContainer config={chartConfig} className="min-h-[120px] w-full">
             <BarChart accessibilityLayer data={data}>
               <CartesianGrid vertical={false} />
               <XAxis
@@ -329,7 +329,7 @@ function ReportChart({ title, data, dataKey }: { title: string, data: any[], dat
         </div>
         <div>
           <h3 className="font-semibold mb-2 text-sm">Agendamentos</h3>
-           <ChartContainer config={chartConfig} className="min-h-[150px] w-full">
+           <ChartContainer config={chartConfig} className="min-h-[120px] w-full">
             <RechartsLineChart accessibilityLayer data={data}>
               <CartesianGrid vertical={false} />
               <XAxis
