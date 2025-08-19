@@ -24,9 +24,16 @@ import {
   Star,
   Activity,
   ArrowUp,
+  Loader2,
 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/use-auth";
+import { useEffect, useState } from "react";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import { useRouter } from "next/navigation";
+import { Role } from "./layout";
 
 const StatCard = ({
   title,
@@ -61,6 +68,60 @@ const mockActivityFeed = [
 ]
 
 export default function DashboardPage() {
+    const { user, loading } = useAuth();
+    const router = useRouter();
+    const [role, setRole] = useState<Role | null>(null);
+    const [isCheckingRole, setIsCheckingRole] = useState(true);
+
+    useEffect(() => {
+        const fetchUserRole = async () => {
+            if (user) {
+                const userDocRef = doc(db, "users", user.uid);
+                const userDocSnap = await getDoc(userDocRef);
+                if (userDocSnap.exists()) {
+                    const userRole = userDocSnap.data().role as Role;
+                    setRole(userRole);
+                    if (userRole === 'client') {
+                        router.replace('/dashboard/my-account');
+                    } else {
+                        setIsCheckingRole(false);
+                    }
+                } else {
+                    // Default to client if no specific role doc is found but they are in 'clients'
+                     const clientDocRef = doc(db, "clients", user.uid);
+                     const clientDocSnap = await getDoc(clientDocRef);
+                     if (clientDocSnap.exists()) {
+                         setRole('client');
+                         router.replace('/dashboard/my-account');
+                     } else {
+                        // Fallback for professional or other roles
+                        setIsCheckingRole(false);
+                     }
+                }
+            } else {
+                setIsCheckingRole(false); // No user, stop checking
+            }
+        };
+
+        if (!loading) {
+            fetchUserRole();
+        }
+    }, [user, loading, router]);
+
+    if (loading || isCheckingRole) {
+        return (
+            <div className="flex h-full w-full items-center justify-center">
+                <Loader2 className="h-16 w-16 animate-spin text-muted-foreground" />
+            </div>
+        )
+    }
+
+    // Only admins or other roles will see this page. Clients are redirected.
+    if (role === 'client') {
+        // This is a fallback while redirecting
+        return null; 
+    }
+
   return (
     <div className="flex flex-col gap-8">
       <div className="flex items-center justify-between">
