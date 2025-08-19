@@ -4,6 +4,7 @@
 import Link from "next/link"
 import {
   Menu,
+  ArrowLeft,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -18,12 +19,17 @@ import { Logo } from "@/components/logo"
 import { Notifications } from "./notifications"
 import React from "react"
 import { Role } from "@/app/dashboard/layout"
-import { useRouter } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 
 
 export function DashboardHeader() {
     const [role, setRole] = React.useState<Role | null>('admin');
     const router = useRouter();
+    const pathname = usePathname();
+
+    // Do not show back button on the root of the dashboard
+    const showBackButton = pathname !== '/dashboard';
+
 
   return (
     <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6">
@@ -49,8 +55,13 @@ export function DashboardHeader() {
           </div>
         </SheetContent>
       </Sheet>
-      <div className="w-full flex-1">
-        {/* Search bar can go here */}
+       <div className="w-full flex-1">
+        {showBackButton && (
+           <Button variant="outline" size="icon" className="h-9 w-9" onClick={() => router.back()}>
+                <ArrowLeft className="h-4 w-4" />
+                <span className="sr-only">Voltar</span>
+            </Button>
+        )}
       </div>
       <Notifications />
       <UserNav />
