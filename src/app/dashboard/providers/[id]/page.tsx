@@ -1,32 +1,29 @@
 
-"use client";
-
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { 
   ArrowLeft,
   Edit,
-  Save,
-  X,
   User,
   CreditCard,
   FileText,
   Calendar,
-  DollarSign,
   Phone,
   Download,
   Play,
   Check,
   AlertTriangle,
   Users,
-  Loader2
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { doc, getDoc, updateDoc, collection, getDocs, where, query } from 'firebase/firestore';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
+import Link from 'next/link';
+import { AdminActions } from '@/components/dashboard/provider/admin-actions';
 
 interface Professional {
+    id: string;
     fullName: string;
     cpf: string;
     birthdate: string;
@@ -39,69 +36,14 @@ interface Professional {
     status: 'Aprovado' | 'Pendente' | 'Rejeitado';
 }
 
-const DetalheProfissionalAdmin = ({ params }: { params: { id: string } }) => {
-  const router = useRouter();
-  const { toast } = useToast();
-  
-  const [profissionalData, setProfissionalData] = useState<Professional | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [salvando, setSalvando] = useState(false);
-  
-  useEffect(() => {
-    const professionalId = params.id;
-    if (!professionalId) return;
-
-    const fetchProfissional = async () => {
-      try {
-        const docRef = doc(db, 'professionals', professionalId);
-        const docSnap = await getDoc(docRef);
-
-        if (docSnap.exists()) {
-          setProfissionalData(docSnap.data() as Professional);
-        } else {
-          toast({ variant: 'destructive', title: 'Erro', description: 'Profissional não encontrado.' });
-          router.push('/dashboard/providers');
-        }
-      } catch (error) {
-        console.error("Error fetching professional:", error);
-        toast({ variant: 'destructive', title: 'Erro', description: 'Falha ao carregar dados do profissional.' });
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProfissional();
-  }, [params.id, router, toast]);
-
-  const handleStatusChange = async (newStatus: 'Aprovado' | 'Rejeitado') => {
-      const confirmationText = newStatus === 'Aprovado' 
-          ? 'Deseja realmente aprovar este cadastro?'
-          : 'Deseja realmente rejeitar este cadastro?';
-      
-      if (window.confirm(confirmationText)) {
-          setSalvando(true);
-          try {
-              const docRef = doc(db, 'professionals', params.id);
-              await updateDoc(docRef, { status: newStatus });
-              setProfissionalData(prev => prev ? { ...prev, status: newStatus } : null);
-              toast({ title: 'Sucesso', description: `Cadastro ${newStatus.toLowerCase()} com sucesso!` });
-          } catch (error) {
-              console.error("Error updating status:", error);
-              toast({ variant: 'destructive', title: 'Erro', description: 'Falha ao atualizar o status.' });
-          } finally {
-              setSalvando(false);
-          }
-      }
-  };
-
-  const getWhatsAppLink = (phone: string | undefined) => {
+const getWhatsAppLink = (phone: string | undefined, fullName: string | undefined) => {
     if (!phone) return '#';
     const telefoneClean = phone.replace(/\D/g, '');
-    const mensagem = `Olá ${profissionalData?.fullName}! Sou da equipe Ajuda em Casa. Como posso ajudá-lo(a)?`;
+    const mensagem = `Olá ${fullName}! Sou da equipe Ajuda em Casa. Como posso ajudá-lo(a)?`;
     return `https://wa.me/55${telefoneClean}?text=${encodeURIComponent(mensagem)}`;
-  };
+};
 
-  const StatusBadge = ({ status }: { status: string }) => {
+const StatusBadge = ({ status }: { status: string }) => {
     const configs: any = {
       Aprovado: { bg: 'bg-green-100', text: 'text-green-800', label: 'Aprovado' },
       Pendente: { bg: 'bg-yellow-100', text: 'text-yellow-800', label: 'Pendente' },
@@ -115,17 +57,33 @@ const DetalheProfissionalAdmin = ({ params }: { params: { id: string } }) => {
         {config.label}
       </span>
     );
-  };
+};
 
-  if (loading) {
-    return (
-      <div className="flex h-full items-center justify-center">
-        <Loader2 className="h-12 w-12 animate-spin text-primary" />
-      </div>
-    );
+
+export default async function DetalheProfissionalAdminPage({ params }: { params: { id: string } }) {
+  const professionalId = params.id;
+  let professionalData: Professional | null = null;
+  let errorMessage: string | null = null;
+
+  try {
+    const docRef = doc(db, 'professionals', professionalId);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      professionalData = { id: docSnap.id, ...docSnap.data() } as Professional;
+    } else {
+      errorMessage = 'Profissional não encontrado.';
+    }
+  } catch (error) {
+    console.error("Error fetching professional:", error);
+    errorMessage = 'Falha ao carregar dados do profissional.';
   }
 
-  if (!profissionalData) {
+  if (errorMessage) {
+    return <div>{errorMessage}</div>
+  }
+  
+  if (!professionalData) {
       return <div>Profissional não encontrado.</div>
   }
 
@@ -135,14 +93,14 @@ const DetalheProfissionalAdmin = ({ params }: { params: { id: string } }) => {
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <button onClick={() => router.back()} className="p-2 hover:bg-muted rounded-lg">
+               <Link href="/dashboard/providers" className="p-2 hover:bg-muted rounded-lg">
                 <ArrowLeft className="w-5 h-5" />
-              </button>
+              </Link>
               <h1 className="text-2xl font-bold text-foreground font-headline">Detalhes do Profissional</h1>
             </div>
             
             <div className="flex items-center gap-3">
-              <StatusBadge status={profissionalData.status} />
+              <StatusBadge status={professionalData.status} />
               <Button disabled>
                   <Edit className="w-4 h-4 inline mr-1" />
                   Editar
@@ -165,27 +123,27 @@ const DetalheProfissionalAdmin = ({ params }: { params: { id: string } }) => {
               <div className="grid grid-cols-2 gap-6">
                  <div>
                   <label className="block text-sm text-muted-foreground mb-1">Nome Completo</label>
-                  <p className="font-medium">{profissionalData.fullName}</p>
+                  <p className="font-medium">{professionalData.fullName}</p>
                 </div>
                  <div>
                   <label className="block text-sm text-muted-foreground mb-1">CPF</label>
-                  <p className="font-medium">{profissionalData.cpf}</p>
+                  <p className="font-medium">{professionalData.cpf}</p>
                 </div>
                 <div>
                   <label className="block text-sm text-muted-foreground mb-1">Data de Nascimento</label>
-                  <p className="font-medium">{profissionalData.birthdate ? new Date(profissionalData.birthdate + 'T00:00:00').toLocaleDateString('pt-BR') : 'N/A'}</p>
+                  <p className="font-medium">{professionalData.birthdate ? new Date(professionalData.birthdate + 'T00:00:00').toLocaleDateString('pt-BR') : 'N/A'}</p>
                 </div>
                  <div>
                   <label className="block text-sm text-muted-foreground mb-1">Data de Cadastro</label>
-                  <p className="font-medium text-muted-foreground">{profissionalData.createdAt?.toDate().toLocaleDateString('pt-BR') || 'N/A'}</p>
+                  <p className="font-medium text-muted-foreground">{professionalData.createdAt?.toDate().toLocaleDateString('pt-BR') || 'N/A'}</p>
                 </div>
                  <div>
                   <label className="block text-sm text-muted-foreground mb-1">Email</label>
-                  <p className="font-medium">{profissionalData.email}</p>
+                  <p className="font-medium">{professionalData.email}</p>
                 </div>
                  <div>
                   <label className="block text-sm text-muted-foreground mb-1">Telefone</label>
-                  <p className="font-medium">{profissionalData.phone}</p>
+                  <p className="font-medium">{professionalData.phone}</p>
                 </div>
               </div>
             </div>
@@ -198,7 +156,7 @@ const DetalheProfissionalAdmin = ({ params }: { params: { id: string } }) => {
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm text-muted-foreground mb-1">Chave PIX</label>
-                  <p className="font-medium">{profissionalData.pixKey || 'Não informado'}</p>
+                  <p className="font-medium">{professionalData.pixKey || 'Não informado'}</p>
                 </div>
               </div>
             </div>
@@ -209,7 +167,7 @@ const DetalheProfissionalAdmin = ({ params }: { params: { id: string } }) => {
                 <h2 className="text-lg font-semibold">Referências Pessoais</h2>
               </div>
               <div className="space-y-4">
-                 <p className="text-sm">{profissionalData.references || 'Nenhuma referência informada.'}</p>
+                 <p className="text-sm">{professionalData.references || 'Nenhuma referência informada.'}</p>
               </div>
             </div>
 
@@ -240,8 +198,8 @@ const DetalheProfissionalAdmin = ({ params }: { params: { id: string } }) => {
                   <Download className="w-4 h-4 text-muted-foreground" />
                   <span className="text-sm">Foto do RG (Em breve)</span>
                 </button>
-                 {profissionalData.videoUrl ? (
-                    <a href={profissionalData.videoUrl} target="_blank" rel="noopener noreferrer" className="w-full flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 text-left">
+                 {professionalData.videoUrl ? (
+                    <a href={professionalData.videoUrl} target="_blank" rel="noopener noreferrer" className="w-full flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 text-left">
                         <Play className="w-4 h-4 text-green-600" />
                         <span className="text-sm text-green-700 font-medium">Ver Vídeo de Apresentação</span>
                     </a>
@@ -258,39 +216,12 @@ const DetalheProfissionalAdmin = ({ params }: { params: { id: string } }) => {
               <h2 className="text-lg font-semibold mb-2">Ações do Administrador</h2>
               <p className="text-sm text-muted-foreground mb-4">Aprove, rejeite ou entre em contato com este profissional.</p>
               
-              <div className="space-y-3">
-                {profissionalData.status !== 'Aprovado' && (
-                  <button 
-                    onClick={() => handleStatusChange('Aprovado')}
-                    disabled={salvando}
-                    className="w-full flex items-center justify-center gap-2 bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 disabled:opacity-50"
-                  >
-                    {salvando ? <Loader2 className="w-4 h-4 animate-spin"/> : <Check className="w-4 h-4" />}
-                    Aprovar Cadastro
-                  </button>
-                )}
-                
-                {profissionalData.status !== 'Rejeitado' && (
-                  <button 
-                    onClick={() => handleStatusChange('Rejeitado')}
-                    disabled={salvando}
-                    className="w-full flex items-center justify-center gap-2 bg-red-500 text-white py-3 px-4 rounded-lg hover:bg-red-600 disabled:opacity-50"
-                  >
-                    {salvando ? <Loader2 className="w-4 h-4 animate-spin"/> : <AlertTriangle className="w-4 h-4" />}
-                    Rejeitar Cadastro
-                  </button>
-                )}
-                
-                <a 
-                  href={getWhatsAppLink(profissionalData.phone)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full flex items-center justify-center gap-2 border border-input text-foreground py-3 px-4 rounded-lg hover:bg-muted"
-                >
-                  <Phone className="w-4 h-4" />
-                  Contatar via WhatsApp
-                </a>
-              </div>
+              <AdminActions 
+                professionalId={professionalId}
+                currentStatus={professionalData.status}
+                phone={professionalData.phone}
+                fullName={professionalData.fullName}
+              />
             </div>
           </div>
         </div>
@@ -298,5 +229,3 @@ const DetalheProfissionalAdmin = ({ params }: { params: { id: string } }) => {
     </div>
   );
 };
-
-export default DetalheProfissionalAdmin;
