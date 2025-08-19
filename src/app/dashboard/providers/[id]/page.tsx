@@ -24,6 +24,7 @@ import { useRouter } from 'next/navigation';
 import { doc, getDoc, updateDoc, collection, getDocs, where, query } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
+import { Button } from '@/components/ui/button';
 
 interface Professional {
     fullName: string;
