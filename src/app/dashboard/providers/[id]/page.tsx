@@ -40,7 +40,6 @@ interface Professional {
 }
 
 const DetalheProfissionalAdmin = ({ params }: { params: { id: string } }) => {
-  const { id } = params;
   const router = useRouter();
   const { toast } = useToast();
   
@@ -49,11 +48,12 @@ const DetalheProfissionalAdmin = ({ params }: { params: { id: string } }) => {
   const [salvando, setSalvando] = useState(false);
   
   useEffect(() => {
-    if (!id) return;
+    const professionalId = params.id;
+    if (!professionalId) return;
 
     const fetchProfissional = async () => {
       try {
-        const docRef = doc(db, 'professionals', id);
+        const docRef = doc(db, 'professionals', professionalId);
         const docSnap = await getDoc(docRef);
 
         if (docSnap.exists()) {
@@ -71,7 +71,7 @@ const DetalheProfissionalAdmin = ({ params }: { params: { id: string } }) => {
     };
 
     fetchProfissional();
-  }, [id, router, toast]);
+  }, [params.id, router, toast]);
 
   const handleStatusChange = async (newStatus: 'Aprovado' | 'Rejeitado') => {
       const confirmationText = newStatus === 'Aprovado' 
@@ -81,7 +81,7 @@ const DetalheProfissionalAdmin = ({ params }: { params: { id: string } }) => {
       if (window.confirm(confirmationText)) {
           setSalvando(true);
           try {
-              const docRef = doc(db, 'professionals', id);
+              const docRef = doc(db, 'professionals', params.id);
               await updateDoc(docRef, { status: newStatus });
               setProfissionalData(prev => prev ? { ...prev, status: newStatus } : null);
               toast({ title: 'Sucesso', description: `Cadastro ${newStatus.toLowerCase()} com sucesso!` });
@@ -300,3 +300,5 @@ const DetalheProfissionalAdmin = ({ params }: { params: { id: string } }) => {
 };
 
 export default DetalheProfissionalAdmin;
+
+    
