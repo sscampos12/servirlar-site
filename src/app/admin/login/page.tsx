@@ -7,10 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { MarketingLayout } from "@/components/marketing-layout";
 import { useToast } from "@/hooks/use-toast";
-import { signInWithEmailAndPassword, signOut } from "firebase/auth";
+import { signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword } from "firebase/auth";
 import { auth, db } from "@/lib/firebase";
 import { Loader2 } from "lucide-react";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
@@ -26,27 +26,63 @@ export default function AdminLoginPage() {
     setIsLoading(true);
 
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
+      // Hardcoded admin credentials for initial setup
+      const adminEmail = "contato@ajudaemcasa.com";
+      const adminPassword = "Admin123!";
 
-      // Check for admin role in Firestore
-      const userDocRef = doc(db, "users", user.uid);
-      const userDocSnap = await getDoc(userDocRef);
+      if (email === adminEmail && password === adminPassword) {
+         try {
+            // Try to sign in first
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
 
-      if (userDocSnap.exists() && userDocSnap.data().role === 'admin') {
-        toast({
-          title: "Login bem-sucedido!",
-          description: "Redirecionando para o painel de controle.",
-        });
-        router.push("/dashboard");
+            const userDocRef = doc(db, "users", user.uid);
+            const userDocSnap = await getDoc(userDocRef);
+
+            if (userDocSnap.exists() && userDocSnap.data().role === 'admin') {
+                toast({ title: "Login bem-sucedido!" });
+                router.push("/dashboard");
+            } else {
+                // If the user exists but is not an admin, deny access
+                await signOut(auth);
+                toast({ variant: "destructive", title: "Acesso Negado" });
+            }
+
+         } catch (error: any) {
+            // If user does not exist, create it
+            if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+                
+                // Create admin user doc in Firestore
+                await setDoc(doc(db, "users", user.uid), {
+                    uid: user.uid,
+                    email: user.email,
+                    name: "Admin",
+                    role: "admin",
+                });
+                
+                toast({ title: "Conta de Administrador criada!", description: "Redirecionando para o painel." });
+                router.push("/dashboard");
+            } else {
+                 throw error; // Re-throw other errors
+            }
+         }
       } else {
-        // Not an admin, deny access
-        await signOut(auth); // Sign out the non-admin user
-        toast({
-            variant: "destructive",
-            title: "Acesso Negado",
-            description: "Você não tem permissão para acessar esta área.",
-        });
+        // Generic login attempt for any other credentials
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+
+        const userDocRef = doc(db, "users", user.uid);
+        const userDocSnap = await getDoc(userDocRef);
+
+        if (userDocSnap.exists() && userDocSnap.data().role === 'admin') {
+            toast({ title: "Login bem-sucedido!" });
+            router.push("/dashboard");
+        } else {
+            await signOut(auth);
+            toast({ variant: "destructive", title: "Acesso Negado", description: "Você não tem permissão." });
+        }
       }
     } catch (error: any) {
         toast({
