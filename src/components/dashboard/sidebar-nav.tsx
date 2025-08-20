@@ -4,7 +4,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { Home, Calendar, Bot, Users, LineChart, Banknote, Briefcase, User, CheckSquare, Building } from "lucide-react"
+import { Home, Calendar, Bot, Users, LineChart, Banknote, Briefcase, User, CheckSquare, Building, Wrench } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 
 type Role = 'admin' | 'client' | 'professional';
@@ -18,6 +18,7 @@ const navConfig: Record<Role, { href: string; label: string; icon: React.Element
         { href: "/dashboard/reports", label: "Relatórios", icon: LineChart },
         { href: "/dashboard/financial", label: "Financeiro", icon: Banknote },
         { href: "/dashboard/insights", label: "AI Insights", icon: Bot, badge: "Beta" },
+        { href: "/dashboard/getting-started", label: "Guia de Configuração", icon: Wrench },
     ],
     professional: [
         { href: "/dashboard/profile", label: "Meu Perfil", icon: User },
