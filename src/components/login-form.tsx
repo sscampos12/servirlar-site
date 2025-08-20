@@ -6,10 +6,11 @@ import { Button } from "@/components/ui/button"
 import { useSearchParams, useRouter } from "next/navigation"
 import { useToast } from "@/hooks/use-toast";
 import React, { useState } from "react";
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
-import { auth, db } from "@/lib/firebase";
-import { doc, setDoc } from "firebase/firestore";
-import { Loader2, User, Briefcase } from "lucide-react";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "@/lib/firebase";
+import { Loader2 } from "lucide-react";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
 
 
 export function LoginForm() {
@@ -19,17 +20,13 @@ export function LoginForm() {
   const requestedRedirect = searchParams.get('redirect');
 
   const [isLoading, setIsLoading] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
-  const redirectToPanel = async () => {
-      // This logic should now be handled by the dashboard layout guard
-      router.push(requestedRedirect || '/dashboard');
-  }
 
-  const handleDemoLogin = async (role: 'client' | 'professional') => {
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
     setIsLoading(true);
-
-    const email = role === 'client' ? 'cliente@exemplo.com' : 'profissional@exemplo.com';
-    const password = '123456';
 
     try {
       await signInWithEmailAndPassword(auth, email, password);
@@ -37,40 +34,13 @@ export function LoginForm() {
         title: "Login bem-sucedido!",
         description: "Redirecionando...",
       });
-      await redirectToPanel();
+      router.push(requestedRedirect || '/dashboard');
     } catch (error: any) {
-      if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
-        try {
-            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-            const user = userCredential.user;
-            
-            if (role === 'client') {
-                 await setDoc(doc(db, "users", user.uid), { uid: user.uid, role: "client", name: "Cliente de Teste", email: user.email });
-                 await setDoc(doc(db, "clients", user.uid), { fullName: "Cliente de Teste", email: user.email, address: "Endereço de Teste" });
-            } else {
-                 await setDoc(doc(db, "users", user.uid), { uid: user.uid, role: "professional", name: "Profissional de Teste", email: user.email });
-                 await setDoc(doc(db, "professionals", user.uid), { fullName: "Profissional de Teste", email: user.email, status: "Aprovado", createdAt: new Date() });
-            }
-
-            toast({
-                title: `Conta de Teste (${role}) Criada!`,
-                description: "Redirecionando...",
-            });
-            await redirectToPanel();
-        } catch (creationError: any) {
-            toast({
-                variant: "destructive",
-                title: "Erro no Login",
-                description: `Não foi possível criar uma conta de teste para ${role}.`,
-          });
-        }
-      } else {
-        toast({
+       toast({
             variant: "destructive",
             title: "Erro no Login",
             description: "Credenciais inválidas. Por favor, verifique seu e-mail e senha.",
         });
-      }
     } finally {
       setIsLoading(false);
     }
@@ -79,16 +49,32 @@ export function LoginForm() {
 
   return (
     <div className="grid gap-4">
-       <Button onClick={() => handleDemoLogin('client')} className="w-full h-auto py-3 flex-col" disabled={isLoading}>
-          <User />
-          <span>Acessar como Cliente</span>
-          <span className="text-xs font-normal text-primary-foreground/80">(Acesso de Demonstração)</span>
+      <form onSubmit={handleLogin} className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="email">Email</Label>
+          <Input 
+            id="email" 
+            type="email" 
+            placeholder="seu@email.com" 
+            required 
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="password">Senha</Label>
+          <Input 
+            id="password" 
+            type="password" 
+            required 
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+        </div>
+        <Button type="submit" className="w-full" disabled={isLoading}>
+          {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : 'Entrar'}
         </Button>
-        <Button onClick={() => handleDemoLogin('professional')} variant="secondary" className="w-full h-auto py-3 flex-col" disabled={isLoading}>
-          <Briefcase />
-           <span>Acessar como Profissional</span>
-           <span className="text-xs font-normal text-secondary-foreground/80">(Acesso de Demonstração)</span>
-        </Button>
+      </form>
 
       <div className="mt-4 text-center text-sm">
         Não tem uma conta?{" "}
