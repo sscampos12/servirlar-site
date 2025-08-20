@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ClientContract } from '@/components/contracts/client-contract';
+import { TermsAndPrivacy } from '@/components/contracts/terms-and-privacy'; // MUDANÇA: Importa o novo componente
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
@@ -34,7 +34,7 @@ export function ClientRegistrationForm() {
       toast({
         variant: "destructive",
         title: "Erro de Validação",
-        description: "Por favor, leia e aceite os Termos do Serviço para continuar.",
+        description: "Por favor, leia e aceite os Termos de Uso e a Política de Privacidade para continuar.", // MUDANÇA: Texto do erro
       });
       return;
     }
@@ -159,16 +159,16 @@ export function ClientRegistrationForm() {
           </div>
           
           <div className="space-y-4 pt-4">
-          <h3 className="font-headline text-xl font-semibold text-center">Termos do Serviço</h3>
-          <div className="h-48 overflow-y-scroll bg-muted/50 p-4 rounded-md border">
-              <ClientContract />
-          </div>
-          <div className="flex items-center space-x-2">
-              <Checkbox id="agreeContract" checked={agreedToContract} onCheckedChange={(checked) => setAgreedToContract(!!checked)} />
-              <Label htmlFor="agreeContract" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-              Li e concordo com os Termos do Serviço.
-              </Label>
-          </div>
+            <h3 className="font-headline text-xl font-semibold text-center">Termos e Políticas</h3>
+            <div className="h-48 overflow-y-scroll bg-muted/50 p-4 rounded-md border">
+                <TermsAndPrivacy /> 
+            </div>
+            <div className="flex items-center space-x-2">
+                <Checkbox id="agreeContract" checked={agreedToContract} onCheckedChange={(checked) => setAgreedToContract(!!checked)} />
+                <Label htmlFor="agreeContract" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                    Li e concordo com os Termos de Uso e a Política de Privacidade.
+                </Label>
+            </div>
           </div>
 
           <div className="text-center pt-4">

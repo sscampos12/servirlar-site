@@ -31,6 +31,8 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useAuth } from '@/hooks/use-auth';
 import { db } from '@/lib/firebase';
 import { collection, query, where, getDocs, orderBy, limit, DocumentData } from 'firebase/firestore';
+import { Checkbox } from '@/components/ui/checkbox';
+import { ClientContract } from '@/components/contracts/client-contract';
 
 const DetailRow = ({ icon: Icon, label, value }: { icon: React.ElementType, label: string, value: string }) => (
     <div className="flex items-center justify-between">
@@ -49,6 +51,7 @@ export default function ConfirmationPage() {
   const { user } = useAuth();
 
   const [paymentMethod, setPaymentMethod] = useState("card");
+  const [agreedToServiceTerms, setAgreedToServiceTerms] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [qrCodeImage, setQrCodeImage] = useState<string | null>(null);
@@ -95,6 +98,14 @@ export default function ConfirmationPage() {
   }, [user, router]);
 
   const handlePayment = async () => {
+    if (!agreedToServiceTerms) {
+        toast({
+            variant: "destructive",
+            title: "Termos não aceitos",
+            description: "Você precisa aceitar os Termos do Serviço para continuar."
+        });
+        return;
+    }
     if (!orderDetails) {
         toast({ variant: "destructive", title: "Erro", description: "Detalhes do pedido não encontrados." });
         return;
@@ -186,18 +197,10 @@ export default function ConfirmationPage() {
   return (
     <ScheduleLayout>
         <div className="max-w-4xl mx-auto">
-            <Alert className="mb-6 border-primary bg-primary/5">
-              <ShieldCheck className="h-4 w-4" />
-              <AlertTitle className="font-headline text-primary">Ambiente Seguro</AlertTitle>
-              <AlertDescription>
-                Seus dados de pagamento são criptografados e processados com segurança.
-              </AlertDescription>
-            </Alert>
-
             <h1 className="font-headline text-2xl font-semibold mb-6 text-center">Finalizar Agendamento</h1>
             <div className="grid gap-8 md:grid-cols-2">
                 
-                {/* Left Side: Order Summary */}
+                {/* Left Side: Order Summary & Contract */}
                 <div className="space-y-6">
                     <Card>
                         <CardHeader>
@@ -217,11 +220,18 @@ export default function ConfirmationPage() {
                     </Card>
                     <Card>
                         <CardHeader>
-                            <CardTitle className="font-headline">Suas Informações</CardTitle>
+                            <CardTitle className="font-headline">Termos do Serviço</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                            <DetailRow icon={User} label="Nome" value={orderDetails.clientName} />
-                            <DetailRow icon={Home} label="Endereço" value={orderDetails.address} />
+                             <div className="h-48 overflow-y-scroll bg-muted/50 p-4 rounded-md border">
+                                <ClientContract />
+                            </div>
+                            <div className="flex items-center space-x-2">
+                                <Checkbox id="agreeServiceTerms" checked={agreedToServiceTerms} onCheckedChange={(checked) => setAgreedToServiceTerms(!!checked)} />
+                                <Label htmlFor="agreeServiceTerms" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                    Li e concordo com os Termos do Serviço para este agendamento.
+                                </Label>
+                            </div>
                         </CardContent>
                     </Card>
                 </div>
@@ -234,6 +244,14 @@ export default function ConfirmationPage() {
                             <CardDescription>Escolha sua forma de pagamento preferida.</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-6">
+                            <Alert className="border-primary bg-primary/5">
+                                <ShieldCheck className="h-4 w-4" />
+                                <AlertTitle className="font-headline text-primary">Ambiente Seguro</AlertTitle>
+                                <AlertDescription>
+                                    Seus dados de pagamento são criptografados e processados com segurança.
+                                </AlertDescription>
+                            </Alert>
+
                              {!qrCodeImage && (
                                 <>
                                     <RadioGroup defaultValue="card" value={paymentMethod} onValueChange={setPaymentMethod}>
@@ -289,7 +307,7 @@ export default function ConfirmationPage() {
                                     <p className="text-xs text-muted-foreground pt-4">Após o pagamento, esta página será atualizada automaticamente.</p>
                                 </div>
                             ) : (
-                                <Button onClick={handlePayment} size="lg" className="w-full" disabled={isLoading}>
+                                <Button onClick={handlePayment} size="lg" className="w-full" disabled={isLoading || !agreedToServiceTerms}>
                                     {isLoading ? <Loader2 className="animate-spin" /> : 'Pagar Agora'}
                                 </Button>
                             )}
