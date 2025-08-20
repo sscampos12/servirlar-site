@@ -59,13 +59,11 @@ const StatCard = ({
   </Card>
 );
 
-const mockRecentAppointments = [
+const mockRecentAppointments: any[] = [
     // Array is empty as per the image
 ];
 
-const mockActivityFeed = [
-    { text: "Novo cadastro de profissional", detail: "Maria da Silva se cadastrou.", time: "1h atrás" },
-    { text: "Novo agendamento", detail: "João P. agendou uma faxina.", time: "3h atrás" },
+const mockActivityFeed: any[] = [
 ]
 
 function DashboardPage() {
@@ -137,26 +135,26 @@ function DashboardPage() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard
           title="Receita Mensal"
-          value="R$ 4.523,18"
-          change="+20.1% do mês passado"
+          value="R$ 0,00"
+          change="Aguardando dados"
           icon={DollarSign}
         />
         <StatCard
           title="Clientes Ativos"
-          value="+235"
-          change="+180.1% do mês passado"
+          value="0"
+          change="Aguardando dados"
           icon={Users}
         />
         <StatCard
           title="Agendamentos"
-          value="+123"
-          change="+19% do mês passado"
+          value="0"
+          change="Aguardando dados"
           icon={Calendar}
         />
         <StatCard
           title="Avaliação Média"
-          value="4.9"
-          change="Média de todas as avaliações"
+          value="N/A"
+          change="Aguardando dados"
           icon={Star}
         />
       </div>
@@ -200,7 +198,7 @@ function DashboardPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            {mockActivityFeed.map((item, index) => (
+            {mockActivityFeed.length > 0 ? mockActivityFeed.map((item, index) => (
                  <div key={index} className="flex items-start gap-4">
                     <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
                         <Activity className="h-4 w-4 text-primary" />
@@ -211,7 +209,11 @@ function DashboardPage() {
                     </div>
                     <p className="text-xs text-muted-foreground">{item.time}</p>
                  </div>
-            ))}
+            )) : (
+                <div className="flex items-center justify-center h-40 rounded-lg text-center">
+                    <p className="text-muted-foreground">Nenhuma atividade recente.</p>
+                </div>
+            )}
           </CardContent>
         </Card>
       </div>
