@@ -6,13 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { TermsAndPrivacy } from '@/components/contracts/terms-and-privacy'; // MUDANÇA: Importa o novo componente
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { auth, db } from '@/lib/firebase';
 import { doc, setDoc } from 'firebase/firestore';
 import { Loader2 } from 'lucide-react';
+import Link from 'next/link';
 
 export function ClientRegistrationForm() {
   const [agreedToContract, setAgreedToContract] = useState(false);
@@ -34,7 +34,7 @@ export function ClientRegistrationForm() {
       toast({
         variant: "destructive",
         title: "Erro de Validação",
-        description: "Por favor, leia e aceite os Termos de Uso e a Política de Privacidade para continuar.", // MUDANÇA: Texto do erro
+        description: "Por favor, leia e aceite os Termos de Uso e a Política de Privacidade para continuar.",
       });
       return;
     }
@@ -159,14 +159,10 @@ export function ClientRegistrationForm() {
           </div>
           
           <div className="space-y-4 pt-4">
-            <h3 className="font-headline text-xl font-semibold text-center">Termos e Políticas</h3>
-            <div className="h-48 overflow-y-scroll bg-muted/50 p-4 rounded-md border">
-                <TermsAndPrivacy /> 
-            </div>
-            <div className="flex items-center space-x-2">
-                <Checkbox id="agreeContract" checked={agreedToContract} onCheckedChange={(checked) => setAgreedToContract(!!checked)} />
-                <Label htmlFor="agreeContract" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                    Li e concordo com os Termos de Uso e a Política de Privacidade.
+            <div className="flex items-start space-x-2">
+                <Checkbox id="agreeContract" checked={agreedToContract} onCheckedChange={(checked) => setAgreedToContract(!!checked)} className="mt-1" />
+                <Label htmlFor="agreeContract" className="text-sm font-normal leading-relaxed peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                    Eu li e concordo com os <Link href="/legal" target="_blank" className="font-semibold text-primary underline-offset-4 hover:underline">Termos de Uso</Link> e a <Link href="/legal#privacy" target="_blank" className="font-semibold text-primary underline-offset-4 hover:underline">Política de Privacidade</Link> da plataforma.
                 </Label>
             </div>
           </div>

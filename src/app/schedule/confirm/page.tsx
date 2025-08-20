@@ -19,6 +19,7 @@ import {
   Landmark,
   ShieldCheck,
   Loader2,
+  FileText,
 } from "lucide-react"
 import { Separator } from "@/components/ui/separator"
 import { useToast } from "@/hooks/use-toast"
@@ -33,6 +34,7 @@ import { db } from '@/lib/firebase';
 import { collection, query, where, getDocs, orderBy, limit, DocumentData } from 'firebase/firestore';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ClientContract } from '@/components/contracts/client-contract';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
 const DetailRow = ({ icon: Icon, label, value }: { icon: React.ElementType, label: string, value: string }) => (
     <div className="flex items-center justify-between">
@@ -196,6 +198,7 @@ export default function ConfirmationPage() {
 
   return (
     <ScheduleLayout>
+      <Dialog>
         <div className="max-w-4xl mx-auto">
             <h1 className="font-headline text-2xl font-semibold mb-6 text-center">Finalizar Agendamento</h1>
             <div className="grid gap-8 md:grid-cols-2">
@@ -215,22 +218,6 @@ export default function ConfirmationPage() {
                             <div className="flex items-center justify-between text-lg font-bold">
                                 <span>Total</span>
                                 <span>R$ {orderDetails.value.toFixed(2).replace('.',',')}</span>
-                            </div>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="font-headline">Termos do Serviço</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                             <div className="h-48 overflow-y-scroll bg-muted/50 p-4 rounded-md border">
-                                <ClientContract />
-                            </div>
-                            <div className="flex items-center space-x-2">
-                                <Checkbox id="agreeServiceTerms" checked={agreedToServiceTerms} onCheckedChange={(checked) => setAgreedToServiceTerms(!!checked)} />
-                                <Label htmlFor="agreeServiceTerms" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                                    Li e concordo com os Termos do Serviço para este agendamento.
-                                </Label>
                             </div>
                         </CardContent>
                     </Card>
@@ -295,6 +282,17 @@ export default function ConfirmationPage() {
                                     </div>
                                 </div>
                             )}
+                            
+                             <div className="flex items-start space-x-2 pt-4">
+                                <Checkbox id="agreeServiceTerms" checked={agreedToServiceTerms} onCheckedChange={(checked) => setAgreedToServiceTerms(!!checked)} className="mt-1" />
+                                <Label htmlFor="agreeServiceTerms" className="text-sm font-normal leading-relaxed">
+                                   Eu li e concordo com os 
+                                    <DialogTrigger asChild>
+                                       <Button variant="link" className="p-1 h-auto -translate-y-1">Termos do Serviço deste Agendamento.</Button>
+                                    </DialogTrigger>
+                                </Label>
+                            </div>
+
 
                             {qrCodeImage ? (
                                 <div className="space-y-4 text-center animate-in fade-in">
@@ -316,6 +314,19 @@ export default function ConfirmationPage() {
                 </div>
             </div>
         </div>
+
+        <DialogContent className="max-w-2xl">
+            <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 font-headline text-2xl"><FileText /> Termos do Serviço</DialogTitle>
+            <DialogDescription>
+                Estes termos regem especificamente este agendamento de serviço.
+            </DialogDescription>
+            </DialogHeader>
+            <div className="max-h-[60vh] overflow-y-auto pr-6">
+             <ClientContract />
+            </div>
+        </DialogContent>
+      </Dialog>
     </ScheduleLayout>
   );
 }
