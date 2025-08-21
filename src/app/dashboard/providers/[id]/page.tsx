@@ -24,7 +24,7 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { updateProfessionalStatus, deleteProfessional } from '../actions';
 
 interface Professional {
@@ -60,10 +60,11 @@ const StatusBadge = ({ status }: { status: string }) => {
 };
 
 
-export default function DetalheProfissionalAdminPage({ params }: { params: { id: string } }) {
+export default function DetalheProfissionalAdminPage() {
   const { toast } = useToast();
   const router = useRouter();
-  const professionalId = params.id;
+  const params = useParams();
+  const professionalId = params.id as string;
   const [professionalData, setProfessionalData] = useState<Professional | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
