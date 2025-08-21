@@ -39,7 +39,9 @@ interface Professional {
     phone: string;
     pixKey: string;
     references: string;
-    videoUrl: string;
+    videoUrl?: string;
+    docCriminalUrl?: string;
+    docRgUrl?: string;
     status: 'Aprovado' | 'Pendente' | 'Rejeitado' | 'Ativo' | 'Inativo';
 }
 
@@ -234,27 +236,43 @@ export default function DetalheProfissionalAdminPage() {
                 <h2 className="text-lg font-semibold">Documentos e Mídia</h2>
               </div>
               
-              <div className="space-y-3">
-                <button disabled className="w-full flex items-center gap-2 p-3 border border-border rounded-lg hover:bg-muted text-left disabled:opacity-50">
-                  <Download className="w-4 h-4 text-muted-foreground" />
-                  <span className="text-sm">Antecedentes Criminais (Em breve)</span>
-                </button>
-                <button disabled className="w-full flex items-center gap-2 p-3 border border-border rounded-lg hover:bg-muted text-left disabled:opacity-50">
-                  <Download className="w-4 h-4 text-muted-foreground" />
-                  <span className="text-sm">Foto do RG (Em breve)</span>
-                </button>
-                 {professionalData.videoUrl ? (
-                    <a href={professionalData.videoUrl} target="_blank" rel="noopener noreferrer" className="w-full flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 text-left">
-                        <Play className="w-4 h-4 text-green-600" />
-                        <span className="text-sm text-green-700 font-medium">Ver Vídeo de Apresentação</span>
-                    </a>
-                ) : (
-                     <button disabled className="w-full flex items-center gap-2 p-3 border border-border rounded-lg text-left disabled:opacity-50">
-                        <Play className="w-4 h-4 text-muted-foreground" />
-                        <span className="text-sm">Sem vídeo de apresentação</span>
-                    </button>
-                )}
-              </div>
+                <div className="space-y-3">
+                    {professionalData.docCriminalUrl ? (
+                        <a href={professionalData.docCriminalUrl} target="_blank" rel="noopener noreferrer" className="w-full flex items-center gap-2 p-3 border border-green-200 bg-green-50 rounded-lg hover:bg-green-100 text-left">
+                            <Download className="w-4 h-4 text-green-600" />
+                            <span className="text-sm text-green-700 font-medium">Ver Antecedentes Criminais</span>
+                        </a>
+                    ) : (
+                        <button disabled className="w-full flex items-center gap-2 p-3 border border-border rounded-lg text-left disabled:opacity-50">
+                            <Download className="w-4 h-4 text-muted-foreground" />
+                            <span className="text-sm">Antecedentes não enviados</span>
+                        </button>
+                    )}
+
+                    {professionalData.docRgUrl ? (
+                        <a href={professionalData.docRgUrl} target="_blank" rel="noopener noreferrer" className="w-full flex items-center gap-2 p-3 border border-green-200 bg-green-50 rounded-lg hover:bg-green-100 text-left">
+                            <Download className="w-4 h-4 text-green-600" />
+                            <span className="text-sm text-green-700 font-medium">Ver Foto do RG</span>
+                        </a>
+                    ) : (
+                        <button disabled className="w-full flex items-center gap-2 p-3 border border-border rounded-lg text-left disabled:opacity-50">
+                            <Download className="w-4 h-4 text-muted-foreground" />
+                            <span className="text-sm">RG não enviado</span>
+                        </button>
+                    )}
+
+                    {professionalData.videoUrl ? (
+                        <a href={professionalData.videoUrl} target="_blank" rel="noopener noreferrer" className="w-full flex items-center gap-2 p-3 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 text-left">
+                            <Play className="w-4 h-4 text-blue-600" />
+                            <span className="text-sm text-blue-700 font-medium">Ver Vídeo de Apresentação</span>
+                        </a>
+                    ) : (
+                        <button disabled className="w-full flex items-center gap-2 p-3 border border-border rounded-lg text-left disabled:opacity-50">
+                            <Play className="w-4 h-4 text-muted-foreground" />
+                            <span className="text-sm">Sem vídeo de apresentação</span>
+                        </button>
+                    )}
+                </div>
             </div>
 
             <Card>
