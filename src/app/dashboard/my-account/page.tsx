@@ -69,10 +69,15 @@ const DetalhesCliente = () => {
                 });
                 setSchedules(scheduleData);
                 setIsLoading(false);
+             }, (error) => {
+                console.error("Error fetching schedules: ", error);
+                // You might want to show a toast or an error message to the user here
+                setIsLoading(false);
              });
              return unsubscribe;
         };
 
+        setIsLoading(true);
         fetchClientData();
         const unsubscribe = subscribeToSchedules();
 
