@@ -61,17 +61,23 @@ const DetalhesCliente = () => {
         };
 
         const subscribeToSchedules = () => {
-             const q = query(collection(db, "schedules"), where("clientId", "==", user.uid), orderBy("date", "desc"));
+             const q = query(collection(db, "schedules"), where("clientId", "==", user.uid));
              const unsubscribe = onSnapshot(q, (querySnapshot) => {
                 const scheduleData: Schedule[] = [];
                 querySnapshot.forEach((doc) => {
                     scheduleData.push({ id: doc.id, ...doc.data() } as Schedule);
                 });
+                // Sort schedules by date on the client side
+                scheduleData.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
                 setSchedules(scheduleData);
                 setIsLoading(false);
              }, (error) => {
                 console.error("Error fetching schedules: ", error);
-                // You might want to show a toast or an error message to the user here
+                toast({
+                    variant: "destructive",
+                    title: "Erro ao buscar agendamentos",
+                    description: "Não foi possível carregar seus agendamentos. Tente novamente mais tarde."
+                });
                 setIsLoading(false);
              });
              return unsubscribe;
@@ -229,6 +235,11 @@ const DetalhesCliente = () => {
         </div>
         </div>
     );
+};
+
+// Dummy toast for client-side sorting
+const toast = ({ title, description, variant }: { title: string, description: string, variant?: string }) => {
+  console.log(`Toast: ${title} - ${description}`);
 };
 
 
