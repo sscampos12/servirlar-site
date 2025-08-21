@@ -381,3 +381,5 @@ function ReportChart({ title, data, dataKey }: { title: string, data: any[], dat
 }
 
 export default withAuth(ReportsPage, ['admin']);
+
+    

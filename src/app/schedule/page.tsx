@@ -397,3 +397,5 @@ const SchedulePage = () => {
 };
 
 export default withAuth(SchedulePage, ['admin', 'client']);
+
+    
