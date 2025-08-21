@@ -23,6 +23,7 @@ export function ClientRegistrationForm() {
   const [email, setEmail] = useState('');
   const [address, setAddress] = useState('');
   const [phone, setPhone] = useState('');
+  const [cpf, setCpf] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -69,6 +70,7 @@ export function ClientRegistrationForm() {
             email: user.email,
             phone: phone,
             address: address,
+            cpf: cpf,
         });
 
         await setDoc(doc(db, "users", user.uid), {
@@ -134,7 +136,7 @@ export function ClientRegistrationForm() {
               <Input id="fullName" name="fullName" placeholder="Seu nome" required value={fullName} onChange={e => setFullName(e.target.value)} />
           </div>
           <div className="grid md:grid-cols-2 gap-4">
-              <div className="space-y-2">
+            <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input id="email" name="email" type="email" placeholder="seu@email.com" required value={email} onChange={e => setEmail(e.target.value)} />
             </div>
@@ -143,10 +145,16 @@ export function ClientRegistrationForm() {
                 <Input id="phone" name="phone" placeholder="(00) 00000-0000" required value={phone} onChange={e => setPhone(e.target.value)} />
             </div>
           </div>
-          <div className="space-y-2">
-              <Label htmlFor="address">Endereço Principal</Label>
-              <Input id="address" name="address" placeholder="Rua, Número, Bairro, Cidade, Estado" required value={address} onChange={e => setAddress(e.target.value)} />
-          </div>
+           <div className="grid md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                  <Label htmlFor="address">Endereço Principal</Label>
+                  <Input id="address" name="address" placeholder="Rua, Número, Bairro, Cidade, Estado" required value={address} onChange={e => setAddress(e.target.value)} />
+              </div>
+                <div className="space-y-2">
+                    <Label htmlFor="cpf">CPF</Label>
+                    <Input id="cpf" name="cpf" placeholder="000.000.000-00" required value={cpf} onChange={e => setCpf(e.target.value)} />
+                </div>
+            </div>
           <div className="grid md:grid-cols-2 gap-4">
           <div className="space-y-2">
               <Label htmlFor="password">Senha</Label>
