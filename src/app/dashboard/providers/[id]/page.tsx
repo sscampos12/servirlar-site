@@ -60,10 +60,9 @@ const StatusBadge = ({ status }: { status: string }) => {
 };
 
 
-export default function DetalheProfissionalAdminPage({ params }: { params: { id: string } }) {
+export default function DetalheProfissionalAdminPage({ params: { id: professionalId } }: { params: { id: string } }) {
   const { toast } = useToast();
   const router = useRouter();
-  const professionalId = params.id;
   const [professionalData, setProfessionalData] = useState<Professional | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
