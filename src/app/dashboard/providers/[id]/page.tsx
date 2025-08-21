@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -17,6 +18,7 @@ import {
   CheckCircle,
   XCircle,
   Loader2,
+  BadgeAlert,
 } from 'lucide-react';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
@@ -127,6 +129,8 @@ export default function DetalheProfissionalAdminPage() {
   if (!professionalData) {
       return <div>Profissional não encontrado.</div>
   }
+
+  const isApprovedPhase = ['Aprovado', 'Ativo', 'Inativo'].includes(professionalData.status);
 
   return (
     <div className="min-h-screen bg-background">
@@ -256,30 +260,55 @@ export default function DetalheProfissionalAdminPage() {
             <Card>
               <CardHeader>
                 <CardTitle>Gerenciamento de Cadastro</CardTitle>
-                <CardDescription>Altere o status ou remova o cadastro do profissional.</CardDescription>
+                <CardDescription>
+                  {isApprovedPhase 
+                    ? "Gerencie o status de atividade do profissional."
+                    : "Aprove ou rejeite este novo cadastro."
+                  }
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
-                <Button 
-                    className="w-full" 
-                    variant="outline"
-                    onClick={() => handleUpdateStatus('Aprovado')}
-                    disabled={isUpdating}>
-                    {isUpdating ? <Loader2 className="animate-spin mr-2 h-4 w-4" /> : <CheckCircle className="mr-2 h-4 w-4" />} Ativar
-                </Button>
-                <Button 
-                    className="w-full" 
-                    variant="outline"
-                    onClick={() => handleUpdateStatus('Inativo')}
-                     disabled={isUpdating}>
-                     {isUpdating ? <Loader2 className="animate-spin mr-2 h-4 w-4" /> : <XCircle className="mr-2 h-4 w-4" />} Inativar
-                </Button>
-                <Button 
-                    className="w-full" 
-                    variant="destructive"
-                    onClick={handleDelete}
-                    disabled={isUpdating}>
-                    {isUpdating ? <Loader2 className="animate-spin mr-2 h-4 w-4" /> : <Trash2 className="mr-2 h-4 w-4" />} Deletar Cadastro
-                </Button>
+                {isApprovedPhase ? (
+                  <>
+                    <Button 
+                        className="w-full" 
+                        variant="outline"
+                        onClick={() => handleUpdateStatus('Ativo')}
+                        disabled={isUpdating || professionalData.status === 'Ativo'}>
+                        {isUpdating ? <Loader2 className="animate-spin mr-2 h-4 w-4" /> : <CheckCircle className="mr-2 h-4 w-4" />} Ativar
+                    </Button>
+                    <Button 
+                        className="w-full" 
+                        variant="outline"
+                        onClick={() => handleUpdateStatus('Inativo')}
+                        disabled={isUpdating || professionalData.status === 'Inativo'}>
+                        {isUpdating ? <Loader2 className="animate-spin mr-2 h-4 w-4" /> : <XCircle className="mr-2 h-4 w-4" />} Inativar
+                    </Button>
+                     <Button 
+                        className="w-full" 
+                        variant="destructive"
+                        onClick={handleDelete}
+                        disabled={isUpdating}>
+                        {isUpdating ? <Loader2 className="animate-spin mr-2 h-4 w-4" /> : <Trash2 className="mr-2 h-4 w-4" />} Deletar Cadastro
+                    </Button>
+                  </>
+                ) : (
+                   <>
+                    <Button 
+                        className="w-full bg-green-600 hover:bg-green-700" 
+                        onClick={() => handleUpdateStatus('Aprovado')}
+                        disabled={isUpdating}>
+                        {isUpdating ? <Loader2 className="animate-spin mr-2 h-4 w-4" /> : <CheckCircle className="mr-2 h-4 w-4" />} Aprovar Cadastro
+                    </Button>
+                    <Button 
+                        className="w-full" 
+                        variant="destructive"
+                        onClick={() => handleUpdateStatus('Rejeitado')}
+                        disabled={isUpdating}>
+                        {isUpdating ? <Loader2 className="animate-spin mr-2 h-4 w-4" /> : <BadgeAlert className="mr-2 h-4 w-4" />} Rejeitar Cadastro
+                    </Button>
+                  </>
+                )}
               </CardContent>
             </Card>
           </div>
