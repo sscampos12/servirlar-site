@@ -13,12 +13,18 @@ import {
   DollarSign,
   MapPin,
   Plus,
-  Loader2
+  Loader2,
+  Edit,
+  Trash2,
+  CheckCircle,
+  XCircle,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { collection, query, onSnapshot, where } from 'firebase/firestore';
+import { collection, query, onSnapshot, where, doc, updateDoc, deleteDoc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
+import { useToast } from "@/hooks/use-toast";
 
 interface Client {
     id: string;
@@ -26,6 +32,7 @@ interface Client {
     email: string;
     phone?: string;
     address?: string;
+    status: 'Ativo' | 'Inativo';
     [key: string]: any; 
 }
 
@@ -45,6 +52,7 @@ const DashboardClientes = () => {
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
 
 
   useEffect(() => {
@@ -56,10 +64,21 @@ const DashboardClientes = () => {
       });
       setClients(clientsData);
       setIsLoading(false);
+      
+      // If a client was selected, update its data
+      if (selectedClient) {
+          const updatedClient = clientsData.find(c => c.id === selectedClient.id);
+          if(updatedClient) {
+              setSelectedClient(updatedClient);
+          } else {
+              setSelectedClient(null); // Deselect if client is no longer in the list
+          }
+      }
+
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [selectedClient]);
 
   useEffect(() => {
     if (!selectedClient) return;
@@ -76,6 +95,32 @@ const DashboardClientes = () => {
     return () => unsubscribe();
 
   }, [selectedClient]);
+
+  const handleStatusChange = async (clientId: string, status: 'Ativo' | 'Inativo') => {
+      try {
+        const docRef = doc(db, 'clients', clientId);
+        await updateDoc(docRef, { status });
+        toast({ title: 'Sucesso', description: `Status do cliente atualizado para ${status}.`});
+      } catch (error) {
+        toast({ variant: 'destructive', title: 'Erro', description: 'Não foi possível atualizar o status.'});
+      }
+  };
+
+  const handleDeleteClient = async (clientId: string) => {
+      if (!window.confirm("Tem certeza que deseja deletar este cliente? Esta ação não pode ser desfeita.")) return;
+      try {
+          await deleteDoc(doc(db, 'clients', clientId));
+           // Also delete from 'users' collection if exists
+          const userDocRef = doc(db, 'users', clientId);
+          if ((await getDoc(userDocRef)).exists()) {
+              await deleteDoc(userDocRef);
+          }
+          toast({ title: 'Sucesso', description: 'Cliente deletado com sucesso.'});
+          setSelectedClient(null);
+      } catch (error) {
+          toast({ variant: 'destructive', title: 'Erro', description: 'Não foi possível deletar o cliente.'});
+      }
+  }
 
 
   // Filtrar clientes
@@ -147,14 +192,20 @@ const DashboardClientes = () => {
 
     return (
     <div className="flex-1 bg-background overflow-y-auto">
-       <div className="p-6">
+       <div className="p-6 space-y-6">
         <div className="grid lg:grid-cols-2 gap-6">
           
           {/* Informações do Cliente */}
-          <div className="bg-card rounded-lg shadow-sm border p-6">
-            <h2 className="text-lg font-headline mb-4">Informações do Cliente</h2>
-            
-            <div className="space-y-4">
+          <Card>
+            <CardHeader>
+                <div className="flex items-center justify-between">
+                    <CardTitle className="font-headline">Informações do Cliente</CardTitle>
+                    <Button variant="outline" size="icon" onClick={() => toast({ title: "Em breve!", description: "A edição de perfil estará disponível em breve."})}>
+                        <Edit className="h-4 w-4" />
+                    </Button>
+                </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
               <div className="flex items-center gap-3">
                 <User className="w-5 h-5 text-muted-foreground" />
                 <div>
@@ -202,55 +253,84 @@ const DashboardClientes = () => {
                   <p className="font-medium">R$ {totalSpent.toFixed(2).replace('.',',')}</p>
                 </div>
               </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
           
           {/* Histórico de Agendamentos */}
-          <div className="bg-card rounded-lg shadow-sm border p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-headline">Histórico de Agendamentos</h2>
-            </div>
-            <p className="text-sm text-muted-foreground mb-4">Visualize todos os seus serviços passados e futuros.</p>
-            
-            <div className="overflow-y-auto max-h-96">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b">
-                    <th className="text-left py-2 font-medium text-muted-foreground">Serviço</th>
-                    <th className="text-left py-2 font-medium text-muted-foreground">Profissional</th>
-                    <th className="text-left py-2 font-medium text-muted-foreground">Data</th>
-                    <th className="text-left py-2 font-medium text-muted-foreground">Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {clientSchedules.length > 0 ? clientSchedules.map((item: any) => (
-                    <tr key={item.id} className="border-b last:border-b-0">
-                      <td className="py-3">
-                        <div>
-                          <p className="font-medium">{item.service}</p>
-                          <p className="text-sm text-muted-foreground">R$ {item.value.toFixed(2).replace('.',',')}</p>
-                        </div>
-                      </td>
-                      <td className="py-3 text-muted-foreground">{item.professionalName}</td>
-                      <td className="py-3 text-muted-foreground">{new Date(item.date).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}</td>
-                      <td className="py-3">
-                        <Badge variant="secondary">
-                          {item.status}
-                        </Badge>
-                      </td>
+          <Card>
+            <CardHeader>
+                <CardTitle className="font-headline">Histórico de Agendamentos</CardTitle>
+                <CardDescription>Visualize todos os serviços passados e futuros.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <div className="overflow-y-auto max-h-96">
+                <table className="w-full text-sm">
+                    <thead>
+                    <tr className="border-b">
+                        <th className="text-left py-2 font-medium text-muted-foreground">Serviço</th>
+                        <th className="text-left py-2 font-medium text-muted-foreground">Profissional</th>
+                        <th className="text-left py-2 font-medium text-muted-foreground">Data</th>
+                        <th className="text-left py-2 font-medium text-muted-foreground">Status</th>
                     </tr>
-                  )) : (
-                     <tr className="border-b last:border-b-0">
-                        <td colSpan={4} className="py-8 text-center text-muted-foreground">
-                            Nenhum agendamento encontrado.
+                    </thead>
+                    <tbody>
+                    {clientSchedules.length > 0 ? clientSchedules.map((item: any) => (
+                        <tr key={item.id} className="border-b last:border-b-0">
+                        <td className="py-3">
+                            <div>
+                            <p className="font-medium">{item.service}</p>
+                            <p className="text-sm text-muted-foreground">R$ {item.value.toFixed(2).replace('.',',')}</p>
+                            </div>
                         </td>
-                     </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
+                        <td className="py-3 text-muted-foreground">{item.professionalName}</td>
+                        <td className="py-3 text-muted-foreground">{new Date(item.date).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}</td>
+                        <td className="py-3">
+                            <Badge variant="secondary">
+                            {item.status}
+                            </Badge>
+                        </td>
+                        </tr>
+                    )) : (
+                        <tr className="border-b last:border-b-0">
+                            <td colSpan={4} className="py-8 text-center text-muted-foreground">
+                                Nenhum agendamento encontrado.
+                            </td>
+                        </tr>
+                    )}
+                    </tbody>
+                </table>
+                </div>
+            </CardContent>
+          </Card>
         </div>
+
+        <Card>
+            <CardHeader>
+                <CardTitle>Gerenciamento de Cadastro</CardTitle>
+                <CardDescription>Altere o status ou remova o cadastro do cliente.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+                <Button 
+                    className="w-full" 
+                    variant="outline"
+                    onClick={() => handleStatusChange(client.id, 'Ativo')}>
+                    <CheckCircle className="mr-2 h-4 w-4" /> Ativar
+                </Button>
+                <Button 
+                    className="w-full" 
+                    variant="outline"
+                    onClick={() => handleStatusChange(client.id, 'Inativo')}>
+                    <XCircle className="mr-2 h-4 w-4" /> Inativar
+                </Button>
+                <Button 
+                    className="w-full" 
+                    variant="destructive"
+                    onClick={() => handleDeleteClient(client.id)}>
+                    <Trash2 className="mr-2 h-4 w-4" /> Deletar Cadastro
+                </Button>
+            </CardContent>
+        </Card>
+
       </div>
     </div>
     )

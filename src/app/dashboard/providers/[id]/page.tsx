@@ -11,13 +11,18 @@ import {
   Download,
   Play,
   Users,
+  Trash2,
+  CheckCircle,
+  XCircle,
 } from 'lucide-react';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { AdminActions } from '@/components/dashboard/provider/admin-actions';
 import { revalidatePath } from 'next/cache';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { toast } from '@/components/ui/use-toast';
 
 interface Professional {
     id: string;
@@ -30,10 +35,10 @@ interface Professional {
     pixKey: string;
     references: string;
     videoUrl: string;
-    status: 'Aprovado' | 'Pendente' | 'Rejeitado';
+    status: 'Aprovado' | 'Pendente' | 'Rejeitado' | 'Ativo' | 'Inativo';
 }
 
-async function updateProfessionalStatus(id: string, newStatus: 'Aprovado' | 'Rejeitado') {
+async function updateProfessionalStatus(id: string, newStatus: Professional['status']) {
     'use server';
     try {
         const docRef = doc(db, 'professionals', id);
@@ -47,12 +52,32 @@ async function updateProfessionalStatus(id: string, newStatus: 'Aprovado' | 'Rej
     }
 }
 
+async function deleteProfessional(id: string) {
+    'use server';
+    try {
+        const docRef = doc(db, 'professionals', id);
+        await deleteDoc(docRef);
+        // Also delete from 'users' collection if exists
+        const userDocRef = doc(db, 'users', id);
+        if ((await getDoc(userDocRef)).exists()) {
+             await deleteDoc(userDocRef);
+        }
+        revalidatePath('/dashboard/providers');
+        return { success: true, message: 'Profissional deletado com sucesso.' };
+    } catch (error) {
+        console.error("Error deleting professional:", error);
+        return { success: false, message: 'Falha ao deletar o profissional.' };
+    }
+}
+
 
 const StatusBadge = ({ status }: { status: string }) => {
     const configs: any = {
       Aprovado: { bg: 'bg-green-100', text: 'text-green-800', label: 'Aprovado' },
       Pendente: { bg: 'bg-yellow-100', text: 'text-yellow-800', label: 'Pendente' },
-      Rejeitado: { bg: 'bg-red-100', text: 'text-red-800', label: 'Rejeitado' }
+      Rejeitado: { bg: 'bg-red-100', text: 'text-red-800', label: 'Rejeitado' },
+      Ativo: { bg: 'bg-blue-100', text: 'text-blue-800', label: 'Ativo' },
+      Inativo: { bg: 'bg-gray-100', text: 'text-gray-800', label: 'Inativo' }
     };
     
     const config = configs[status] || configs.Pendente;
@@ -106,7 +131,7 @@ export default async function DetalheProfissionalAdminPage({ params }: { params:
             
             <div className="flex items-center gap-3">
               <StatusBadge status={professionalData.status} />
-              <Button disabled>
+              <Button onClick={() => toast({ title: "Em breve!", description: "A edição de perfil estará disponível em breve."})}>
                   <Edit className="w-4 h-4 inline mr-1" />
                   Editar
               </Button>
@@ -218,7 +243,7 @@ export default async function DetalheProfissionalAdminPage({ params }: { params:
             </div>
 
             <div className="bg-card rounded-lg shadow-sm border p-6">
-              <h2 className="text-lg font-semibold mb-2">Ações do Administrador</h2>
+              <h2 className="text-lg font-semibold mb-2">Aprovação de Cadastro</h2>
               <p className="text-sm text-muted-foreground mb-4">Aprove, rejeite ou entre em contato com este profissional.</p>
               
               <AdminActions 
@@ -229,6 +254,37 @@ export default async function DetalheProfissionalAdminPage({ params }: { params:
                 updateStatusAction={updateProfessionalStatus}
               />
             </div>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle>Gerenciamento de Cadastro</CardTitle>
+                <CardDescription>Altere o status ou remova o cadastro do profissional.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <Button 
+                    className="w-full" 
+                    variant="outline"
+                    onClick={() => updateProfessionalStatus(professionalId, 'Ativo')}>
+                    <CheckCircle className="mr-2 h-4 w-4" /> Ativar
+                </Button>
+                <Button 
+                    className="w-full" 
+                    variant="outline"
+                    onClick={() => updateProfessionalStatus(professionalId, 'Inativo')}>
+                    <XCircle className="mr-2 h-4 w-4" /> Inativar
+                </Button>
+                <Button 
+                    className="w-full" 
+                    variant="destructive"
+                    onClick={() => {
+                        if(confirm('Tem certeza que deseja deletar este cadastro? Esta ação não pode ser desfeita.')) {
+                            deleteProfessional(professionalId);
+                        }
+                    }}>
+                    <Trash2 className="mr-2 h-4 w-4" /> Deletar Cadastro
+                </Button>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>
