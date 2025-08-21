@@ -1,7 +1,7 @@
 
 "use client"
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import {
   Card,
   CardContent,
@@ -23,7 +23,7 @@ import {
 } from "lucide-react"
 import { Separator } from "@/components/ui/separator"
 import { useToast } from "@/hooks/use-toast"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import { Input } from '@/components/ui/input';
@@ -31,7 +31,7 @@ import { ScheduleLayout } from '@/app/schedule/layout';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useAuth } from '@/hooks/use-auth';
 import { db } from '@/lib/firebase';
-import { collection, query, where, getDocs, orderBy, limit, DocumentData } from 'firebase/firestore';
+import { doc, getDoc, DocumentData, updateDoc } from 'firebase/firestore';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ClientContract } from '@/components/contracts/client-contract';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -47,9 +47,10 @@ const DetailRow = ({ icon: Icon, label, value }: { icon: React.ElementType, labe
 );
 
 
-export default function ConfirmationPage() {
+function ConfirmationContent() {
   const { toast } = useToast();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user } = useAuth();
 
   const [paymentMethod, setPaymentMethod] = useState("card");
@@ -59,6 +60,7 @@ export default function ConfirmationPage() {
   const [qrCodeImage, setQrCodeImage] = useState<string | null>(null);
   const [pixCopiaECola, setPixCopiaECola] = useState<string | null>(null);
   const [orderDetails, setOrderDetails] = useState<DocumentData | null>(null);
+  const orderId = searchParams.get('orderId');
 
   // Estados do formulário de cartão
   const [cardNumber, setCardNumber] = useState('');
@@ -67,23 +69,23 @@ export default function ConfirmationPage() {
   const [cardName, setCardName] = useState('');
 
    useEffect(() => {
-    const fetchLastSchedule = async () => {
-      if (user) {
+    const fetchSchedule = async () => {
+      if (user && orderId) {
         setIsLoading(true);
         try {
-          const q = query(
-            collection(db, "schedules"),
-            where("clientId", "==", user.uid),
-            where("status", "==", "Pendente"),
-            orderBy("createdAt", "desc"),
-            limit(1)
-          );
-          const querySnapshot = await getDocs(q);
-          if (!querySnapshot.empty) {
-            const lastSchedule = querySnapshot.docs[0].data();
-            setOrderDetails(lastSchedule);
+          const docRef = doc(db, "schedules", orderId);
+          const docSnap = await getDoc(docRef);
+          
+          if (docSnap.exists()) {
+             const scheduleData = docSnap.data();
+             // Security check: ensure the user owns this schedule
+             if (scheduleData.clientId === user.uid) {
+                setOrderDetails(scheduleData);
+             } else {
+                 setError("Você não tem permissão para visualizar este agendamento.");
+             }
           } else {
-             setError("Nenhum agendamento pendente encontrado.");
+             setError("Agendamento não encontrado.");
           }
         } catch (e) {
           setError("Erro ao buscar detalhes do agendamento.");
@@ -91,13 +93,18 @@ export default function ConfirmationPage() {
         } finally {
           setIsLoading(false);
         }
-      } else {
-          router.push('/login?redirect=/schedule/confirm');
+      } else if (!orderId) {
+        setError("Nenhum pedido especificado.");
+        setIsLoading(false);
       }
     };
 
-    fetchLastSchedule();
-  }, [user, router]);
+    if (user) {
+        fetchSchedule();
+    } else {
+        router.push(`/login?redirect=/schedule/confirm${orderId ? `?orderId=${orderId}` : ''}`);
+    }
+  }, [user, orderId, router]);
 
   const handlePayment = async () => {
     if (!agreedToServiceTerms) {
@@ -108,7 +115,7 @@ export default function ConfirmationPage() {
         });
         return;
     }
-    if (!orderDetails) {
+    if (!orderDetails || !orderId) {
         toast({ variant: "destructive", title: "Erro", description: "Detalhes do pedido não encontrados." });
         return;
     }
@@ -116,6 +123,15 @@ export default function ConfirmationPage() {
     setIsLoading(true);
     setError(null);
     setQrCodeImage(null);
+
+    const updatePaymentStatus = async (paymentId: string, paymentMethod: string) => {
+        const scheduleRef = doc(db, "schedules", orderId);
+        await updateDoc(scheduleRef, {
+            paymentStatus: "Pago",
+            paymentId: paymentId,
+            paymentMethod: paymentMethod,
+        });
+    }
 
     try {
         if (paymentMethod === 'pix') {
@@ -134,7 +150,11 @@ export default function ConfirmationPage() {
                 throw new Error(data.error || 'Falha ao gerar cobrança PIX.');
             }
             setQrCodeImage(data.qrcode);
-            setPixCopiaECola(data.txid); // Supondo que txid seja o código
+            setPixCopiaECola(data.txid);
+            // In a real app, we would listen for a webhook to confirm payment.
+            // For this demo, we'll just assume payment and update status.
+            await updatePaymentStatus(data.txid, 'pix');
+
         } else if (paymentMethod === 'card') {
             const response = await fetch('/api/cartao-credito/gerar-cobranca', {
                 method: 'POST',
@@ -156,11 +176,14 @@ export default function ConfirmationPage() {
             if (!response.ok || !data.success) {
                  throw new Error(data.details?.end_to_end_id?.[0] || data.error || 'Falha ao processar pagamento com cartão.');
             }
+
+            await updatePaymentStatus(data.data.charge_id, 'credit_card');
+
             toast({
                 title: "Pagamento Aprovado!",
                 description: "Seu agendamento foi confirmado com sucesso.",
             });
-            router.push('/dashboard/clients');
+            router.push('/dashboard/my-account');
         }
     } catch (err: any) {
         setError(err.message);
@@ -176,28 +199,23 @@ export default function ConfirmationPage() {
   
     if (isLoading) {
         return (
-            <ScheduleLayout>
-                <div className="flex h-full items-center justify-center">
-                    <Loader2 className="h-16 w-16 animate-spin" />
-                </div>
-            </ScheduleLayout>
+            <div className="flex h-full items-center justify-center">
+                <Loader2 className="h-16 w-16 animate-spin" />
+            </div>
         );
     }
 
     if (error || !orderDetails) {
         return (
-             <ScheduleLayout>
-                <Alert variant="destructive">
-                    <AlertTitle>Erro</AlertTitle>
-                    <AlertDescription>{error || "Não foi possível carregar os detalhes do seu agendamento."}</AlertDescription>
-                </Alert>
-            </ScheduleLayout>
+            <Alert variant="destructive">
+                <AlertTitle>Erro</AlertTitle>
+                <AlertDescription>{error || "Não foi possível carregar os detalhes do seu agendamento."}</AlertDescription>
+            </Alert>
         )
     }
 
 
   return (
-    <ScheduleLayout>
       <Dialog>
         <div className="max-w-4xl mx-auto">
             <h1 className="font-headline text-2xl font-semibold mb-6 text-center">Finalizar Agendamento</h1>
@@ -302,7 +320,8 @@ export default function ConfirmationPage() {
                                     </div>
                                     <Input readOnly value={pixCopiaECola || ''} />
                                     <Button variant="outline" size="sm" onClick={() => navigator.clipboard.writeText(pixCopiaECola || '')}>Copiar Código PIX</Button>
-                                    <p className="text-xs text-muted-foreground pt-4">Após o pagamento, esta página será atualizada automaticamente.</p>
+                                    <p className="text-xs text-muted-foreground pt-4">Após o pagamento, seu serviço será confirmado. Você pode acompanhar na sua área de cliente.</p>
+                                    <Button onClick={() => router.push('/dashboard/my-account')}>Ir para Meus Agendamentos</Button>
                                 </div>
                             ) : (
                                 <Button onClick={handlePayment} size="lg" className="w-full" disabled={isLoading || !agreedToServiceTerms}>
@@ -327,6 +346,16 @@ export default function ConfirmationPage() {
             </div>
         </DialogContent>
       </Dialog>
-    </ScheduleLayout>
   );
+}
+
+
+export default function ConfirmationPage() {
+    return (
+        <ScheduleLayout>
+            <Suspense fallback={<div className="flex h-full items-center justify-center"><Loader2 className="h-16 w-16 animate-spin" /></div>}>
+                <ConfirmationContent />
+            </Suspense>
+        </ScheduleLayout>
+    )
 }

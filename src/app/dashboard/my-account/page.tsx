@@ -11,13 +11,16 @@ import {
   DollarSign,
   MapPin,
   Loader2,
+  MessageSquare,
 } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/use-auth';
 import { db } from '@/lib/firebase';
-import { doc, getDoc, collection, query, where, onSnapshot } from 'firebase/firestore';
+import { doc, getDoc, collection, query, where, onSnapshot, orderBy } from 'firebase/firestore';
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 interface ClientData {
   id: string;
@@ -34,6 +37,7 @@ interface Schedule {
     professionalName: string;
     date: string;
     status: string;
+    chatId?: string;
 }
 
 const DetalhesCliente = () => {
@@ -57,7 +61,7 @@ const DetalhesCliente = () => {
         };
 
         const subscribeToSchedules = () => {
-             const q = query(collection(db, "schedules"), where("clientId", "==", user.uid));
+             const q = query(collection(db, "schedules"), where("clientId", "==", user.uid), orderBy("date", "desc"));
              const unsubscribe = onSnapshot(q, (querySnapshot) => {
                 const scheduleData: Schedule[] = [];
                 querySnapshot.forEach((doc) => {
@@ -88,7 +92,16 @@ const DetalhesCliente = () => {
         return <p>Dados do cliente não encontrados.</p>;
     }
     
-    const totalSpent = schedules.reduce((acc, schedule) => acc + schedule.value, 0);
+    const totalSpent = schedules.filter(s => s.status === 'Finalizado').reduce((acc, schedule) => acc + schedule.value, 0);
+    
+    const getStatusVariant = (status: string) => {
+        switch (status) {
+            case "Confirmado": return "default";
+            case "Pendente": return "secondary";
+            case "Finalizado": return "outline";
+            default: return "outline";
+        }
+    }
 
     return (
         <div className="flex-1 bg-background overflow-y-auto">
@@ -166,6 +179,7 @@ const DetalhesCliente = () => {
                             <TableHead>Profissional</TableHead>
                             <TableHead>Data</TableHead>
                             <TableHead>Status</TableHead>
+                            <TableHead></TableHead>
                         </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -177,17 +191,26 @@ const DetalhesCliente = () => {
                                 <p className="text-sm text-muted-foreground">R$ {item.value.toFixed(2).replace('.',',')}</p>
                                 </div>
                             </TableCell>
-                            <TableCell className="text-muted-foreground">{item.professionalName}</TableCell>
+                            <TableCell className="text-muted-foreground">{item.professionalName || 'Aguardando'}</TableCell>
                             <TableCell className="text-muted-foreground">{new Date(item.date).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}</TableCell>
                             <TableCell>
-                                <Badge variant="secondary">
+                                <Badge variant={getStatusVariant(item.status) as any}>
                                 {item.status}
                                 </Badge>
+                            </TableCell>
+                            <TableCell>
+                                {item.chatId && item.status === 'Confirmado' && (
+                                     <Button asChild variant="ghost" size="icon">
+                                        <Link href={`/chat/${item.chatId}`}>
+                                            <MessageSquare className="h-4 w-4" />
+                                        </Link>
+                                    </Button>
+                                )}
                             </TableCell>
                             </TableRow>
                         )) : (
                             <TableRow>
-                                <TableCell colSpan={4} className="text-center h-24">
+                                <TableCell colSpan={5} className="text-center h-24">
                                     Você ainda não possui agendamentos.
                                 </TableCell>
                             </TableRow>

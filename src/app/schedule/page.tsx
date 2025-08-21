@@ -246,7 +246,7 @@ const ClientScheduleForm = ({ user }: { user: any }) => {
     setIsSubmitting(true);
     
     try {
-        await addDoc(collection(db, "schedules"), {
+        const scheduleData = {
             clientId: user.uid,
             clientName: clientData.fullName,
             clientCpf: clientData.cpf || '',
@@ -259,17 +259,20 @@ const ClientScheduleForm = ({ user }: { user: any }) => {
             address: formData.address,
             observations: formData.observations,
             value: total,
-            status: "Pendente", // Client schedules are pending for professional acceptance
+            status: "Pendente",
             paymentStatus: 'Pendente',
             createdAt: serverTimestamp(),
             scheduledBy: 'client',
-        });
+        };
+
+        const docRef = await addDoc(collection(db, "schedules"), scheduleData);
         
         toast({
             title: "Solicitação Enviada!",
             description: "Seu agendamento foi enviado e aguarda a confirmação de um profissional.",
         });
-        router.push('/schedule/confirm');
+
+        router.push(`/schedule/confirm?orderId=${docRef.id}`);
 
     } catch (error) {
         toast({ variant: "destructive", title: "Erro ao agendar", description: "Não foi possível criar o agendamento. Tente novamente." });
