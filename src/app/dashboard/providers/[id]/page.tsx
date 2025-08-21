@@ -142,7 +142,7 @@ export default function DetalheProfissionalAdminPage() {
             
             <div className="flex items-center gap-3">
               <StatusBadge status={professionalData.status} />
-              <Button onClick={() => toast({ title: "Em breve!", description: "A edição de perfil estará disponível em breve."})}>
+               <Button onClick={() => router.push(`/dashboard/providers/profile?edit=true&id=${professionalData.id}`)}>
                   <Edit className="w-4 h-4 inline mr-1" />
                   Editar
               </Button>
@@ -262,7 +262,7 @@ export default function DetalheProfissionalAdminPage() {
                 <Button 
                     className="w-full" 
                     variant="outline"
-                    onClick={() => handleUpdateStatus('Ativo')}
+                    onClick={() => handleUpdateStatus('Aprovado')}
                     disabled={isUpdating}>
                     {isUpdating ? <Loader2 className="animate-spin mr-2 h-4 w-4" /> : <CheckCircle className="mr-2 h-4 w-4" />} Ativar
                 </Button>
