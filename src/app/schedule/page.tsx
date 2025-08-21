@@ -90,8 +90,8 @@ const SchedulePage = () => {
 
     const fetchData = async () => {
         try {
-            // Fetch approved professionals
-            const profQuery = query(collection(db, "professionals"), where("status", "==", "Aprovado"));
+            // Fetch approved or active professionals
+            const profQuery = query(collection(db, "professionals"), where("status", "in", ["Aprovado", "Ativo"]));
             const profSnap = await getDocs(profQuery);
             setProfessionals(profSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
 

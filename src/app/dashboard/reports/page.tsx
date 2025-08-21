@@ -103,7 +103,7 @@ function ReportsPage() {
 
     useEffect(() => {
         const fetchProfessionals = async () => {
-            const profQuery = query(collection(db, "professionals"), where("status", "==", "Aprovado"));
+            const profQuery = query(collection(db, "professionals"), where("status", "in", ["Aprovado", "Ativo"]));
             const profSnap = await getDocs(profQuery);
             setProfessionals(profSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
         }
