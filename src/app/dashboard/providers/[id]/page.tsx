@@ -1,5 +1,7 @@
 
-import React from 'react';
+"use client";
+
+import React, { useState, useEffect } from 'react';
 import { 
   ArrowLeft,
   Edit,
@@ -14,15 +16,16 @@ import {
   Trash2,
   CheckCircle,
   XCircle,
+  Loader2,
 } from 'lucide-react';
-import { doc, getDoc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { AdminActions } from '@/components/dashboard/provider/admin-actions';
-import { revalidatePath } from 'next/cache';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { toast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
+import { useRouter } from 'next/navigation';
+import { updateProfessionalStatus, deleteProfessional } from '../actions';
 
 interface Professional {
     id: string;
@@ -37,39 +40,6 @@ interface Professional {
     videoUrl: string;
     status: 'Aprovado' | 'Pendente' | 'Rejeitado' | 'Ativo' | 'Inativo';
 }
-
-async function updateProfessionalStatus(id: string, newStatus: Professional['status']) {
-    'use server';
-    try {
-        const docRef = doc(db, 'professionals', id);
-        await updateDoc(docRef, { status: newStatus });
-        revalidatePath(`/dashboard/providers/${id}`);
-        revalidatePath('/dashboard/providers');
-        return { success: true, message: `Status atualizado para ${newStatus}` };
-    } catch (error) {
-        console.error("Error updating status:", error);
-        return { success: false, message: 'Falha ao atualizar o status.' };
-    }
-}
-
-async function deleteProfessional(id: string) {
-    'use server';
-    try {
-        const docRef = doc(db, 'professionals', id);
-        await deleteDoc(docRef);
-        // Also delete from 'users' collection if exists
-        const userDocRef = doc(db, 'users', id);
-        if ((await getDoc(userDocRef)).exists()) {
-             await deleteDoc(userDocRef);
-        }
-        revalidatePath('/dashboard/providers');
-        return { success: true, message: 'Profissional deletado com sucesso.' };
-    } catch (error) {
-        console.error("Error deleting professional:", error);
-        return { success: false, message: 'Falha ao deletar o profissional.' };
-    }
-}
-
 
 const StatusBadge = ({ status }: { status: string }) => {
     const configs: any = {
@@ -90,27 +60,67 @@ const StatusBadge = ({ status }: { status: string }) => {
 };
 
 
-export default async function DetalheProfissionalAdminPage({ params }: { params: { id: string } }) {
+export default function DetalheProfissionalAdminPage({ params }: { params: { id: string } }) {
+  const { toast } = useToast();
+  const router = useRouter();
   const professionalId = params.id;
-  let professionalData: Professional | null = null;
-  let errorMessage: string | null = null;
+  const [professionalData, setProfessionalData] = useState<Professional | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isUpdating, setIsUpdating] = useState(false);
 
-  try {
-    const docRef = doc(db, 'professionals', professionalId);
-    const docSnap = await getDoc(docRef);
+  useEffect(() => {
+    const fetchProfessional = async () => {
+        if(!professionalId) return;
+        setIsLoading(true);
+        try {
+            const docRef = doc(db, 'professionals', professionalId);
+            const docSnap = await getDoc(docRef);
 
-    if (docSnap.exists()) {
-      professionalData = { id: docSnap.id, ...docSnap.data() } as Professional;
+            if (docSnap.exists()) {
+                setProfessionalData({ id: docSnap.id, ...docSnap.data() } as Professional);
+            } else {
+                toast({ variant: 'destructive', title: 'Erro', description: 'Profissional não encontrado.' });
+                router.push('/dashboard/providers');
+            }
+        } catch (error) {
+            console.error("Error fetching professional:", error);
+            toast({ variant: 'destructive', title: 'Erro', description: 'Falha ao carregar dados do profissional.' });
+        } finally {
+            setIsLoading(false);
+        }
+    };
+    fetchProfessional();
+  }, [professionalId, router, toast]);
+
+  const handleUpdateStatus = async (newStatus: Professional['status']) => {
+    setIsUpdating(true);
+    const result = await updateProfessionalStatus(professionalId, newStatus);
+    if(result.success) {
+        setProfessionalData(prev => prev ? {...prev, status: newStatus} : null);
+        toast({ title: 'Sucesso', description: result.message });
     } else {
-      errorMessage = 'Profissional não encontrado.';
+        toast({ variant: 'destructive', title: 'Erro', description: result.message });
     }
-  } catch (error) {
-    console.error("Error fetching professional:", error);
-    errorMessage = 'Falha ao carregar dados do profissional.';
+    setIsUpdating(false);
   }
 
-  if (errorMessage) {
-    return <div>{errorMessage}</div>
+  const handleDelete = async () => {
+     if(window.confirm('Tem certeza que deseja deletar este cadastro? Esta ação não pode ser desfeita.')) {
+        setIsUpdating(true);
+        const result = await deleteProfessional(professionalId);
+        if (result.success) {
+            toast({ title: 'Sucesso', description: result.message });
+            router.push('/dashboard/providers');
+        } else {
+            toast({ variant: 'destructive', title: 'Erro', description: result.message });
+            setIsUpdating(false);
+        }
+     }
+  }
+
+
+  if (isLoading) {
+    return <div className="flex h-full w-full items-center justify-center"><Loader2 className="h-16 w-16 animate-spin" /></div>
   }
   
   if (!professionalData) {
@@ -242,19 +252,6 @@ export default async function DetalheProfissionalAdminPage({ params }: { params:
               </div>
             </div>
 
-            <div className="bg-card rounded-lg shadow-sm border p-6">
-              <h2 className="text-lg font-semibold mb-2">Aprovação de Cadastro</h2>
-              <p className="text-sm text-muted-foreground mb-4">Aprove, rejeite ou entre em contato com este profissional.</p>
-              
-              <AdminActions 
-                professionalId={professionalId}
-                currentStatus={professionalData.status}
-                phone={professionalData.phone}
-                fullName={professionalData.fullName}
-                updateStatusAction={updateProfessionalStatus}
-              />
-            </div>
-            
             <Card>
               <CardHeader>
                 <CardTitle>Gerenciamento de Cadastro</CardTitle>
@@ -264,24 +261,23 @@ export default async function DetalheProfissionalAdminPage({ params }: { params:
                 <Button 
                     className="w-full" 
                     variant="outline"
-                    onClick={() => updateProfessionalStatus(professionalId, 'Ativo')}>
-                    <CheckCircle className="mr-2 h-4 w-4" /> Ativar
+                    onClick={() => handleUpdateStatus('Ativo')}
+                    disabled={isUpdating}>
+                    {isUpdating ? <Loader2 className="animate-spin mr-2 h-4 w-4" /> : <CheckCircle className="mr-2 h-4 w-4" />} Ativar
                 </Button>
                 <Button 
                     className="w-full" 
                     variant="outline"
-                    onClick={() => updateProfessionalStatus(professionalId, 'Inativo')}>
-                    <XCircle className="mr-2 h-4 w-4" /> Inativar
+                    onClick={() => handleUpdateStatus('Inativo')}
+                     disabled={isUpdating}>
+                     {isUpdating ? <Loader2 className="animate-spin mr-2 h-4 w-4" /> : <XCircle className="mr-2 h-4 w-4" />} Inativar
                 </Button>
                 <Button 
                     className="w-full" 
                     variant="destructive"
-                    onClick={() => {
-                        if(confirm('Tem certeza que deseja deletar este cadastro? Esta ação não pode ser desfeita.')) {
-                            deleteProfessional(professionalId);
-                        }
-                    }}>
-                    <Trash2 className="mr-2 h-4 w-4" /> Deletar Cadastro
+                    onClick={handleDelete}
+                    disabled={isUpdating}>
+                    {isUpdating ? <Loader2 className="animate-spin mr-2 h-4 w-4" /> : <Trash2 className="mr-2 h-4 w-4" />} Deletar Cadastro
                 </Button>
               </CardContent>
             </Card>
