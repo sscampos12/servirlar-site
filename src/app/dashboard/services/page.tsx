@@ -38,6 +38,7 @@ interface Service {
     id: string;
     clientId: string;
     clientName: string;
+    clientEmail: string; // Adicionado para notificação
     service: string;
     address: string;
     date: string;
@@ -63,10 +64,10 @@ const InfoRow = ({ icon: Icon, label, value }: { icon: React.ElementType, label:
 );
 
 
-const ServiceCard = ({ service, onAccept, onDecline, isAccepting, isDeclining }: { service: Service, onAccept: (id: string, clientId: string) => Promise<void>, onDecline: (id: string) => void, isAccepting: boolean, isDeclining: boolean }) => {
+const ServiceCard = ({ service, onAccept, onDecline, isAccepting }: { service: Service, onAccept: (service: Service) => Promise<void>, onDecline: (id: string) => void, isAccepting: boolean }) => {
     
     const handleAccept = async () => {
-        await onAccept(service.id, service.clientId);
+        await onAccept(service);
     }
     
     const handleDecline = () => {
@@ -88,11 +89,11 @@ const ServiceCard = ({ service, onAccept, onDecline, isAccepting, isDeclining }:
          <p className="text-xs text-muted-foreground text-right">(Valor total: R$ {service.value.toFixed(2).replace('.', ',')} - Taxa da plataforma: 25%)</p>
       </CardContent>
       <CardFooter className="flex justify-end gap-2">
-            <Button variant="outline" size="sm" onClick={handleDecline} disabled={isAccepting || isDeclining}>
-                {isDeclining ? <Loader2 className="animate-spin h-4 w-4" /> : <XCircle className="h-4 w-4" />}
+            <Button variant="outline" size="sm" onClick={handleDecline} disabled={isAccepting}>
+                <XCircle className="h-4 w-4" />
                 <span className="ml-2 hidden sm:inline">Recusar</span>
             </Button>
-            <Button size="sm" onClick={handleAccept} disabled={isAccepting || isDeclining}>
+            <Button size="sm" onClick={handleAccept} disabled={isAccepting}>
                 {isAccepting ? <Loader2 className="animate-spin h-4 w-4" /> : <ThumbsUp className="h-4 w-4" />}
                 <span className="ml-2 hidden sm:inline">Aceitar</span>
             </Button>
@@ -118,7 +119,6 @@ function ServicesPage() {
 
         setIsLoading(true);
 
-        // Listener for available services
         const availableQuery = query(collection(db, "schedules"), where("status", "==", "Pendente"));
         const unsubscribeAvailable = onSnapshot(availableQuery, (snapshot) => {
             const availableData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Service));
@@ -134,8 +134,11 @@ function ServicesPage() {
             setIsLoading(false);
         });
 
-        // Listener for professional's services
-        const myServicesQuery = query(collection(db, "schedules"), where("professionalId", "==", user.uid));
+        const myServicesQuery = query(
+            collection(db, "schedules"), 
+            where("professionalId", "==", user.uid),
+            where("status", "in", ["Confirmado", "Finalizado"])
+        );
         const unsubscribeMyServices = onSnapshot(myServicesQuery, (snapshot) => {
             const myServicesData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Service));
             setMyServices(myServicesData);
@@ -155,12 +158,26 @@ function ServicesPage() {
 
     }, [user, toast]);
 
-    const handleAcceptService = async (serviceId: string, clientId: string) => {
+    const sendNotificationEmail = async (to: string, subject: string, html: string) => {
+        try {
+            await fetch('/api/send-email', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ to, subject, html }),
+            });
+        } catch (error) {
+            console.error("Falha ao enviar e-mail de notificação:", error);
+            // Não notificar o usuário para não poluir a interface, apenas logar.
+        }
+    };
+
+
+    const handleAcceptService = async (service: Service) => {
         if (!user) {
             toast({ variant: "destructive", title: "Erro", description: "Você precisa estar logado para aceitar." });
             return;
         }
-        setIsProcessing(serviceId);
+        setIsProcessing(service.id);
 
         const professionalDocRef = doc(db, "professionals", user.uid);
         
@@ -171,23 +188,23 @@ function ServicesPage() {
                  setIsProcessing(null);
                 return;
             }
-            const professionalName = professionalDoc.data().fullName;
+            const professionalData = professionalDoc.data();
             
             // 1. Create chat document
             const chatRef = await addDoc(collection(db, "chats"), {
-                members: [clientId, user.uid],
+                members: [service.clientId, user.uid],
                 createdAt: serverTimestamp(),
                 lastMessage: "Serviço aceito! Bem-vindo ao chat.",
                 lastMessageAt: serverTimestamp(),
-                serviceId: serviceId
+                serviceId: service.id
             });
 
             // 2. Update service with professional and chatId
-            const serviceRef = doc(db, "schedules", serviceId);
+            const serviceRef = doc(db, "schedules", service.id);
             await updateDoc(serviceRef, {
                 status: "Confirmado",
                 professionalId: user.uid,
-                professionalName: professionalName,
+                professionalName: professionalData.fullName,
                 chatId: chatRef.id
             });
             
@@ -196,6 +213,24 @@ function ServicesPage() {
                 description: "O agendamento foi adicionado à sua lista e um chat foi criado.",
                 className: "bg-green-100 border-green-500 text-green-700",
             });
+
+            // 3. Send notification emails (as per user request)
+            // Notify Client
+            await sendNotificationEmail(
+                service.clientEmail,
+                `Seu serviço de ${service.service} foi confirmado!`,
+                `<h1>Olá, ${service.clientName}!</h1><p>O profissional <strong>${professionalData.fullName}</strong> aceitou seu serviço. Acesse a plataforma para combinar os detalhes.</p>`
+            );
+
+            // Notify Professional
+            if (professionalData.email) {
+                 await sendNotificationEmail(
+                    professionalData.email,
+                    `Serviço confirmado: ${service.service}`,
+                    `<h1>Parabéns, ${professionalData.fullName}!</h1><p>Você confirmou o serviço para o cliente <strong>${service.clientName}</strong>.</p>`
+                );
+            }
+
         } catch (error) {
              console.error(error);
              toast({
@@ -253,7 +288,6 @@ function ServicesPage() {
                                     onAccept={handleAcceptService}
                                     onDecline={handleDeclineService}
                                     isAccepting={isProcessing === service.id}
-                                    isDeclining={false}
                                 />
                             ))
                         ) : (

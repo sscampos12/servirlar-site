@@ -216,6 +216,7 @@ const ClientScheduleForm = ({ user }: { user: any }) => {
   const [clientData, setClientData] = useState<DocumentData | null>(null);
 
   useEffect(() => {
+    if (!user) return;
     const fetchClientData = async () => {
         const clientDocRef = doc(db, "clients", user.uid);
         const docSnap = await getDoc(clientDocRef);
@@ -242,7 +243,10 @@ const ClientScheduleForm = ({ user }: { user: any }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user || !clientData) return;
+    if (!user || !clientData) {
+        toast({ variant: "destructive", title: "Erro", description: "Não foi possível carregar os dados do cliente."});
+        return;
+    };
     setIsSubmitting(true);
     
     try {
@@ -346,8 +350,7 @@ const SchedulePage = () => {
   
   return (
     <ScheduleLayout>
-        {user.role === 'admin' && <AdminScheduleForm />}
-        {user.role === 'client' && <ClientScheduleForm user={user} />}
+        {user.role === 'admin' ? <AdminScheduleForm /> : <ClientScheduleForm user={user} />}
     </ScheduleLayout>
   );
 };
