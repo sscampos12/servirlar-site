@@ -238,13 +238,14 @@ const ClientScheduleForm = ({ user }: { user: any }) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ to, subject, html }),
       });
-      const data = await response.json();
-      if (!response.ok || !data.success) {
-        // Log a more detailed error message
-        console.error("Falha ao enviar e-mail de notificação:", data.details || data.error || 'Erro desconhecido');
+      if (!response.ok) {
+        // Try to get more details from the response body
+        const errorData = await response.json().catch(() => ({ error: "Falha ao ler o corpo do erro da API." }));
+        console.error("Falha ao enviar e-mail de notificação:", errorData);
       }
     } catch (error) {
       console.error("Erro na chamada da API de e-mail:", error);
+      throw error; // Re-throw the error to be caught by the calling function's catch block
     }
   };
 
@@ -406,4 +407,5 @@ const SchedulePage = () => {
 };
 
 export default withAuth(SchedulePage, ['admin', 'client']);
+
 
