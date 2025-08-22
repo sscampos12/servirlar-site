@@ -239,13 +239,14 @@ const ClientScheduleForm = ({ user }: { user: any }) => {
         body: JSON.stringify({ to, subject, html }),
       });
       if (!response.ok) {
-        // Try to get more details from the response body
         const errorData = await response.json().catch(() => ({ error: "Falha ao ler o corpo do erro da API." }));
-        console.error("Falha ao enviar e-mail de notificação:", errorData);
+        // Lança um erro com a mensagem detalhada para ser pego pelo catch externo
+        throw errorData; 
       }
     } catch (error) {
-      console.error("Erro na chamada da API de e-mail:", error);
-      throw error; // Re-throw the error to be caught by the calling function's catch block
+      // O erro detalhado será logado no catch da função que chamou esta.
+      // E relançado para parar a execução, se necessário.
+      throw error; 
     }
   };
 
@@ -273,7 +274,14 @@ const ClientScheduleForm = ({ user }: { user: any }) => {
         await Promise.all(notificationPromises);
 
     } catch (error) {
-        console.error("Erro ao notificar profissionais:", error);
+        // Agora o erro detalhado vindo de sendNotificationEmail será logado aqui
+        console.error("Falha detalhada ao notificar profissionais:", error);
+        // Opcional: notificar o usuário que a notificação aos profissionais falhou, mas o serviço foi criado.
+        toast({
+            variant: "destructive",
+            title: "Aviso: Falha na Notificação",
+            description: "Sua solicitação foi criada, mas houve um erro ao notificar os profissionais por e-mail."
+        })
     }
   };
 
@@ -317,7 +325,7 @@ const ClientScheduleForm = ({ user }: { user: any }) => {
             scheduledBy: 'client',
         };
 
-        const docRef = await addDoc(collection(db, "schedules"), scheduleData);
+        await addDoc(collection(db, "schedules"), scheduleData);
         
         toast({
             title: "Solicitação Enviada!",
@@ -331,7 +339,7 @@ const ClientScheduleForm = ({ user }: { user: any }) => {
 
     } catch (error) {
         toast({ variant: "destructive", title: "Erro ao agendar", description: "Não foi possível criar o agendamento. Tente novamente." });
-        console.error("Error creating schedule: ", error);
+        console.error("Erro detalhado ao criar agendamento:", error);
     } finally {
         setIsSubmitting(false);
     }
