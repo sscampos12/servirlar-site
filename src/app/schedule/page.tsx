@@ -229,6 +229,46 @@ const ClientScheduleForm = ({ user }: { user: any }) => {
     fetchClientData();
   }, [user]);
 
+  const sendNotificationEmail = async (to: string, subject: string, html: string) => {
+    try {
+        await fetch('/api/send-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ to, subject, html }),
+        });
+    } catch (error) {
+        console.error("Falha ao enviar e-mail de notificação:", error);
+    }
+  };
+
+  const notifyAllProfessionals = async (serviceData: any) => {
+    try {
+        const profQuery = query(collection(db, "professionals"), where("status", "in", ["Aprovado", "Ativo"]));
+        const profSnap = await getDocs(profQuery);
+        
+        const notificationPromises = profSnap.docs.map(profDoc => {
+            const profData = profDoc.data();
+            if (profData.email) {
+                return sendNotificationEmail(
+                    profData.email,
+                    `Nova Oportunidade: Serviço de ${serviceData.service} Disponível!`,
+                    `<h1>Olá, ${profData.fullName}!</h1>
+                     <p>Um novo serviço de ${serviceData.service} foi solicitado na sua região e está disponível para você aceitar.</p>
+                     <p><strong>Endereço:</strong> ${serviceData.address}</p>
+                     <p><strong>Data:</strong> ${new Date(serviceData.date).toLocaleDateString('pt-BR', {timeZone: 'UTC'})} às ${serviceData.time}</p>
+                     <p>Acesse a plataforma para ver mais detalhes e aceitar o serviço.</p>`
+                );
+            }
+            return Promise.resolve();
+        });
+
+        await Promise.all(notificationPromises);
+
+    } catch (error) {
+        console.error("Erro ao notificar profissionais:", error);
+    }
+  };
+
   const handleInputChange = (field: string, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
@@ -273,8 +313,11 @@ const ClientScheduleForm = ({ user }: { user: any }) => {
         
         toast({
             title: "Solicitação Enviada!",
-            description: "Seu agendamento foi enviado e aguarda a confirmação de um profissional.",
+            description: "Seu agendamento foi enviado e os profissionais da sua área serão notificados.",
         });
+
+        // Notify professionals after successfully creating the schedule
+        await notifyAllProfessionals(scheduleData);
 
         router.push(`/schedule/confirm?orderId=${docRef.id}`);
 
