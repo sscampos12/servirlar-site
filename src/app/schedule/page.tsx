@@ -238,9 +238,14 @@ const ClientScheduleForm = ({ user }: { user: any }) => {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ to, subject, html }),
         });
-        const data = await response.json();
         if (!response.ok) {
-            console.error("Falha ao enviar e-mail de notificação:", data.details || data.error);
+            const errorData = await response.json().catch(() => ({ error: "Falha ao analisar o erro da API" }));
+            console.error("Falha ao enviar e-mail de notificação:", errorData);
+            return;
+        }
+        const data = await response.json();
+        if (!data.success) {
+            console.error("Falha na API ao enviar e-mail:", data.details || data.error);
         }
     } catch (error) {
         console.error("Erro na chamada da API de e-mail:", error);
