@@ -133,7 +133,7 @@ const AdminScheduleForm = () => {
             professionalId: formData.professionalId,
             professionalName: selectedProfessional.fullName,
             service: serviceNames[formData.service] || formData.service,
-            duration: `${formData.duration} horas`,
+            duration: `${'${'}formData.duration} horas`,
             date: formData.date.toISOString().split('T')[0],
             time: formData.time,
             address: formData.address,
@@ -187,7 +187,7 @@ const AdminScheduleForm = () => {
                             <div className="flex items-center gap-3"><User className="h-4 w-4 text-muted-foreground" /><p className="text-sm truncate">{formData.clientId ? clients.find(c => c.id === formData.clientId)?.fullName : 'N/A'}</p></div>
                             <div className="flex items-center gap-3"><Briefcase className="h-4 w-4 text-muted-foreground" /><p className="text-sm truncate">{formData.professionalId ? professionals.find(p => p.id === formData.professionalId)?.fullName : 'N/A'}</p></div>
                             <div className="flex items-center gap-3"><CalendarIcon className="h-4 w-4 text-muted-foreground" /><p className="text-sm">{formData.date ? format(formData.date, "PPP", { locale: ptBR }) : 'N/A'}</p></div>
-                            <div className="flex items-center gap-3"><Clock className="h-4 w-4 text-muted-foreground" /><p className="text-sm">{formData.time && formData.duration ? `${formData.time} (${formData.duration}h)` : 'N_A'}</p></div>
+                            <div className="flex items-center gap-3"><Clock className="h-4 w-4 text-muted-foreground" /><p className="text-sm">{formData.time && formData.duration ? `${'${'}formData.time} (${'${'}formData.duration}h)` : 'N_A'}</p></div>
                         </div>
                         <div className="space-y-2"><Label>8. Status do Pagamento</Label><Select onValueChange={(value) => handleInputChange('paymentStatus', value)} value={formData.paymentStatus} required><SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger><SelectContent><SelectItem value="Em Aberto">Em Aberto</SelectItem><SelectItem value="Pago">Pago</SelectItem></SelectContent></Select></div>
                         <div className="flex justify-between items-center pt-4 border-t"><span className="text-muted-foreground">Valor Total</span><span className="font-bold text-xl">R$ {total.toFixed(2).replace('.', ',')}</span></div>
@@ -233,20 +233,18 @@ const ClientScheduleForm = ({ user }: { user: any }) => {
 
   const sendNotificationEmail = async (to: string, subject: string, html: string) => {
     try {
-      const response = await fetch('/api/send-email', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ to, subject, html }),
-      });
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: "Falha ao ler o corpo do erro da API." }));
-        // Lança um erro com a mensagem detalhada para ser pego pelo catch externo
-        throw errorData; 
-      }
+        const response = await fetch('/api/send-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ to, subject, html }),
+        });
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({ error: "Falha ao ler o corpo do erro da API." }));
+            throw errorData; 
+        }
     } catch (error) {
-      // O erro detalhado será logado no catch da função que chamou esta.
-      // E relançado para parar a execução, se necessário.
-      throw error; 
+        console.error("Falha detalhada ao enviar e-mail:", error);
+        throw error;
     }
   };
 
@@ -260,11 +258,11 @@ const ClientScheduleForm = ({ user }: { user: any }) => {
             if (profData.email) {
                 return sendNotificationEmail(
                     profData.email,
-                    `Nova Oportunidade: Serviço de ${serviceData.service} Disponível!`,
-                    `<h1>Olá, ${profData.fullName}!</h1>
-                     <p>Um novo serviço de ${serviceData.service} foi solicitado na sua região e está disponível para você aceitar.</p>
-                     <p><strong>Endereço:</strong> ${serviceData.address}</p>
-                     <p><strong>Data:</strong> ${new Date(serviceData.date).toLocaleDateString('pt-BR', {timeZone: 'UTC'})} às ${serviceData.time}</p>
+                    `Nova Oportunidade: Serviço de ${'${'}serviceData.service} Disponível!`,
+                    `<h1>Olá, ${'${'}profData.fullName}!</h1>
+                     <p>Um novo serviço de ${'${'}serviceData.service} foi solicitado na sua região e está disponível para você aceitar.</p>
+                     <p><strong>Endereço:</strong> ${'${'}serviceData.address}</p>
+                     <p><strong>Data:</strong> ${'${'}new Date(serviceData.date).toLocaleDateString('pt-BR', {timeZone: 'UTC'})} às ${'${'}serviceData.time}</p>
                      <p>Acesse a plataforma para ver mais detalhes e aceitar o serviço.</p>`
                 );
             }
@@ -274,9 +272,7 @@ const ClientScheduleForm = ({ user }: { user: any }) => {
         await Promise.all(notificationPromises);
 
     } catch (error) {
-        // Agora o erro detalhado vindo de sendNotificationEmail será logado aqui
-        console.error("Falha detalhada ao notificar profissionais:", error);
-        // Opcional: notificar o usuário que a notificação aos profissionais falhou, mas o serviço foi criado.
+        console.error("Erro ao notificar todos os profissionais. Causa raiz:", error);
         toast({
             variant: "destructive",
             title: "Aviso: Falha na Notificação",
@@ -313,7 +309,7 @@ const ClientScheduleForm = ({ user }: { user: any }) => {
             clientEmail: user.email,
             clientPhone: clientData.phone || '',
             service: serviceNames[formData.service] || formData.service,
-            duration: `${formData.duration} horas`,
+            duration: `${'${'}formData.duration} horas`,
             date: formData.date.toISOString().split('T')[0],
             time: formData.time,
             address: formData.address,
@@ -373,7 +369,7 @@ const ClientScheduleForm = ({ user }: { user: any }) => {
                          <div className="p-4 bg-muted/50 rounded-lg space-y-4"><h4 className="font-headline font-semibold">Resumo</h4>
                             <div className="flex items-center gap-3"><HomeIcon className="h-4 w-4 text-muted-foreground" /><p className="text-sm truncate">{formData.service ? serviceNames[formData.service] : 'N/A'}</p></div>
                             <div className="flex items-center gap-3"><CalendarIcon className="h-4 w-4 text-muted-foreground" /><p className="text-sm">{formData.date ? format(formData.date, "PPP", { locale: ptBR }) : 'N/A'}</p></div>
-                            <div className="flex items-center gap-3"><Clock className="h-4 w-4 text-muted-foreground" /><p className="text-sm">{formData.time && formData.duration ? `${formData.time} (${formData.duration}h)` : 'N/A'}</p></div>
+                            <div className="flex items-center gap-3"><Clock className="h-4 w-4 text-muted-foreground" /><p className="text-sm">{formData.time && formData.duration ? `${'${'}formData.time} (${'${'}formData.duration}h)` : 'N/A'}</p></div>
                         </div>
                         <div className="flex justify-between items-center pt-4 border-t"><span className="text-muted-foreground">Valor Total Estimado</span><span className="font-bold text-xl">R$ {total.toFixed(2).replace('.', ',')}</span></div>
                         <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>{isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Confirmar Solicitação'}</Button>
@@ -417,3 +413,5 @@ const SchedulePage = () => {
 export default withAuth(SchedulePage, ['admin', 'client']);
 
 
+
+    
