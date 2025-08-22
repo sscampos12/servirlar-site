@@ -17,7 +17,7 @@ import {
   Shirt,
   UserPlus
 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { ScheduleLayout } from './layout';
 import { useAuth } from '@/hooks/use-auth';
@@ -203,11 +203,12 @@ const AdminScheduleForm = () => {
 
 const ClientScheduleForm = ({ user }: { user: any }) => {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { toast } = useToast();
   
   const [formData, setFormData] = useState({
-    service: '',
-    duration: '',
+    service: searchParams.get('service') || '',
+    duration: searchParams.get('duration') || '',
     date: new Date(new Date().setDate(new Date().getDate() + 1)),
     time: '',
     address: '',
@@ -232,13 +233,17 @@ const ClientScheduleForm = ({ user }: { user: any }) => {
 
   const sendNotificationEmail = async (to: string, subject: string, html: string) => {
     try {
-        await fetch('/api/send-email', {
+        const response = await fetch('/api/send-email', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ to, subject, html }),
         });
+        const data = await response.json();
+        if (!response.ok) {
+            console.error("Falha ao enviar e-mail de notificação:", data.details || data.error);
+        }
     } catch (error) {
-        console.error("Falha ao enviar e-mail de notificação:", error);
+        console.error("Erro na chamada da API de e-mail:", error);
     }
   };
 
@@ -400,3 +405,5 @@ const SchedulePage = () => {
 };
 
 export default withAuth(SchedulePage, ['admin', 'client']);
+
+    

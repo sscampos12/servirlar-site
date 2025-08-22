@@ -12,15 +12,19 @@ import {
   MapPin,
   Loader2,
   MessageSquare,
+  Trash2,
+  RefreshCw,
 } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/use-auth';
 import { db } from '@/lib/firebase';
-import { doc, getDoc, collection, query, where, onSnapshot, orderBy } from 'firebase/firestore';
+import { doc, getDoc, collection, query, where, onSnapshot, deleteDoc } from 'firebase/firestore';
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
+import { useRouter } from 'next/navigation';
 
 interface ClientData {
   id: string;
@@ -38,10 +42,13 @@ interface Schedule {
     date: string;
     status: string;
     chatId?: string;
+    duration: string;
 }
 
 const DetalhesCliente = () => {
     const { user, loading: authLoading } = useAuth();
+    const router = useRouter();
+    const { toast } = useToast();
     const [clientData, setClientData] = useState<ClientData | null>(null);
     const [schedules, setSchedules] = useState<Schedule[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -89,7 +96,37 @@ const DetalhesCliente = () => {
 
         return () => unsubscribe();
         
-    }, [user]);
+    }, [user, toast]);
+
+    const handleDeleteSchedule = async (scheduleId: string) => {
+        if (!window.confirm("Tem certeza que deseja excluir esta solicitação?")) return;
+        try {
+            await deleteDoc(doc(db, "schedules", scheduleId));
+            toast({
+                title: "Solicitação Excluída",
+                description: "Seu pedido de agendamento foi removido com sucesso.",
+            });
+        } catch (error) {
+            console.error("Error deleting schedule:", error);
+            toast({
+                variant: "destructive",
+                title: "Erro ao Excluir",
+                description: "Não foi possível remover a solicitação. Tente novamente.",
+            });
+        }
+    };
+    
+    const handleReSchedule = (schedule: Schedule) => {
+        const serviceKey = Object.keys(serviceNames).find(key => serviceNames[key] === schedule.service);
+        const durationKey = schedule.duration.split(' ')[0];
+        
+        if (serviceKey && durationKey) {
+            router.push(`/schedule?service=${serviceKey}&duration=${durationKey}`);
+        } else {
+            router.push('/schedule');
+        }
+    };
+
 
     if (authLoading || isLoading) {
         return (
@@ -113,6 +150,13 @@ const DetalhesCliente = () => {
             default: return "outline";
         }
     }
+
+    const serviceNames: Record<string, string> = {
+        faxina: 'Faxina Padrão',
+        passadoria: 'Passadoria',
+        cozinheira: 'Cozinheira',
+        cuidador: 'Cuidador(a) de Idosos'
+    };
 
     return (
         <div className="flex-1 bg-background overflow-y-auto">
@@ -190,7 +234,7 @@ const DetalhesCliente = () => {
                             <TableHead>Profissional</TableHead>
                             <TableHead>Data</TableHead>
                             <TableHead>Status</TableHead>
-                            <TableHead></TableHead>
+                            <TableHead className="text-right">Ações</TableHead>
                         </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -209,12 +253,20 @@ const DetalhesCliente = () => {
                                 {item.status}
                                 </Badge>
                             </TableCell>
-                            <TableCell>
+                            <TableCell className="flex justify-end gap-1">
                                 {item.chatId && item.status === 'Confirmado' && (
                                      <Button asChild variant="ghost" size="icon">
                                         <Link href={`/chat/${item.chatId}`}>
                                             <MessageSquare className="h-4 w-4" />
                                         </Link>
+                                    </Button>
+                                )}
+                                <Button variant="ghost" size="icon" onClick={() => handleReSchedule(item)}>
+                                    <RefreshCw className="h-4 w-4" />
+                                </Button>
+                                {item.status === 'Pendente' && (
+                                    <Button variant="ghost" size="icon" onClick={() => handleDeleteSchedule(item.id)}>
+                                        <Trash2 className="h-4 w-4 text-destructive" />
                                     </Button>
                                 )}
                             </TableCell>
@@ -237,14 +289,11 @@ const DetalhesCliente = () => {
     );
 };
 
-// Dummy toast for client-side sorting
-const toast = ({ title, description, variant }: { title: string, description: string, variant?: string }) => {
-  console.log(`Toast: ${title} - ${description}`);
-};
-
 
 function ClientAccountPage() {
     return <DetalhesCliente />
 }
 
 export default withAuth(ClientAccountPage, ['client']);
+
+    
