@@ -13,6 +13,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useToast } from "@/hooks/use-toast";
 import { getFunctions, httpsCallable } from "firebase/functions";
 import { loadStripe } from "@stripe/stripe-js";
+import { Separator } from "@/components/ui/separator";
 
 // --- Configurações Iniciais ---
 const STRIPE_PUBLIC_KEY = process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY;
@@ -220,10 +221,6 @@ function ServiceDetailPage() {
         </Card>
     </div>
   )
-}
-
-function Separator({className}: {className?: string}) {
-    return <div className={`w-full h-px bg-border ${className}`} />
 }
 
 export default withAuth(ServiceDetailPage, ['professional']);

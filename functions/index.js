@@ -24,8 +24,8 @@ exports.createStripeCheckout = functions.https.onCall(async (data, context) => {
 
   // URLs para onde o Stripe redirecionará após o pagamento
   // SUBSTITUA 'ajudaemcasa.vercel.app' pelo seu domínio final quando tiver um.
-  const successUrl = `https://ajudaemcasa.vercel.app/servico/${servicoId}?pagamento=sucesso`;
-  const cancelUrl = `https://ajudaemcasa.vercel.app/servico/${servicoId}?pagamento=cancelado`;
+  const successUrl = `https://lar-seguro-76fan.web.app/dashboard/services/${servicoId}?pagamento=sucesso`;
+  const cancelUrl = `https://lar-seguro-76fan.web.app/dashboard/services/${servicoId}?pagamento=cancelado`;
 
   try {
     const session = await stripe.checkout.sessions.create({
@@ -49,7 +49,7 @@ exports.createStripeCheckout = functions.https.onCall(async (data, context) => {
     });
 
     // Salva o ID da sessão no documento do serviço para referência
-    await db.collection("servicos").doc(servicoId).update({
+    await db.collection("schedules").doc(servicoId).update({
       "taxa.checkoutSessionId": session.id,
     });
 
@@ -87,7 +87,7 @@ exports.stripeWebhook = functions.https.onRequest(async (req, res) => {
 
     // Atualiza o documento do serviço no Firestore para liberar o acesso
     try {
-      await db.collection("servicos").doc(servicoId).update({
+      await db.collection("schedules").doc(servicoId).update({
         "taxa.statusPagamento": "PAGO",
         "taxa.profissionalId": profissionalId, // Garante que o ID do profissional está salvo
       });
