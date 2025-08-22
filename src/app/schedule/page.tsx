@@ -1,4 +1,5 @@
 
+
 "use client"
 
 import withAuth from "@/components/auth/with-auth";
@@ -186,7 +187,7 @@ const AdminScheduleForm = () => {
                             <div className="flex items-center gap-3"><User className="h-4 w-4 text-muted-foreground" /><p className="text-sm truncate">{formData.clientId ? clients.find(c => c.id === formData.clientId)?.fullName : 'N/A'}</p></div>
                             <div className="flex items-center gap-3"><Briefcase className="h-4 w-4 text-muted-foreground" /><p className="text-sm truncate">{formData.professionalId ? professionals.find(p => p.id === formData.professionalId)?.fullName : 'N/A'}</p></div>
                             <div className="flex items-center gap-3"><CalendarIcon className="h-4 w-4 text-muted-foreground" /><p className="text-sm">{formData.date ? format(formData.date, "PPP", { locale: ptBR }) : 'N/A'}</p></div>
-                            <div className="flex items-center gap-3"><Clock className="h-4 w-4 text-muted-foreground" /><p className="text-sm">{formData.time && formData.duration ? `${formData.time} (${formData.duration}h)` : 'N/A'}</p></div>
+                            <div className="flex items-center gap-3"><Clock className="h-4 w-4 text-muted-foreground" /><p className="text-sm">{formData.time && formData.duration ? `${formData.time} (${formData.duration}h)` : 'N_A'}</p></div>
                         </div>
                         <div className="space-y-2"><Label>8. Status do Pagamento</Label><Select onValueChange={(value) => handleInputChange('paymentStatus', value)} value={formData.paymentStatus} required><SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger><SelectContent><SelectItem value="Em Aberto">Em Aberto</SelectItem><SelectItem value="Pago">Pago</SelectItem></SelectContent></Select></div>
                         <div className="flex justify-between items-center pt-4 border-t"><span className="text-muted-foreground">Valor Total</span><span className="font-bold text-xl">R$ {total.toFixed(2).replace('.', ',')}</span></div>
@@ -313,13 +314,13 @@ const ClientScheduleForm = ({ user }: { user: any }) => {
         
         toast({
             title: "Solicitação Enviada!",
-            description: "Seu agendamento foi enviado e os profissionais da sua área serão notificados.",
+            description: "Seu agendamento foi enviado aos profissionais. Você será notificado quando um deles aceitar.",
         });
 
         // Notify professionals after successfully creating the schedule
         await notifyAllProfessionals(scheduleData);
 
-        router.push(`/schedule/confirm?orderId=${docRef.id}`);
+        router.push('/dashboard/my-account');
 
     } catch (error) {
         toast({ variant: "destructive", title: "Erro ao agendar", description: "Não foi possível criar o agendamento. Tente novamente." });
@@ -360,8 +361,8 @@ const ClientScheduleForm = ({ user }: { user: any }) => {
                             <div className="flex items-center gap-3"><Clock className="h-4 w-4 text-muted-foreground" /><p className="text-sm">{formData.time && formData.duration ? `${formData.time} (${formData.duration}h)` : 'N/A'}</p></div>
                         </div>
                         <div className="flex justify-between items-center pt-4 border-t"><span className="text-muted-foreground">Valor Total Estimado</span><span className="font-bold text-xl">R$ {total.toFixed(2).replace('.', ',')}</span></div>
-                        <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>{isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Avançar para Pagamento'}</Button>
-                        <p className="text-xs text-center text-muted-foreground">Você será redirecionado para a página de pagamento seguro.</p>
+                        <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>{isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Confirmar Solicitação'}</Button>
+                        <p className="text-xs text-center text-muted-foreground">Um profissional irá aceitar seu serviço. Você será notificado.</p>
                     </CardContent>
                 </Card>
             </div>
