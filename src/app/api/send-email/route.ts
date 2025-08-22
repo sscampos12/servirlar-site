@@ -24,21 +24,18 @@ export async function POST(req: NextRequest) {
         }, { status: 400 });
     }
 
+    // Se a chave não estiver presente ou estiver vazia, simula o envio.
     if (!process.env.RESEND_API_KEY) {
-        console.error('RESEND_API_KEY não está configurada nas variáveis de ambiente.');
-        // Em vez de falhar, vamos simular o envio se a chave não estiver presente
-        // para não quebrar o fluxo em ambientes de desenvolvimento sem chave.
-        console.log('--- MODO DE SIMULAÇÃO (RESEND_API_KEY não encontrada) ---');
-        console.log(`Para: ${to}`);
+        console.warn('--- MODO DE SIMULAÇÃO (RESEND_API_KEY não configurada no arquivo .env) ---');
+        console.log(`Um e-mail teria sido enviado para: ${to}`);
         console.log(`Assunto: ${subject}`);
-        console.log('-------------------------------------------------------');
+        console.log('-------------------------------------------------------------------------');
         return NextResponse.json({
             success: true,
-            message: `E-mail simulado enviado para ${to} pois a RESEND_API_KEY não foi configurada.`,
+            message: `E-mail simulado enviado para ${to}. Configure a RESEND_API_KEY no arquivo .env para envios reais.`,
             data: { id: `simulated_${new Date().getTime()}` },
         });
     }
-
 
     try {
         const { data, error } = await resend.emails.send({
