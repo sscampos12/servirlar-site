@@ -14,21 +14,30 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 const fromEmail = "Ajuda em Casa <onboarding@resend.dev>";
 
 const emailSchema = z.object({
-  to: z.string().email(),
-  subject: z.string(),
-  html: z.string(),
+  to: z.string().email({ message: "Endereço de e-mail do destinatário inválido." }),
+  subject: z.string().min(1, { message: "O assunto não pode estar vazio." }),
+  html: z.string().min(1, { message: "O conteúdo HTML não pode estar vazio." }),
 });
 
 
 export async function POST(req: NextRequest) {
-    const body = await req.json();
+    let body;
+    try {
+        body = await req.json();
+    } catch (error) {
+        return NextResponse.json({ 
+            success: false, 
+            error: 'Corpo da requisição inválido (não é um JSON válido).' 
+        }, { status: 400 });
+    }
 
     const parsed = emailSchema.safeParse(body);
 
     if (!parsed.success) {
          return NextResponse.json({ 
+          success: false,
           error: 'Dados inválidos ou incompletos para enviar o e-mail.',
-          details: parsed.error.format()
+          details: parsed.error.flatten().fieldErrors
         }, { status: 400 });
     }
 
@@ -56,11 +65,11 @@ export async function POST(req: NextRequest) {
         });
 
         if (error) {
-            console.error('Erro ao enviar e-mail com Resend:', error);
+            console.error('Erro detalhado do Resend:', error);
             return NextResponse.json({ 
                 success: false,
                 error: 'Falha no serviço de e-mail.',
-                details: error
+                details: error.message
             }, { status: 500 });
         }
 
@@ -71,7 +80,7 @@ export async function POST(req: NextRequest) {
         });
 
     } catch (error: any) {
-        console.error('Erro na API de envio de e-mail:', error);
+        console.error('Erro catastrófico na API de envio de e-mail:', error);
         
         return NextResponse.json({ 
             success: false,
