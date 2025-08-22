@@ -24,6 +24,7 @@ import {
   CheckCircle,
   XCircle,
   MessageSquare,
+  Eye,
 } from "lucide-react"
 import { Separator } from "@/components/ui/separator"
 import { useToast } from "@/hooks/use-toast"
@@ -38,7 +39,7 @@ interface Service {
     id: string;
     clientId: string;
     clientName: string;
-    clientEmail: string; // Adicionado para notificação
+    clientEmail: string; 
     service: string;
     address: string;
     date: string;
@@ -64,16 +65,7 @@ const InfoRow = ({ icon: Icon, label, value }: { icon: React.ElementType, label:
 );
 
 
-const ServiceCard = ({ service, onAccept, onDecline, isAccepting }: { service: Service, onAccept: (service: Service) => Promise<void>, onDecline: (id: string) => void, isAccepting: boolean }) => {
-    
-    const handleAccept = async () => {
-        await onAccept(service);
-    }
-    
-    const handleDecline = () => {
-        onDecline(service.id);
-    }
-    
+const ServiceCard = ({ service }: { service: Service }) => {
   return (
     <Card className={`transition-all duration-300`}>
       <CardHeader>
@@ -81,21 +73,18 @@ const ServiceCard = ({ service, onAccept, onDecline, isAccepting }: { service: S
         <CardDescription>{new Date(service.date).toLocaleDateString('pt-BR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' })}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <InfoRow icon={MapPin} label="Endereço" value={`${service.address}`} />
+        <InfoRow icon={MapPin} label="Localização" value={`${service.address.split(',').slice(-2).join(', ')}`} />
         <InfoRow icon={Clock} label="Horário" value={`${service.time} (${service.duration})`} />
         {service.observations && <InfoRow icon={Info} label="Observações do Cliente" value={<span className="italic">"{service.observations}"</span>} />}
         <Separator />
-        <InfoRow icon={DollarSign} label="Valor a Receber" value={<span className="text-lg font-bold text-primary">R$ {(service.value * 0.75).toFixed(2).replace('.', ',')}</span>} />
-         <p className="text-xs text-muted-foreground text-right">(Valor total: R$ {service.value.toFixed(2).replace('.', ',')} - Taxa da plataforma: 25%)</p>
+        <InfoRow icon={DollarSign} label="Valor do Serviço" value={<span className="text-lg font-bold text-primary">R$ {service.value.toFixed(2).replace('.', ',')}</span>} />
       </CardContent>
       <CardFooter className="flex justify-end gap-2">
-            <Button variant="outline" size="sm" onClick={handleDecline} disabled={isAccepting}>
-                <XCircle className="h-4 w-4" />
-                <span className="ml-2 hidden sm:inline">Recusar</span>
-            </Button>
-            <Button size="sm" onClick={handleAccept} disabled={isAccepting}>
-                {isAccepting ? <Loader2 className="animate-spin h-4 w-4" /> : <ThumbsUp className="h-4 w-4" />}
-                <span className="ml-2 hidden sm:inline">Aceitar</span>
+            <Button asChild size="sm">
+                <Link href={`/dashboard/services/${service.id}`}>
+                    <Eye className="h-4 w-4 mr-2" />
+                    Ver Detalhes e Pagar Taxa
+                </Link>
             </Button>
       </CardFooter>
     </Card>
@@ -107,9 +96,7 @@ function ServicesPage() {
     const { user } = useAuth();
     const [availableServices, setAvailableServices] = useState<Service[]>([]);
     const [myServices, setMyServices] = useState<Service[]>([]);
-    const [declinedServices, setDeclinedServices] = useState<string[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [isProcessing, setIsProcessing] = useState<string | null>(null);
 
     useEffect(() => {
         if (!user) {
@@ -157,96 +144,7 @@ function ServicesPage() {
         };
 
     }, [user, toast]);
-
-    const sendNotificationEmail = async (to: string, subject: string, html: string) => {
-        try {
-            await fetch('/api/send-email', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ to, subject, html }),
-            });
-        } catch (error) {
-            console.error("Falha ao enviar e-mail de notificação:", error);
-            // Não notificar o usuário para não poluir a interface, apenas logar.
-        }
-    };
-
-
-    const handleAcceptService = async (service: Service) => {
-        if (!user) {
-            toast({ variant: "destructive", title: "Erro", description: "Você precisa estar logado para aceitar." });
-            return;
-        }
-        setIsProcessing(service.id);
-
-        const professionalDocRef = doc(db, "professionals", user.uid);
-        
-        try {
-            const professionalDoc = await getDoc(professionalDocRef);
-            if (!professionalDoc.exists()) {
-                 toast({ variant: "destructive", title: "Erro", description: "Perfil de profissional não encontrado." });
-                 setIsProcessing(null);
-                return;
-            }
-            const professionalData = professionalDoc.data();
-            
-            // 1. Create chat document
-            const chatRef = await addDoc(collection(db, "chats"), {
-                members: [service.clientId, user.uid],
-                createdAt: serverTimestamp(),
-                lastMessage: "Serviço aceito! Bem-vindo ao chat.",
-                lastMessageAt: serverTimestamp(),
-                serviceId: service.id
-            });
-
-            // 2. Update service with professional and chatId
-            const serviceRef = doc(db, "schedules", service.id);
-            await updateDoc(serviceRef, {
-                status: "Confirmado",
-                professionalId: user.uid,
-                professionalName: professionalData.fullName,
-                chatId: chatRef.id
-            });
-            
-            toast({
-                title: "Serviço Aceito!",
-                description: "O agendamento foi adicionado à sua lista e um chat foi criado.",
-                className: "bg-green-100 border-green-500 text-green-700",
-            });
-
-            // 3. Send notification emails (as per user request)
-            // Notify Client
-            await sendNotificationEmail(
-                service.clientEmail,
-                `Seu serviço de ${service.service} foi confirmado!`,
-                `<h1>Olá, ${service.clientName}!</h1><p>O profissional <strong>${professionalData.fullName}</strong> aceitou seu serviço. Acesse a plataforma para combinar os detalhes.</p>`
-            );
-
-            // Notify Professional
-            if (professionalData.email) {
-                 await sendNotificationEmail(
-                    professionalData.email,
-                    `Serviço confirmado: ${service.service}`,
-                    `<h1>Parabéns, ${professionalData.fullName}!</h1><p>Você confirmou o serviço para o cliente <strong>${service.clientName}</strong>.</p>`
-                );
-            }
-
-        } catch (error) {
-             console.error(error);
-             toast({
-                variant: "destructive",
-                title: "Erro",
-                description: "Não foi possível aceitar o serviço. Outro profissional pode ter aceitado primeiro.",
-            });
-        } finally {
-            setIsProcessing(null);
-        }
-    };
-
-    const handleDeclineService = (id: string) => {
-        setDeclinedServices(prev => [...prev, id]);
-    };
-
+    
      const getStatusVariant = (status: string) => {
         switch (status) {
             case "Confirmado": return "default";
@@ -270,7 +168,7 @@ function ServicesPage() {
                     <CardHeader>
                         <CardTitle className="font-headline">Marketplace de Serviços</CardTitle>
                         <CardDescription>
-                            Visualize, aceite ou recuse os serviços disponíveis em tempo real.
+                            Visualize os serviços disponíveis. Pague a taxa para ver os detalhes e contatar o cliente.
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
@@ -278,16 +176,12 @@ function ServicesPage() {
                              <div className="flex justify-center items-center h-48">
                                 <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
                             </div>
-                        ) : availableServices.filter(s => !declinedServices.includes(s.id)).length > 0 ? (
+                        ) : availableServices.length > 0 ? (
                             availableServices
-                            .filter(service => !declinedServices.includes(service.id))
                             .map(service => (
                                 <ServiceCard 
                                     key={service.id} 
                                     service={service} 
-                                    onAccept={handleAcceptService}
-                                    onDecline={handleDeclineService}
-                                    isAccepting={isProcessing === service.id}
                                 />
                             ))
                         ) : (
