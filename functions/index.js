@@ -37,7 +37,7 @@ exports.createStripeCheckout = functions.https.onCall(async (data, context) => {
       line_items: [
         {
           // ID do Preço que você criou no painel do Stripe
-          // SUBSTITUA ESTE ID PELO SEU ID DE PREÇO REAL DO STRIPE
+          // SUBSTITUA ESTE ID PELO SEU ID DE PREÇO REAL DO STRIPE (Crie um produto de R$1,00 para testes)
           price: "price_1PjCgqDEQaroqD4wLpQdFzYq", 
           quantity: 1,
         },
