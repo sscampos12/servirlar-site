@@ -4,7 +4,7 @@
 import withAuth from "@/components/auth/with-auth";
 import { useState, useEffect } from 'react';
 import { db, auth } from '@/lib/firebase';
-import { doc, onSnapshot, DocumentData, updateDoc, getDoc } from 'firebase/firestore';
+import { doc, onSnapshot, DocumentData, updateDoc, getDoc, addDoc, collection } from 'firebase/firestore';
 import { useAuth } from '@/hooks/use-auth';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { Loader2, Info, MapPin, Clock, User, Phone, CheckCircle, AlertCircle } from 'lucide-react';
@@ -29,54 +29,6 @@ const InfoRow = ({ icon: Icon, label, value, blurred = false }: { icon: React.El
         </div>
     </div>
 );
-
-// Função de notificação movida do backend para o frontend para simulação
-async function simularLogicaWebhook(serviceId: string, professionalId: string, serviceData: DocumentData) {
-    const professionalRef = doc(db, "professionals", professionalId);
-    const professionalSnap = await getDoc(professionalRef);
-    const professionalData = professionalSnap.data();
-
-    if (serviceData && professionalData) {
-        // 1. Criar notificação no site para o cliente
-        const notificacaoCliente = {
-            userId: serviceData.clientId,
-            title: "Seu serviço foi aceito!",
-            description: `${professionalData.fullName} pegou seu serviço de ${serviceData.service} e entrará em contato em breve.`,
-            createdAt: new Date(),
-            isRead: false,
-            link: `/dashboard/my-account`
-        };
-        await addDoc(collection(db, 'notifications'), notificacaoCliente);
-        
-        // 2. Enviar notificação por e-mail para o cliente (simulação chamando a API)
-        if (serviceData.clientEmail) {
-            const emailBody = {
-                to: serviceData.clientEmail,
-                subject: `Um profissional aceitou seu serviço de ${serviceData.service}!`,
-                html: `
-                    <h1>Olá, ${serviceData.clientName}!</h1>
-                    <p>Temos uma ótima notícia! O profissional <strong>${professionalData.fullName}</strong> aceitou seu agendamento para o serviço de <strong>${serviceData.service}</strong>.</p>
-                    <p>Ele(a) recebeu seus detalhes de contato e deve se comunicar em breve para confirmar tudo.</p>
-                    <p>Para ver os detalhes do seu agendamento, acesse sua conta em nossa plataforma.</p>
-                    <br>
-                    <p>Atenciosamente,</p>
-                    <p>Equipe ServirLar</p>
-                `
-            };
-            // Chama a API de e-mail do frontend
-             try {
-                await fetch('/api/send-email', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(emailBody),
-                });
-            } catch(emailError) {
-                console.error("Erro ao simular envio de email:", emailError);
-            }
-        }
-    }
-}
-
 
 function ServiceDetailPage() {
     const { user, loading: authLoading } = useAuth();
@@ -147,37 +99,36 @@ function ServiceDetailPage() {
         return () => unsubscribe();
     }, [serviceId, user, router, toast]);
 
-    // ** FUNÇÃO DE PAGAMENTO MODIFICADA PARA SIMULAÇÃO **
     const handlePagarTaxa = async () => {
-        if (!user || !serviceId || !service) {
-            toast({ variant: 'destructive', title: 'Erro', description: 'Usuário ou serviço inválido.' });
+        if (!user || !serviceId || !stripePromise) {
+            toast({ variant: 'destructive', title: 'Erro', description: 'O sistema de pagamento não está configurado corretamente.' });
             return;
         }
 
         setIsProcessingPayment(true);
         try {
-            // 1. Atualiza o documento do serviço no Firestore
-            const serviceRef = doc(db, "schedules", serviceId as string);
-            await updateDoc(serviceRef, {
-                "taxa.statusPagamento": "PAGO",
-                "taxa.profissionalId": user.uid,
-                professionalId: user.uid,
-                professionalName: user.name,
-                status: 'Confirmado',
-            });
+            // Chame a Cloud Function para criar a sessão de checkout
+            const createStripeCheckout = httpsCallable(functions, 'createStripeCheckout');
+            const result: any = await createStripeCheckout({ servicoId });
+            const sessionId = result.data.id;
 
-            // 2. Chama a lógica de notificação (simulando o webhook)
-            await simularLogicaWebhook(serviceId as string, user.uid, service);
-
-            // 3. Exibe mensagem de sucesso
+            // Redirecione para o checkout do Stripe
+            const stripe = await stripePromise;
+            if (stripe) {
+                const { error } = await stripe.redirectToCheckout({ sessionId });
+                if (error) {
+                    throw new Error(error.message);
+                }
+            } else {
+                 throw new Error("Stripe.js não carregou.");
+            }
+        } catch (error: any) {
+            console.error("Erro ao processar pagamento:", error);
             toast({
-                title: 'Pagamento Simulado com Sucesso!',
-                description: 'As informações do cliente foram liberadas.',
+                variant: 'destructive',
+                title: 'Erro no Pagamento',
+                description: error.message || 'Não foi possível iniciar o processo de pagamento. Tente novamente.',
             });
-            
-        } catch (error) {
-            console.error("Erro ao simular o pagamento:", error);
-            toast({ variant: 'destructive', title: 'Erro na Simulação', description: 'Ocorreu um erro ao processar a simulação.' });
         } finally {
             setIsProcessingPayment(false);
         }
@@ -255,7 +206,7 @@ function ServiceDetailPage() {
                     {!hasPaid && (
                         <Button className="w-full" onClick={handlePagarTaxa} disabled={isProcessingPayment}>
                             {isProcessingPayment ? <Loader2 className="animate-spin mr-2" /> : null}
-                            {isProcessingPayment ? 'Processando...' : 'Pagar Taxa e Ver Detalhes (Simulação)'}
+                            {isProcessingPayment ? 'Processando...' : 'Pagar Taxa e Ver Detalhes'}
                         </Button>
                     )}
                      {hasPaid && (
@@ -271,5 +222,3 @@ function ServiceDetailPage() {
 }
 
 export default withAuth(ServiceDetailPage, ['professional']);
-
-    
