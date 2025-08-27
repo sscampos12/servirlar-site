@@ -59,6 +59,11 @@ const config = {
           '4': 'hsl(var(--chart-4))',
           '5': 'hsl(var(--chart-5))',
         },
+        // Novas cores da ServirLar
+        servirlarBlue: '#4A90E2',
+        servirlarGreen: '#50E3C2',
+        servirlarGray: '#4A4A4A',
+        servirlarWhite: '#FFFFFF',
       },
       borderRadius: {
         lg: 'var(--radius)',
