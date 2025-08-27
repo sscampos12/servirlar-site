@@ -6,7 +6,7 @@ import { Loader2, Calendar as CalendarIcon, Clock, Home as HomeIcon, User, Brief
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
-import { collection, getDocs, DocumentData, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, getDocs, DocumentData, addDoc, serverTimestamp, query, where } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
