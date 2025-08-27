@@ -11,9 +11,6 @@ export function LandingHeader() {
         <Link href="/" className="flex items-center space-x-2">
           <Logo className="h-8 w-auto" />
         </Link>
-        <nav className="hidden absolute left-1/2 -translate-x-1/2 items-center gap-6 text-sm font-semibold tracking-wider md:flex">
-          <Link href="/pricing" className="transition-colors hover:text-primary/80 text-foreground uppercase">Serviços</Link>
-        </nav>
         <div className="flex items-center justify-end space-x-2">
            <Button asChild variant="ghost" className="uppercase">
             <Link href="/login">Entrar</Link>
