@@ -206,6 +206,29 @@ const HowItWorksSection = () => {
     )
 }
 
+const CtaSection = () => {
+    return (
+        <section style={{ backgroundColor: '#494949' }} className="py-20">
+            <div className="container mx-auto px-4 text-center">
+                <h2 className="font-headline text-4xl font-bold text-white mb-4">
+                    Pronto para Transformar Seu Espaço?
+                </h2>
+                <p className="text-lg text-gray-300 mb-8 max-w-2xl mx-auto">
+                    Agende um serviço com nossos profissionais qualificados ou junte-se à nossa equipe e comece a oferecer seus talentos.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                    <Button asChild size="lg" className="text-lg h-12">
+                        <Link href="/login">Agendar Serviço</Link>
+                    </Button>
+                    <Button asChild size="lg" variant="secondary" className="text-lg h-12 bg-white text-primary hover:bg-gray-200">
+                        <Link href="/register/provider">Seja um Profissional</Link>
+                    </Button>
+                </div>
+            </div>
+        </section>
+    )
+}
+
 export default function Home() {
   return (
     <MarketingLayout>
@@ -274,6 +297,9 @@ export default function Home() {
 
        {/* How it Works Section */}
        <HowItWorksSection />
+       
+       {/* Call to Action Section */}
+       <CtaSection />
        
     </MarketingLayout>
   );
