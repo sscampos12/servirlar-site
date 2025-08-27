@@ -74,12 +74,13 @@ export default function Home() {
                 </div>
                  <div>
                     <Image 
-                        src="https://picsum.photos/600/400"
+                        src="https://firebasestudio-hosting.web.app/projects/servirlar/assets/hero_image.png"
                         width={600}
                         height={400}
-                        alt="Profissional de limpeza sorrindo em uma sala organizada"
+                        alt="Divisão entre um escritório organizado e uma sala de estar aconchegante"
                         className="rounded-lg shadow-xl"
-                        data-ai-hint="cleaning professional"
+                        data-ai-hint="office living room"
+                        priority
                     />
                 </div>
             </div>
