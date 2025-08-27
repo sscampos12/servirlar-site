@@ -99,7 +99,7 @@ export const AdminScheduleForm = () => {
                 address: formData.address,
                 observations: formData.observations,
                 value: formData.value,
-                status: "Confirmado", // Admin pode confirmar diretamente
+                status: "Confirmado" as const, // Admin pode confirmar diretamente
                 paymentStatus: 'Pendente',
                 createdAt: serverTimestamp(),
                 scheduledBy: 'admin',
@@ -211,7 +211,7 @@ export const AdminScheduleForm = () => {
                         </div>
                          <div className="space-y-2">
                             <Label><DollarSign className="inline-block mr-2 h-4 w-4" />Valor do Serviço (R$)</Label>
-                            <Input type="number" step="0.01" value={formData.value} onChange={(e) => handleInputChange('value', parseFloat(e.target.value))} required />
+                            <Input type="number" step="0.01" value={formData.value} onChange={(e) => handleInputChange('value', parseFloat(e.target.value) || 0)} required />
                         </div>
                      </div>
 
