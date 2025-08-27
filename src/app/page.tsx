@@ -65,7 +65,7 @@ export default function Home() {
                     </p>
                     <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
                         <Button asChild size="lg" className="text-lg h-12">
-                            <Link href="/schedule">Agendar um Serviço</Link>
+                            <Link href="/login">Agendar um Serviço</Link>
                         </Button>
                         <Button asChild size="lg" variant="secondary" className="text-lg h-12">
                             <Link href="/register/provider">Sou Profissional</Link>
