@@ -68,7 +68,7 @@ export default function Home() {
                             <Link href="/login">Agendar um Serviço</Link>
                         </Button>
                         <Button asChild size="lg" variant="secondary" className="text-lg h-12">
-                            <Link href="/register/provider">Sou Profissional</Link>
+                            <Link href="/register/provider">Seja um Profissional</Link>
                         </Button>
                     </div>
                 </div>
