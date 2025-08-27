@@ -17,9 +17,6 @@ import { Separator } from "@/components/ui/separator";
 
 // --- Configurações Iniciais ---
 const STRIPE_PUBLIC_KEY = process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY;
-if (!STRIPE_PUBLIC_KEY) {
-    console.error("Chave pública do Stripe não configurada em .env.local");
-}
 const stripePromise = STRIPE_PUBLIC_KEY ? loadStripe(STRIPE_PUBLIC_KEY) : Promise.resolve(null);
 const functions = getFunctions();
 
