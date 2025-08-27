@@ -2,6 +2,7 @@
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 const stripe = require("stripe")(functions.config().stripe.secret);
+const fetch = require("node-fetch");
 
 admin.initializeApp();
 const db = admin.firestore();
@@ -85,15 +86,70 @@ exports.stripeWebhook = functions.https.onRequest(async (req, res) => {
     const session = event.data.object;
     const { servicoId, profissionalId } = session.metadata;
 
-    // Atualiza o documento do serviço no Firestore para liberar o acesso
     try {
-      await db.collection("schedules").doc(servicoId).update({
+      const servicoRef = db.collection("schedules").doc(servicoId);
+      
+      // Atualiza o documento do serviço no Firestore para liberar o acesso
+      await servicoRef.update({
         "taxa.statusPagamento": "PAGO",
         "taxa.profissionalId": profissionalId, // Garante que o ID do profissional está salvo
       });
       console.log(`Pagamento para o serviço ${servicoId} foi bem-sucedido!`);
+
+      // ---- INÍCIO DA LÓGICA DE NOTIFICAÇÃO ----
+      const servicoSnap = await servicoRef.get();
+      const servicoData = servicoSnap.data();
+
+      if (servicoData) {
+        const profissionalRef = db.collection("professionals").doc(profissionalId);
+        const profissionalSnap = await profissionalRef.get();
+        const profissionalData = profissionalSnap.data();
+        
+        // 1. Criar notificação no site para o cliente
+        const notificacaoCliente = {
+            userId: servicoData.clientId,
+            title: "Seu serviço foi aceito!",
+            description: `${profissionalData.fullName} pegou seu serviço de ${servicoData.service} e entrará em contato em breve.`,
+            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+            isRead: false,
+            link: `/dashboard/my-account`
+        };
+        await db.collection('notifications').add(notificacaoCliente);
+        
+        // 2. Enviar notificação por e-mail para o cliente
+        if (servicoData.clientEmail) {
+            const emailBody = {
+                to: servicoData.clientEmail,
+                subject: `Um profissional aceitou seu serviço de ${servicoData.service}!`,
+                html: `
+                    <h1>Olá, ${servicoData.clientName}!</h1>
+                    <p>Temos uma ótima notícia! O profissional <strong>${profissionalData.fullName}</strong> aceitou seu agendamento para o serviço de <strong>${servicoData.service}</strong>.</p>
+                    <p>Ele(a) recebeu seus detalhes de contato e deve se comunicar em breve para confirmar tudo.</p>
+                    <p>Para ver os detalhes do seu agendamento, acesse sua conta em nossa plataforma.</p>
+                    <br>
+                    <p>Atenciosamente,</p>
+                    <p>Equipe ServirLar</p>
+                `
+            };
+
+            const emailApiUrl = `https://lar-seguro-76fan.web.app/api/send-email`;
+            
+            try {
+                await fetch(emailApiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(emailBody),
+                });
+                 console.log(`E-mail de notificação enviado para ${servicoData.clientEmail}`);
+            } catch(emailError) {
+                console.error("Erro ao enviar email de notificação:", emailError);
+            }
+        }
+      }
+      // ---- FIM DA LÓGICA DE NOTIFICAÇÃO ----
+
     } catch (error) {
-      console.error("Erro ao atualizar o Firestore:", error);
+      console.error("Erro ao atualizar o Firestore ou notificar:", error);
       return res.status(500).send("Erro ao processar o pedido.");
     }
   }
