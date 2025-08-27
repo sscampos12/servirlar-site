@@ -74,9 +74,17 @@ export default function ProviderInitialRegistrationPage() {
 
     } catch (error: any) {
       console.error("Error creating professional account: ", error);
-      let errorMessage = "Ocorreu um erro ao criar sua conta.";
+      let errorMessage: React.ReactNode = "Ocorreu um erro ao criar sua conta.";
       if (error.code === 'auth/email-already-in-use') {
-        errorMessage = "Este e-mail já está em uso por outra conta.";
+        errorMessage = (
+          <span>
+            Este e-mail já está em uso. Tente{' '}
+            <Link href="/login" className="font-bold underline">
+              fazer login
+            </Link>
+            .
+          </span>
+        );
       }
       toast({
         variant: "destructive",
