@@ -47,6 +47,8 @@ exports.createStripeCheckout = functions.https.onCall(async (data, context) => {
         servicoId: servicoId,
         profissionalId: profissionalId,
       },
+       // Adiciona o email do cliente para o Stripe pré-preencher
+      customer_email: context.auth.token.email,
     });
 
     // Salva o ID da sessão no documento do serviço para referência
@@ -88,28 +90,31 @@ exports.stripeWebhook = functions.https.onRequest(async (req, res) => {
 
     try {
       const servicoRef = db.collection("schedules").doc(servicoId);
+      const professionalDocRef = db.collection("professionals").doc(profissionalId);
+
+      const [servicoSnap, professionalSnap] = await Promise.all([servicoRef.get(), professionalDocRef.get()]);
+      const professionalData = professionalSnap.data();
       
       // Atualiza o documento do serviço no Firestore para liberar o acesso
       await servicoRef.update({
         "taxa.statusPagamento": "PAGO",
-        "taxa.profissionalId": profissionalId, // Garante que o ID do profissional está salvo
+        "taxa.profissionalId": profissionalId,
+        professionalId: profissionalId,
+        professionalName: professionalData.fullName,
+        status: 'Confirmado',
       });
       console.log(`Pagamento para o serviço ${servicoId} foi bem-sucedido!`);
 
       // ---- INÍCIO DA LÓGICA DE NOTIFICAÇÃO ----
-      const servicoSnap = await servicoRef.get();
       const servicoData = servicoSnap.data();
 
       if (servicoData) {
-        const profissionalRef = db.collection("professionals").doc(profissionalId);
-        const profissionalSnap = await profissionalRef.get();
-        const profissionalData = profissionalSnap.data();
         
         // 1. Criar notificação no site para o cliente
         const notificacaoCliente = {
             userId: servicoData.clientId,
             title: "Seu serviço foi aceito!",
-            description: `${profissionalData.fullName} pegou seu serviço de ${servicoData.service} e entrará em contato em breve.`,
+            description: `${professionalData.fullName} pegou seu serviço de ${servicoData.service} e entrará em contato em breve.`,
             createdAt: admin.firestore.FieldValue.serverTimestamp(),
             isRead: false,
             link: `/dashboard/my-account`
@@ -123,7 +128,7 @@ exports.stripeWebhook = functions.https.onRequest(async (req, res) => {
                 subject: `Um profissional aceitou seu serviço de ${servicoData.service}!`,
                 html: `
                     <h1>Olá, ${servicoData.clientName}!</h1>
-                    <p>Temos uma ótima notícia! O profissional <strong>${profissionalData.fullName}</strong> aceitou seu agendamento para o serviço de <strong>${servicoData.service}</strong>.</p>
+                    <p>Temos uma ótima notícia! O profissional <strong>${professionalData.fullName}</strong> aceitou seu agendamento para o serviço de <strong>${servicoData.service}</strong>.</p>
                     <p>Ele(a) recebeu seus detalhes de contato e deve se comunicar em breve para confirmar tudo.</p>
                     <p>Para ver os detalhes do seu agendamento, acesse sua conta em nossa plataforma.</p>
                     <br>
@@ -156,3 +161,5 @@ exports.stripeWebhook = functions.https.onRequest(async (req, res) => {
 
   res.status(200).send();
 });
+
+    
