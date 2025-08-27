@@ -7,14 +7,14 @@ export function Footer() {
   const LinkItem: React.FC<{ href: string; children: React.ReactNode }> = ({ href, children }) => (
     <Link
       href={href}
-      className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+      className="text-sm text-muted-foreground hover:text-primary transition-colors"
     >
       {children}
     </Link>
   );
 
   return (
-    <footer className="mt-16 border-t bg-[#e5e7eb] text-card-foreground">
+    <footer className="mt-16 border-t bg-background text-foreground">
       <div className="container mx-auto max-w-7xl px-6">
         {/* Main footer content */}
         <div className="grid gap-10 py-12 sm:grid-cols-2 lg:grid-cols-4">
