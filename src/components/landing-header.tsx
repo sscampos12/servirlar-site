@@ -13,8 +13,10 @@ export function LandingHeader() {
           <Logo className="h-8 w-auto" />
         </Link>
         <nav className="hidden absolute left-1/2 -translate-x-1/2 items-center gap-6 text-sm font-semibold tracking-wider md:flex">
-          <Link href="/pricing" className="transition-colors hover:text-primary/80 text-primary uppercase">Preços e Serviços</Link>
-          <Link href="/register/provider" className="transition-colors hover:text-primary/80 text-primary uppercase">Profissionais</Link>
+          <Link href="/pricing" className="transition-colors hover:text-primary/80 text-foreground uppercase">Serviços</Link>
+          <Link href="/about" className="transition-colors hover:text-primary/80 text-foreground uppercase">Sobre</Link>
+          <Link href="/testimonials" className="transition-colors hover:text-primary/80 text-foreground uppercase">Depoimentos</Link>
+          <Link href="/contact" className="transition-colors hover:text-primary/80 text-foreground uppercase">Contato</Link>
         </nav>
         <div className="flex items-center justify-end space-x-2">
            <Button asChild variant="ghost" className="uppercase">
