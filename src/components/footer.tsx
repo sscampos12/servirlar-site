@@ -1,4 +1,3 @@
-
 import { Logo } from "./logo";
 import Link from 'next/link';
 
@@ -88,10 +87,10 @@ export function Footer() {
             </p>
             <div className="flex flex-col gap-2 text-sm text-muted-foreground">
               <p>
-                WhatsApp: <a href="https://wa.me/5500000000000" className="text-foreground hover:underline">(00) 00000-0000</a>
+                WhatsApp: <a href="https://wa.me/5521920150039" className="text-foreground hover:underline">(21) 92015-0039</a>
               </p>
               <p>
-                E-mail: <a href="mailto:suporte@servirlar.com.br" className="text-foreground hover:underline">suporte@servirlar.com.br</a>
+                E-mail: <a href="mailto:contato@servirlar.com.br" className="text-foreground hover:underline">contato@servirlar.com.br</a>
               </p>
             </div>
           </div>
