@@ -7,7 +7,7 @@ export function ClientContract() {
         
         <div>
           <h4 className="font-semibold text-foreground">1. Intermediação</h4>
-          <p>A Ajuda em Casa atua apenas como intermediadora, não havendo vínculo empregatício com o prestador.</p>
+          <p>A ServirLar atua apenas como intermediadora, não havendo vínculo empregatício com o prestador.</p>
         </div>
         <div>
           <h4 className="font-semibold text-foreground">2. Responsabilidade</h4>

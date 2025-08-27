@@ -18,7 +18,7 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: 'Ajuda em Casa',
+  title: 'ServirLar',
   description: 'Conectando você aos melhores profissionais domésticos.',
 };
 

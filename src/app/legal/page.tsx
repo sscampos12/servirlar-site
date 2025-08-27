@@ -10,18 +10,18 @@ export default function LegalPage() {
           <CardHeader className="text-center">
             <CardTitle className="font-headline text-3xl">Termos e Políticas</CardTitle>
             <CardDescription>
-              Ao utilizar a plataforma Ajuda em Casa, o usuário concorda com os seguintes termos e políticas.
+              Ao utilizar a plataforma ServirLar, o usuário concorda com os seguintes termos e políticas.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-8 text-muted-foreground">
             
             <section id="terms">
-              <h2 className="font-headline text-2xl font-bold text-foreground mb-4">Termos de Uso da Plataforma – Ajuda em Casa</h2>
+              <h2 className="font-headline text-2xl font-bold text-foreground mb-4">Termos de Uso da Plataforma – ServirLar</h2>
               <p className="text-sm mb-4">Última atualização: 20 de agosto de 2025</p>
               <div className="space-y-4">
                 <div>
                   <h3 className="font-headline text-lg font-semibold text-foreground mb-1">1. Objeto</h3>
-                  <p>A plataforma Ajuda em Casa atua exclusivamente como intermediadora, conectando clientes a prestadores de serviços domésticos autônomos.</p>
+                  <p>A plataforma ServirLar atua exclusivamente como intermediadora, conectando clientes a prestadores de serviços domésticos autônomos.</p>
                 </div>
                 <div>
                   <h3 className="font-headline text-lg font-semibold text-foreground mb-1">2. Natureza da Relação</h3>
@@ -47,7 +47,7 @@ export default function LegalPage() {
                 </div>
                 <div>
                   <h3 className="font-headline text-lg font-semibold text-foreground mb-1">5. Obrigações da Plataforma</h3>
-                   <p>A Ajuda em Casa compromete-se a:</p>
+                   <p>A ServirLar compromete-se a:</p>
                     <ul className="list-disc list-inside pl-4 mt-2 space-y-1">
                         <li>Disponibilizar sistema de agendamento;</li>
                         <li>Processar pagamentos de forma segura e transparente;</li>
@@ -72,7 +72,7 @@ export default function LegalPage() {
             <Separator />
 
             <section id="privacy">
-              <h2 className="font-headline text-2xl font-bold text-foreground mb-4">Política de Privacidade – Ajuda em Casa</h2>
+              <h2 className="font-headline text-2xl font-bold text-foreground mb-4">Política de Privacidade – ServirLar</h2>
                <p className="text-sm mb-4">Última atualização: 20 de agosto de 2025</p>
               <div className="space-y-4">
                   <div>
@@ -98,7 +98,7 @@ export default function LegalPage() {
                   </div>
                    <div>
                       <h3 className="font-headline text-lg font-semibold text-foreground mb-1">5. Direitos do Usuário (LGPD)</h3>
-                      <p>Você pode solicitar a qualquer momento: acesso, correção, exclusão ou portabilidade dos seus dados. Contato: <a href="mailto:privacidade@ajudaemcasa.com.br" className="text-primary underline">privacidade@ajudaemcasa.com.br</a>.</p>
+                      <p>Você pode solicitar a qualquer momento: acesso, correção, exclusão ou portabilidade dos seus dados. Contato: <a href="mailto:privacidade@servirlar.com.br" className="text-primary underline">privacidade@servirlar.com.br</a>.</p>
                   </div>
                    <div>
                       <h3 className="font-headline text-lg font-semibold text-foreground mb-1">6. Cookies</h3>

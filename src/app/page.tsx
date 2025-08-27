@@ -23,7 +23,7 @@ const BenefitCard = ({ icon: Icon, title, description }: { icon: React.ElementTy
 const HowItWorksStep = ({ icon: Icon, step, title, description }: { icon: React.ElementType, step: number, title: string, description: string }) => (
     <div className="relative flex flex-col items-center text-center">
         <div className="relative z-10">
-            <div className="flex items-center justify-center w-24 h-24 bg-card border-4 border-secondary/80 rounded-full">
+            <div className="flex items-center justify-center w-24 h-24 bg-card border-4 border-accent rounded-full">
                 <Icon className="w-12 h-12 text-primary"/>
             </div>
         </div>
@@ -41,13 +41,13 @@ export default function Home() {
         <section className="bg-muted py-20 px-4 text-center flex-grow flex flex-col justify-center min-h-[calc(100vh-8rem)]">
           <div className="container mx-auto">
             <h1 className="font-headline font-black text-4xl md:text-6xl text-primary mb-4 max-w-4xl mx-auto leading-tight">
-              A ajuda que seu lar precisa, com a confiança que você merece.
+              A solução que seu lar precisa, com a confiança que você merece.
             </h1>
             <p className="text-lg text-foreground/80 max-w-2xl mx-auto leading-relaxed mb-8">
               Encontre diaristas, passadeiras e cozinheiras qualificadas em poucos cliques. Simples, rápido e seguro.
             </p>
             <div className="flex justify-center gap-4 flex-wrap">
-              <Button asChild size="lg" className="shadow-md bg-secondary text-secondary-foreground hover:bg-secondary/90 text-lg py-7 px-8">
+              <Button asChild size="lg" className="shadow-md bg-accent text-secondary-foreground hover:bg-accent/90 text-lg py-7 px-8">
                 <Link href="/login">
                   Agendar um Serviço
                 </Link>
@@ -92,7 +92,7 @@ export default function Home() {
         {/* Why Choose Us Section */}
         <section className="py-24 px-4 bg-muted">
             <div className="container mx-auto text-center">
-                <h2 className="font-headline text-4xl font-bold mb-4 text-primary">Por que escolher a Ajuda em Casa?</h2>
+                <h2 className="font-headline text-4xl font-bold mb-4 text-primary">Por que escolher a ServirLar?</h2>
                 <p className="text-muted-foreground mb-12 max-w-2xl mx-auto text-lg">Sua tranquilidade é nossa prioridade. Oferecemos a melhor experiência com segurança e qualidade.</p>
                 <div className="grid md:grid-cols-3 gap-8">
                     <BenefitCard 

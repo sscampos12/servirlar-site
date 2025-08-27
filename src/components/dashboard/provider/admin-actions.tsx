@@ -17,7 +17,7 @@ interface AdminActionsProps {
 const getWhatsAppLink = (phone: string | undefined, fullName: string | undefined) => {
     if (!phone) return '#';
     const telefoneClean = phone.replace(/\D/g, '');
-    const mensagem = `Olá ${fullName}! Sou da equipe Ajuda em Casa. Como posso ajudá-lo(a)?`;
+    const mensagem = `Olá ${fullName}! Sou da equipe ServirLar. Como posso ajudá-lo(a)?`;
     return `https://wa.me/55${telefoneClean}?text=${encodeURIComponent(mensagem)}`;
 };
 

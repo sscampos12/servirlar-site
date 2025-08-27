@@ -68,7 +68,7 @@ export async function POST(req: NextRequest) {
             original: valor.toFixed(2), // Formato com 2 casas decimais
         },
         chave: process.env.EFI_CHAVE_PIX!, // Sua chave PIX cadastrada na Efí
-        solicitacaoPagador: descricao || 'Pagamento via PIX para Ajuda em Casa',
+        solicitacaoPagador: descricao || 'Pagamento via PIX para ServirLar',
     };
 
     try {
@@ -77,7 +77,7 @@ export async function POST(req: NextRequest) {
         
         // const locResponse = await efipay.pixDetailLoc({ id: pixResponse.loc.id });
 
-        const qrCodeBase64 = "iVBORw0KGgoAAAANSUhEUgAAARgAAAGEAQMAAABe30K8AAAABlBMVEX///8AAABVwtN+AAABsklEQVR42uyasW3DMBAA3//Scf3A8BlIJiQghZCHgMIMuLpjpwSXfB/s7a1rrX/y9/v7y3v4fP/P93l/f3//f5/b+1sXAHgQMAgYBAwCBoGjDx4EDAKGgAEkGd4GgYGgYNAgYBAwCBgEDAKGgAEkGd4GgYGgYNAgYBAwCBgEDAKGgAEkGd4GgYGgYNAgYBAwCBgEDAKGgAEkGd4GgYGgYNAgYBAwCBgEDAKGgAEkGd4GgYGgYNAgYBAwCBgEDAKGgAEkGd4GgYGgYNAgYBAwCBgEDAKGgAEkGd4GgYGgYNAgYBAwCBgEDAKGgAEkGd4GgYGgYNAgYBAwCBgEDAKGgAEkGd4GgYGgYNAgYBAwCBgEDAKGgAEkGd4GgYGgYNAgYBAwCBgEDAKGgAEkGd4GgYGgYNAgYBAwCBgEDAKGgAEkGd4GgYGgYNAgYBAwCBgEDAKGgAEkGd4GgYGgYNAgYBAwCBgEDAKGgAEkGd4GgYGgYNAgYBAwCBgEDAKGgAEkGd4GgYGgYNAgYBAwCBgEDAKGgAEkGd4GgYGgYNAgYBAwCBgEDAKGgAEkGd4GgYGgYNAgYBAw+P6AwAAnbLd+kssq5gAAAABJRU5ErkJggg==";
+        const qrCodeBase64 = "iVBORw0KGgoAAAANSUhEUgAAARgAAAGEAQMAAABe30K8AAAABlBMVEX///8AAABVwtN+AAABsklEQVR42uyasW3DMBAA3//Scf3A8BlIJiQghZCHgMIMuLpjpwSXfB/s7a1rrX/y9/v7y3v4fP/P93l/f3//f5/b+1sXAHgQMAgYBAwCBoGjDx4EDAKGgAEkGd4GgYGgYNAgYBAwCBgEDAKGgAEkGd4GgYGgYNAgYBAwCBgEDAKGgAEkGd4GgYGgYNAgYBAwCBgEDAKGgAEkGd4GgYGgYNAgYBAwCBgEDAKGgAEkGd4GgYGgYNAgYBAwCBgEDAKGgAEkGd4GgYGgYNAgYBAwCBgEDAKGgAEkGd4GgYGgYNAgYBAwCBgEDAKGgAEkGd4GgYGgYNAgYBAwCBgEDAKGgAEkGd4GgYGgYNAgYBAwCBgEDAKGgAEkGd4GgYGgYNAgYBAwCBgEDAKGgAEkGd4GgYGgYNAgYBAwCBgEDAKGgAEkGd4GgYGgYNAgYBAwCBgEDAKGgAEkGd4GgYGgYNAgYBAwCBgEDAKGgAEkGd4GgYGgYNAgYBAwCBgEDAKGgAEkGd4GgYGgYNAgYBAwCBgEDAKGgAEkGd4GgYGgYNAgYBAw+P6AwAAnbLd+kssq5gAAAABJRU5ErkJggg==";
 
         return NextResponse.json({
             success: true,

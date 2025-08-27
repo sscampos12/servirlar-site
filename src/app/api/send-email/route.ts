@@ -11,7 +11,7 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 // Para testes e desenvolvimento, o Resend permite o uso do remetente 'onboarding@resend.dev'.
 // Para produção, você DEVE trocar este valor por um e-mail de um domínio que você
 // verificou na sua conta do Resend. Ex: "nao-responda@seusite.com.br"
-const fromEmail = "Ajuda em Casa <onboarding@resend.dev>";
+const fromEmail = "ServirLar <onboarding@resend.dev>";
 
 const emailSchema = z.object({
   to: z.string().email({ message: "Endereço de e-mail do destinatário inválido." }),

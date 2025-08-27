@@ -91,7 +91,7 @@ export function Footer() {
                 WhatsApp: <a href="https://wa.me/5500000000000" className="text-foreground hover:underline">(00) 00000-0000</a>
               </p>
               <p>
-                E-mail: <a href="mailto:suporte@ajudaemcasa.com.br" className="text-foreground hover:underline">suporte@ajudaemcasa.com.br</a>
+                E-mail: <a href="mailto:suporte@servirlar.com.br" className="text-foreground hover:underline">suporte@servirlar.com.br</a>
               </p>
             </div>
           </div>
@@ -103,7 +103,7 @@ export function Footer() {
         {/* Legal bottom bar */}
         <div className="flex flex-col items-center justify-between gap-4 py-8 sm:flex-row">
           <p className="text-xs text-muted-foreground">
-            © {year} Ajuda em Casa. Todos os direitos reservados.
+            © {year} ServirLar. Todos os direitos reservados.
           </p>
           <div className="flex items-center gap-4">
             <LinkItem href="/legal">Termos de Serviço</LinkItem>

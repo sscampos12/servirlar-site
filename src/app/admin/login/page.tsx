@@ -27,7 +27,7 @@ export default function AdminLoginPage() {
 
     try {
       // Hardcoded admin credentials for initial setup
-      const adminEmail = "contato@ajudaemcasa.com";
+      const adminEmail = "contato@servirlar.com";
       const adminPassword = "Admin123!";
 
       if (email === adminEmail && password === adminPassword) {

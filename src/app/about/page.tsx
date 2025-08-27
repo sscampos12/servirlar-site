@@ -11,18 +11,18 @@ export default function AboutPage() {
             <Sparkles className="mx-auto h-12 w-12 text-accent mb-4" />
             <CardTitle className="font-headline text-3xl">Sobre Nós</CardTitle>
             <CardDescription>
-                Conheça a história e os valores da Ajuda em Casa.
+                Conheça a história e os valores da ServirLar.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6 text-lg text-muted-foreground leading-relaxed">
             <p className="text-center">
-              A <strong>Ajuda em Casa</strong> nasceu para tornar a rotina mais leve e prática, conectando clientes a profissionais de confiança para serviços domésticos. Nosso propósito é oferecer praticidade e segurança, garantindo qualidade em cada atendimento.
+              A <strong>ServirLar</strong> nasceu para tornar a rotina mais leve e prática, conectando clientes a profissionais de confiança para serviços domésticos. Nosso propósito é oferecer praticidade e segurança, garantindo qualidade em cada atendimento.
             </p>
             <p className="text-center">
               Acreditamos que todo lar merece cuidado, organização e atenção. Por isso, criamos uma plataforma simples e acessível, onde você encontra profissionais capacitados para limpeza, organização, babá, cuidador de idosos e muito mais.
             </p>
             <p className="text-center">
-                Mais do que um site, a <strong>Ajuda em Casa</strong> é um elo de confiança: ajudamos quem precisa de serviços confiáveis e damos oportunidade a profissionais que desejam trabalhar de forma justa e transparente.
+                Mais do que um site, a <strong>ServirLar</strong> é um elo de confiança: ajudamos quem precisa de serviços confiáveis e damos oportunidade a profissionais que desejam trabalhar de forma justa e transparente.
             </p>
 
             <div className="grid md:grid-cols-3 gap-8 pt-8 text-center">

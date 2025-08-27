@@ -4,46 +4,49 @@ import React from "react";
 export function Logo({ className, ...props }: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
-      width="175"
+      width="152"
       height="32"
-      viewBox="0 0 175 32"
+      viewBox="0 0 152 32"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={cn(className)}
       {...props}
     >
-      {/* Icon */}
       <g>
-        <path
-          d="M23.5 4.5L12.5 11.5L4 7.5L0 11V27C0 28.1046 0.89543 29 2 29H28C29.1046 29 30 28.1046 30 27V11L23.5 4.5Z"
-          fill="hsl(var(--accent))"
+        {/* House Outline (Blue) */}
+        <path 
+          d="M17.4028 3.03361L30.9361 12.428V28H2V12.428L15.5334 3.03361C16.4429 2.38311 17.6521 2.38311 18.5616 3.03361H17.4028Z" 
+          stroke="hsl(var(--primary))" 
+          strokeWidth="3.5"
+          strokeLinejoin="round"
         />
-        <path
-          d="M9.5 19L13.5 23L21.5 15"
-          stroke="hsl(var(--primary))"
-          strokeWidth="2.5"
-          strokeLinecap="round"
+        {/* Checkmark (Green) */}
+        <path 
+          d="M6.5 17L13 23.5L26.5 10" 
+          stroke="hsl(var(--accent))" 
+          strokeWidth="4" 
+          strokeLinecap="round" 
           strokeLinejoin="round"
         />
       </g>
       {/* Text */}
       <text 
-        x="38" 
-        y="22" 
+        x="40" 
+        y="23" 
         fontFamily="'Poppins', sans-serif" 
-        fontSize="18" 
+        fontSize="20" 
         fontWeight="bold" 
-        fill="hsl(var(--primary))">
-        Ajuda
+        fill="hsl(var(--foreground))">
+        Servir
       </text>
       <text 
-        x="95" 
-        y="22" 
+        x="98" 
+        y="23" 
         fontFamily="'Poppins', sans-serif" 
-        fontSize="18" 
+        fontSize="20" 
         fontWeight="bold" 
         fill="hsl(var(--accent))">
-        em Casa
+        Lar
       </text>
     </svg>
   );

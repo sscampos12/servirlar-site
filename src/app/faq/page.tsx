@@ -10,12 +10,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 export default function FAQPage() {
     const faqs = [
         {
-            question: "O que é a Ajuda em Casa?",
+            question: "O que é a ServirLar?",
             answer: "É uma plataforma que conecta clientes a prestadores de serviços domésticos autônomos, atuando apenas como intermediário e facilitador de agendamentos e pagamentos."
         },
         {
-            question: "A Ajuda em Casa contrata os prestadores de serviço?",
-            answer: "Não. Todos os profissionais cadastrados na plataforma são autônomos e independentes. A Ajuda em Casa não possui vínculo empregatício com nenhum prestador."
+            question: "A ServirLar contrata os prestadores de serviço?",
+            answer: "Não. Todos os profissionais cadastrados na plataforma são autônomos e independentes. A ServirLar não possui vínculo empregatício com nenhum prestador."
         },
         {
             question: "Como funciona o pagamento?",

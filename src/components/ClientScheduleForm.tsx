@@ -79,7 +79,7 @@ export const ClientScheduleForm = ({ user }: { user: any }) => {
             clientEmail: user.email,
             clientPhone: clientData.phone || '',
             service: serviceNames[formData.service as keyof typeof serviceNames] || formData.service,
-            duration: `${'${'}formData.duration} horas`,
+            duration: `${formData.duration} horas`,
             date: formData.date.toISOString().split('T')[0],
             time: formData.time,
             address: formData.address,
@@ -105,8 +105,8 @@ export const ClientScheduleForm = ({ user }: { user: any }) => {
             if (!prof.email) return Promise.resolve();
             const apiRequestBody = {
                 to: prof.email,
-                subject: `Nova Oportunidade: Serviço de ${'${'}scheduleData.service} Disponível!`,
-                html: `<h1>Olá, ${'${'}prof.fullName}!</h1><p>Um novo serviço de ${'${'}scheduleData.service} foi solicitado.</p><p><strong>Endereço:</strong> ${'${'}scheduleData.address}</p><p><strong>Data:</strong> ${'${'}new Date(scheduleData.date).toLocaleDateString('pt-BR', { timeZone: 'UTC' })} às ${'${'}scheduleData.time}</p><p>Acesse a plataforma para ver mais detalhes.</p>`
+                subject: `Nova Oportunidade: Serviço de ${scheduleData.service} Disponível!`,
+                html: `<h1>Olá, ${prof.fullName}!</h1><p>Um novo serviço de ${scheduleData.service} foi solicitado.</p><p><strong>Endereço:</strong> ${scheduleData.address}</p><p><strong>Data:</strong> ${new Date(scheduleData.date).toLocaleDateString('pt-BR', { timeZone: 'UTC' })} às ${scheduleData.time}</p><p>Acesse a plataforma para ver mais detalhes.</p>`
             };
             return fetch('/api/send-email', {
                 method: 'POST',
@@ -155,7 +155,7 @@ export const ClientScheduleForm = ({ user }: { user: any }) => {
                          <div className="p-4 bg-muted/50 rounded-lg space-y-4"><h4 className="font-headline font-semibold">Resumo</h4>
                             <div className="flex items-center gap-3"><HomeIcon className="h-4 w-4 text-muted-foreground" /><p className="text-sm truncate">{formData.service ? serviceNames[formData.service as keyof typeof serviceNames] : 'N/A'}</p></div>
                             <div className="flex items-center gap-3"><CalendarIcon className="h-4 w-4 text-muted-foreground" /><p className="text-sm">{formData.date ? format(formData.date, "PPP", { locale: ptBR }) : 'N/A'}</p></div>
-                            <div className="flex items-center gap-3"><Clock className="h-4 w-4 text-muted-foreground" /><p className="text-sm">{formData.time && formData.duration ? `${'${'}formData.time} (${'${'}formData.duration}h)` : 'N/A'}</p></div>
+                            <div className="flex items-center gap-3"><Clock className="h-4 w-4 text-muted-foreground" /><p className="text-sm">{formData.time && formData.duration ? `${formData.time} (${formData.duration}h)` : 'N/A'}</p></div>
                         </div>
                         <div className="flex justify-between items-center pt-4 border-t"><span className="text-muted-foreground">Valor Total Estimado</span><span className="font-bold text-xl">R$ {total.toFixed(2).replace('.', ',')}</span></div>
                         <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>{isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Confirmar Solicitação'}</Button>
