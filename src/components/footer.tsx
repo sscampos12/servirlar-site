@@ -14,7 +14,7 @@ export function Footer() {
   );
 
   return (
-    <footer className="mt-16 border-t bg-card text-card-foreground">
+    <footer className="mt-16 border-t bg-muted/50 text-card-foreground">
       <div className="container mx-auto max-w-7xl px-6">
         {/* Main footer content */}
         <div className="grid gap-10 py-12 sm:grid-cols-2 lg:grid-cols-4">
@@ -76,7 +76,7 @@ export function Footer() {
         {/* Legal bottom bar */}
         <div className="flex flex-col items-center justify-between gap-4 py-8 sm:flex-row">
           <p className="text-xs text-muted-foreground">
-            © {year} ServirLar. Todos os direitos reservados.
+            © {new Date().getFullYear()} ServirLar. Todos os direitos reservados.
           </p>
           <div className="flex items-center gap-4">
             <LinkItem href="/legal">Termos de Serviço</LinkItem>
