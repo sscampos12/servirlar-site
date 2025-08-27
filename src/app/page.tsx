@@ -15,18 +15,69 @@ const FeatureCard = ({ icon: Icon, title, description }: { icon: React.ElementTy
     </div>
 );
 
-const WhyChooseUsCard = ({ icon: Icon, title, description }: { icon: React.ElementType, title: string, description: string }) => (
-  <div className="flex flex-col items-center text-center p-6">
-      <div className="flex items-center justify-center h-16 w-16 rounded-full bg-primary/10 mb-4">
-        <Icon className="h-8 w-8 text-primary" />
+const WhyChooseUsCard = ({ icon, title, description, iconColor }: { icon: React.ReactNode, title: string, description: string, iconColor: string }) => (
+  <div className="text-center p-10 bg-white rounded-2xl shadow-lg hover:shadow-xl hover:-translate-y-2 transition-all duration-300">
+      <div className={`w-20 h-20 rounded-full mx-auto mb-6 flex items-center justify-center bg-gradient-to-br ${iconColor}`}>
+        {icon}
       </div>
-      <h3 className="font-headline text-xl font-semibold mb-2">{title}</h3>
-      <p className="text-muted-foreground text-sm">{description}</p>
+      <h3 className="text-xl font-semibold text-gray-800 mb-4 font-headline">
+        {title}
+      </h3>
+      <p className="text-gray-600 leading-relaxed">
+        {description}
+      </p>
   </div>
 );
 
+const features = [
+    {
+      id: 1,
+      title: "Profissionais Qualificados",
+      description: "Equipe rigorosamente selecionada e treinada para garantir excelência em cada serviço.",
+      iconColor: "from-blue-500 to-blue-600",
+      icon: (
+        <svg className="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-1.5 13.5l-3-3 1.41-1.41L10.5 14.67l6.09-6.09L18 10l-7.5 7.5z" />
+        </svg>
+      )
+    },
+    {
+      id: 2,
+      title: "Flexibilidade e Conveniência",
+      description: "Agendamento fácil e serviços personalizados para sua rotina e necessidades específicas.",
+      iconColor: "from-green-500 to-green-600",
+      icon: (
+        <svg className="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
+        </svg>
+      )
+    },
+    {
+      id: 3,
+      title: "Segurança e Transparência",
+      description: "Processos claros e sistema de avaliação que garantem sua total tranquilidade.",
+      iconColor: "from-blue-500 to-blue-600",
+      icon: (
+         <svg className="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-1.5 13.5l-3-3 1.41-1.41L10.5 14.67l6.09-6.09L18 10l-7.5 7.5z" />
+        </svg>
+      )
+    },
+    {
+      id: 4,
+      title: "Bem-Estar e Produtividade",
+      description: "Transformamos espaços para melhorar sua qualidade de vida e eficiência no trabalho.",
+      iconColor: "from-cyan-500 to-cyan-600",
+      icon: (
+        <svg className="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+        </svg>
+      )
+    }
+  ];
+
 const TestimonialCard = ({ name, role, feedback, avatarSrc, rating }: { name: string, role: string, feedback: string, avatarSrc: string, rating: number }) => (
-    <Card className="flex flex-col bg-background">
+    <Card className="flex flex-col bg-card">
         <CardContent className="p-6 pb-4 flex-grow">
             <div className="flex mb-2">
                 {Array.from({ length: 5 }).map((_, i) => (
@@ -118,38 +169,27 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Why Choose Us Section */}
-      <section className="py-20 md:py-28 bg-muted/30">
-        <div className="container mx-auto px-4">
-            <div className="text-center max-w-3xl mx-auto mb-16">
-              <h2 className="font-headline text-3xl md:text-4xl font-bold text-foreground">
+       {/* Why Choose Us Section - New Design */}
+      <section className="bg-gray-50 py-20 md:py-28">
+        <div className="max-w-7xl mx-auto px-5">
+            <div className="text-center mb-16">
+            <h2 className="font-headline text-4xl md:text-5xl font-bold text-gray-800 mb-4">
                 Por Que Escolher a ServirLar?
-              </h2>
-              <p className="text-lg text-muted-foreground mt-4">
+            </h2>
+            <p className="text-xl text-gray-600">
                 Confiança, Qualidade e Praticidade em Cada Detalhe
-              </p>
+            </p>
             </div>
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-              <WhyChooseUsCard 
-                  icon={Users}
-                  title="Profissionais Qualificados"
-                  description="Equipe rigorosamente selecionada e treinada para garantir excelência em cada serviço."
-              />
-              <WhyChooseUsCard 
-                  icon={Clock}
-                  title="Flexibilidade e Conveniência"
-                  description="Agendamento fácil e serviços personalizados para sua rotina e necessidades específicas."
-              />
-              <WhyChooseUsCard 
-                  icon={ShieldCheck}
-                  title="Segurança e Transparência"
-                  description="Processos claros e sistema de avaliação que garantem sua total tranquilidade."
-              />
-              <WhyChooseUsCard 
-                  icon={Star}
-                  title="Bem-Estar e Produtividade"
-                  description="Transformamos espaços para melhorar sua qualidade de vida e eficiência no trabalho."
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+                {features.map((feature) => (
+                    <WhyChooseUsCard 
+                        key={feature.id}
+                        icon={feature.icon}
+                        title={feature.title}
+                        description={feature.description}
+                        iconColor={feature.iconColor}
+                    />
+                ))}
             </div>
         </div>
       </section>
