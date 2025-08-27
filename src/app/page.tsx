@@ -156,6 +156,55 @@ const TestimonialsSection = () => {
   );
 };
 
+const HowItWorksStep = ({ number, title, description, icon, isLast = false }: { number?: number, title: string, description: string, icon?: React.ReactNode, isLast?: boolean }) => (
+    <div className="flex flex-col items-center text-center">
+        <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-4 ${number ? 'bg-primary text-primary-foreground' : 'bg-accent text-accent-foreground'}`}>
+            {number ? (
+                 <span className="text-2xl font-bold">{number}</span>
+            ) : (
+                icon
+            )}
+        </div>
+        <h3 className="font-headline text-xl mb-2 text-foreground">{title}</h3>
+        <p className="text-muted-foreground">{description}</p>
+    </div>
+);
+
+
+const HowItWorksSection = () => {
+    return (
+        <section className="bg-muted/30 py-20 md:py-28">
+            <div className="container mx-auto px-4">
+                 <div className="text-center max-w-2xl mx-auto mb-16">
+                    <h2 className="font-headline text-4xl md:text-5xl font-bold text-foreground mb-4">Seu Cuidado a Apenas Alguns Cliques</h2>
+                    <p className="text-lg text-muted-foreground">Processo simples e transparente para contratar nossos serviços</p>
+                </div>
+                 <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-12 items-start">
+                    <HowItWorksStep 
+                        number={1}
+                        title="Escolha o Serviço"
+                        description="Selecione o tipo de serviço (casa ou empresa) e suas necessidades específicas."
+                    />
+                     <HowItWorksStep 
+                        number={2}
+                        title="Agende"
+                        description="Defina a data e horário que melhor se encaixam na sua agenda."
+                    />
+                     <HowItWorksStep 
+                        number={3}
+                        title="Receba o Profissional"
+                        description="Nossos especialistas chegam prontos para transformar seu espaço."
+                    />
+                     <HowItWorksStep 
+                        title="Avalie"
+                        description="Sua opinião é fundamental para mantermos a excelência em nossos serviços."
+                        icon={<Star className="w-8 h-8" />}
+                    />
+                </div>
+            </div>
+        </section>
+    )
+}
 
 export default function Home() {
   return (
@@ -222,6 +271,9 @@ export default function Home() {
 
        {/* Testimonials Section */}
        <TestimonialsSection />
+
+       {/* How it Works Section */}
+       <HowItWorksSection />
        
     </MarketingLayout>
   );
