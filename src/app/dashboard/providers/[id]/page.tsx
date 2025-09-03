@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import React, { useState, useEffect, useTransition } from 'react';
@@ -20,14 +19,16 @@ import {
   Loader2,
   BadgeAlert,
 } from 'lucide-react';
-import { doc, onSnapshot } from 'firebase/firestore';
+import { doc, onSnapshot, updateDoc, getDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter, useParams } from 'next/navigation';
-import { updateProfessionalStatus, deleteProfessional } from '../actions';
+import { updateProfessionalStatusAction, deleteProfessionalAction } from '../actions';
+
+type ProfessionalStatus = 'Aprovado' | 'Pendente' | 'Rejeitado' | 'Ativo' | 'Inativo';
 
 interface Professional {
     id: string;
@@ -42,7 +43,7 @@ interface Professional {
     videoUrl?: string;
     docCriminalUrl?: string;
     docRgUrl?: string;
-    status: 'Aprovado' | 'Pendente' | 'Rejeitado' | 'Ativo' | 'Inativo';
+    status: ProfessionalStatus;
 }
 
 const StatusBadge = ({ status }: { status: string }) => {
@@ -97,7 +98,7 @@ export default function DetalheProfissionalAdminPage() {
 
   const handleUpdateStatus = async (newStatus: Professional['status']) => {
     startTransition(async () => {
-        const result = await updateProfessionalStatus(professionalId, newStatus);
+        const result = await updateProfessionalStatusAction(professionalId, newStatus);
         if(result.success) {
             toast({ title: 'Sucesso', description: result.message });
         } else {
@@ -109,7 +110,7 @@ export default function DetalheProfissionalAdminPage() {
   const handleDelete = async () => {
      if(window.confirm('Tem certeza que deseja deletar este cadastro? Esta ação não pode ser desfeita.')) {
         startTransition(async () => {
-            const result = await deleteProfessional(professionalId);
+            const result = await deleteProfessionalAction(professionalId);
             if (result.success) {
                 toast({ title: 'Sucesso', description: result.message });
                 router.push('/dashboard/providers');
