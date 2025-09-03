@@ -2,97 +2,77 @@
 import admin from 'firebase-admin';
 
 // Adiciona a importação e configuração do dotenv no topo do arquivo
+// Isso é útil para desenvolvimento local, mas o applicationDefault() é preferível para produção
 require('dotenv').config();
 
+// Esta função garante que a inicialização só ocorra uma vez
+// e de forma segura no ambiente do servidor.
+export function initializeAdminApp() {
+  if (admin.apps.length > 0) {
+    return {
+      db: admin.firestore(),
+      auth: admin.auth(),
+    };
+  }
 
-// Verifica se o Firebase Admin já foi inicializado
-if (!admin.apps.length) {
   try {
-    // Opção 1: Usando Service Account Key (arquivo JSON)
+    // Tenta inicializar com as credenciais padrão do ambiente (ideal para Firebase/Google Cloud)
+    admin.initializeApp({
+      credential: admin.credential.applicationDefault(),
+    });
+    console.log('Firebase Admin inicializado com sucesso usando Application Default Credentials.');
+  } catch (e) {
+    console.warn(
+      'Falha ao inicializar com credenciais padrão. Tentando com variáveis de ambiente manuais...',
+      e
+    );
+    // Fallback para variáveis de ambiente, caso o método padrão falhe ou não esteja configurado
     const serviceAccount = {
-      type: "service_account",
-      project_id: process.env.FIREBASE_PROJECT_ID,
-      private_key_id: process.env.FIREBASE_PRIVATE_KEY_ID,
-      private_key: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-      client_email: process.env.FIREBASE_CLIENT_EMAIL,
-      client_id: process.env.FIREBASE_CLIENT_ID,
-      auth_uri: "https://accounts.google.com/o/oauth2/auth",
-      token_uri: "https://oauth2.googleapis.com/token",
-      auth_provider_x509_cert_url: "https://www.googleapis.com/oauth2/v1/certs",
-      client_x509_cert_url: process.env.FIREBASE_CLIENT_CERT_URL,
-      universe_domain: "googleapis.com"
+      projectId: process.env.FIREBASE_PROJECT_ID,
+      privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
     };
 
-    // Adiciona uma verificação para garantir que as variáveis de ambiente críticas existem
-    if (!serviceAccount.project_id || !serviceAccount.private_key || !serviceAccount.client_email) {
-      throw new Error('As variáveis de ambiente do Firebase Admin SDK não estão definidas. Verifique seu arquivo .env.');
+    if (!serviceAccount.projectId || !serviceAccount.privateKey || !serviceAccount.clientEmail) {
+       throw new Error('As variáveis de ambiente do Firebase Admin SDK não estão definidas. Verifique a configuração do seu ambiente.');
     }
 
-
     admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount as admin.ServiceAccount),
-      databaseURL: process.env.FIREBASE_DATABASE_URL,
+        credential: admin.credential.cert(serviceAccount as admin.ServiceAccount),
     });
-    
-    console.log('Firebase Admin inicializado com sucesso');
-  } catch (error) {
-    console.error('Erro ao inicializar Firebase Admin:', error);
-    throw error;
+    console.log('Firebase Admin inicializado com sucesso usando variáveis de ambiente.');
   }
-} else {
-  console.log('Firebase Admin já foi inicializado');
-}
 
-export const initializeAdminApp = () => {
   return {
     db: admin.firestore(),
     auth: admin.auth(),
   };
 };
 
-export const db = admin.firestore();
-export const auth = admin.auth();
-
 // Funções utilitárias para Firestore
-export const createDocument = async (collection: string, data: any) => {
-  try {
-    const docRef = await db.collection(collection).add(data);
+export const createDocument = async (collectionName: string, data: any) => {
+    const { db } = initializeAdminApp();
+    const docRef = await db.collection(collectionName).add(data);
     return docRef.id;
-  } catch (error) {
-    console.error('Erro ao criar documento:', error);
-    throw error;
-  }
 };
 
-export const getDocument = async (collection: string, id: string) => {
-  try {
-    const doc = await db.collection(collection).doc(id).get();
+export const getDocument = async (collectionName: string, id: string) => {
+    const { db } = initializeAdminApp();
+    const doc = await db.collection(collectionName).doc(id).get();
     if (doc.exists) {
-      return { id: doc.id, ...doc.data() };
+        return { id: doc.id, ...doc.data() };
     }
     return null;
-  } catch (error) {
-    console.error('Erro ao buscar documento:', error);
-    throw error;
-  }
 };
 
-export const updateDocument = async (collection: string, id: string, data: any) => {
-  try {
-    await db.collection(collection).doc(id).update(data);
+export const updateDocument = async (collectionName: string, id: string, data: any) => {
+    const { db } = initializeAdminApp();
+    await db.collection(collectionName).doc(id).update(data);
     return true;
-  } catch (error) {
-    console.error('Erro ao atualizar documento:', error);
-    throw error;
-  }
 };
 
-export const deleteDocument = async (collection: string, id: string) => {
-  try {
-    await db.collection(collection).doc(id).delete();
+export const deleteDocument = async (collectionName: string, id: string) => {
+    const { db } = initializeAdminApp();
+    await db.collection(collectionName).doc(id).delete();
     return true;
-  } catch (error) {
-    console.error('Erro ao deletar documento:', error);
-    throw error;
-  }
 };
