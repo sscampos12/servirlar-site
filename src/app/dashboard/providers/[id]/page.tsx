@@ -2,7 +2,7 @@
 
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useTransition } from 'react';
 import { 
   ArrowLeft,
   Edit,
@@ -20,7 +20,7 @@ import {
   Loader2,
   BadgeAlert,
 } from 'lucide-react';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, onSnapshot } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -71,55 +71,52 @@ export default function DetalheProfissionalAdminPage() {
   const professionalId = params.id as string;
   const [professionalData, setProfessionalData] = useState<Professional | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isUpdating, setIsUpdating] = useState(false);
+  const [isPending, startTransition] = useTransition();
 
   useEffect(() => {
-    const fetchProfessional = async () => {
-        if(!professionalId) return;
-        setIsLoading(true);
-        try {
-            const docRef = doc(db, 'professionals', professionalId);
-            const docSnap = await getDoc(docRef);
+    if(!professionalId) return;
+    setIsLoading(true);
+    const docRef = doc(db, 'professionals', professionalId);
 
-            if (docSnap.exists()) {
-                setProfessionalData({ id: docSnap.id, ...docSnap.data() } as Professional);
-            } else {
-                toast({ variant: 'destructive', title: 'Erro', description: 'Profissional não encontrado.' });
-                router.push('/dashboard/providers');
-            }
-        } catch (error) {
-            console.error("Error fetching professional:", error);
-            toast({ variant: 'destructive', title: 'Erro', description: 'Falha ao carregar dados do profissional.' });
-        } finally {
-            setIsLoading(false);
+    const unsubscribe = onSnapshot(docRef, (docSnap) => {
+        if (docSnap.exists()) {
+            setProfessionalData({ id: docSnap.id, ...docSnap.data() } as Professional);
+        } else {
+            toast({ variant: 'destructive', title: 'Erro', description: 'Profissional não encontrado.' });
+            router.push('/dashboard/providers');
         }
-    };
-    fetchProfessional();
+        setIsLoading(false);
+    }, (error) => {
+        console.error("Error fetching professional:", error);
+        toast({ variant: 'destructive', title: 'Erro', description: 'Falha ao carregar dados do profissional.' });
+        setIsLoading(false);
+    });
+
+    return () => unsubscribe();
   }, [professionalId, router, toast]);
 
   const handleUpdateStatus = async (newStatus: Professional['status']) => {
-    setIsUpdating(true);
-    const result = await updateProfessionalStatus(professionalId, newStatus);
-    if(result.success) {
-        setProfessionalData(prev => prev ? {...prev, status: newStatus} : null);
-        toast({ title: 'Sucesso', description: result.message });
-    } else {
-        toast({ variant: 'destructive', title: 'Erro', description: result.message });
-    }
-    setIsUpdating(false);
+    startTransition(async () => {
+        const result = await updateProfessionalStatus(professionalId, newStatus);
+        if(result.success) {
+            toast({ title: 'Sucesso', description: result.message });
+        } else {
+            toast({ variant: 'destructive', title: 'Erro', description: result.message });
+        }
+    });
   }
 
   const handleDelete = async () => {
      if(window.confirm('Tem certeza que deseja deletar este cadastro? Esta ação não pode ser desfeita.')) {
-        setIsUpdating(true);
-        const result = await deleteProfessional(professionalId);
-        if (result.success) {
-            toast({ title: 'Sucesso', description: result.message });
-            router.push('/dashboard/providers');
-        } else {
-            toast({ variant: 'destructive', title: 'Erro', description: result.message });
-            setIsUpdating(false);
-        }
+        startTransition(async () => {
+            const result = await deleteProfessional(professionalId);
+            if (result.success) {
+                toast({ title: 'Sucesso', description: result.message });
+                router.push('/dashboard/providers');
+            } else {
+                toast({ variant: 'destructive', title: 'Erro', description: result.message });
+            }
+        });
      }
   }
 
@@ -148,7 +145,7 @@ export default function DetalheProfissionalAdminPage() {
             
             <div className="flex items-center gap-3">
               <StatusBadge status={professionalData.status} />
-               <Button onClick={() => router.push(`/dashboard/providers/profile?edit=true&id=${professionalData.id}`)} disabled={isUpdating}>
+               <Button onClick={() => router.push(`/dashboard/providers/profile?edit=true&id=${professionalData.id}`)} disabled={isPending}>
                   <Edit className="w-4 h-4 inline mr-1" />
                   Editar
               </Button>
@@ -292,22 +289,22 @@ export default function DetalheProfissionalAdminPage() {
                         className="w-full" 
                         variant="outline"
                         onClick={() => handleUpdateStatus('Ativo')}
-                        disabled={isUpdating || professionalData.status === 'Ativo'}>
-                        {isUpdating ? <Loader2 className="animate-spin mr-2 h-4 w-4" /> : <CheckCircle className="mr-2 h-4 w-4" />} Ativar
+                        disabled={isPending || professionalData.status === 'Ativo'}>
+                        {isPending && professionalData.status !== 'Ativo' ? <Loader2 className="animate-spin mr-2 h-4 w-4" /> : <CheckCircle className="mr-2 h-4 w-4" />} Ativar
                     </Button>
                     <Button 
                         className="w-full" 
                         variant="outline"
                         onClick={() => handleUpdateStatus('Inativo')}
-                        disabled={isUpdating || professionalData.status === 'Inativo'}>
-                        {isUpdating ? <Loader2 className="animate-spin mr-2 h-4 w-4" /> : <XCircle className="mr-2 h-4 w-4" />} Inativar
+                        disabled={isPending || professionalData.status === 'Inativo'}>
+                        {isPending && professionalData.status !== 'Inativo' ? <Loader2 className="animate-spin mr-2 h-4 w-4" /> : <XCircle className="mr-2 h-4 w-4" />} Inativar
                     </Button>
                      <Button 
                         className="w-full" 
                         variant="destructive"
                         onClick={handleDelete}
-                        disabled={isUpdating}>
-                        {isUpdating ? <Loader2 className="animate-spin mr-2 h-4 w-4" /> : <Trash2 className="mr-2 h-4 w-4" />} Deletar Cadastro
+                        disabled={isPending}>
+                        {isPending ? <Loader2 className="animate-spin mr-2 h-4 w-4" /> : <Trash2 className="mr-2 h-4 w-4" />} Deletar Cadastro
                     </Button>
                   </>
                 ) : (
@@ -315,15 +312,15 @@ export default function DetalheProfissionalAdminPage() {
                     <Button 
                         className="w-full bg-green-600 hover:bg-green-700" 
                         onClick={() => handleUpdateStatus('Aprovado')}
-                        disabled={isUpdating}>
-                        {isUpdating ? <Loader2 className="animate-spin mr-2 h-4 w-4" /> : <CheckCircle className="mr-2 h-4 w-4" />} Aprovar Cadastro
+                        disabled={isPending}>
+                        {isPending ? <Loader2 className="animate-spin mr-2 h-4 w-4" /> : <CheckCircle className="mr-2 h-4 w-4" />} Aprovar Cadastro
                     </Button>
                     <Button 
                         className="w-full" 
                         variant="destructive"
                         onClick={() => handleUpdateStatus('Rejeitado')}
-                        disabled={isUpdating}>
-                        {isUpdating ? <Loader2 className="animate-spin mr-2 h-4 w-4" /> : <BadgeAlert className="mr-2 h-4 w-4" />} Rejeitar Cadastro
+                        disabled={isPending}>
+                        {isPending ? <Loader2 className="animate-spin mr-2 h-4 w-4" /> : <BadgeAlert className="mr-2 h-4 w-4" />} Rejeitar Cadastro
                     </Button>
                   </>
                 )}

@@ -2,8 +2,10 @@
 'use server';
 
 import { doc, updateDoc, deleteDoc, getDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { db, auth } from '@/lib/firebase'; // Import auth
 import { Resend } from 'resend';
+import { deleteUser } from 'firebase-admin/auth';
+import { getAdminApp } from '@/lib/firebase-admin';
 
 // Inicializa o Resend fora da função para reutilização
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -13,10 +15,10 @@ type ProfessionalStatus = 'Aprovado' | 'Pendente' | 'Rejeitado' | 'Ativo' | 'Ina
 
 // Função auxiliar para enviar e-mails
 async function sendStatusEmail(to: string, fullName: string, newStatus: ProfessionalStatus) {
-    if (!process.env.RESEND_API_KEY) {
+    if (!process.env.RESEND_API_KEY || process.env.RESEND_API_KEY === "") {
         console.warn('--- MODO DE SIMULAÇÃO (RESEND_API_KEY não configurada) ---');
         console.log(`E-mail de status '${newStatus}' seria enviado para ${to}`);
-        return { success: true };
+        return { success: true, message: 'Simulação de e-mail.' };
     }
 
     let subject = '';
@@ -33,14 +35,15 @@ async function sendStatusEmail(to: string, fullName: string, newStatus: Professi
             break;
         // Outros status podem ser adicionados aqui se necessário
         default:
-            return { success: true }; // Não envia email para outros status
+            return { success: true, message: "Nenhum e-mail necessário para este status." }; // Não envia email para outros status
     }
 
     try {
         await resend.emails.send({ from: fromEmail, to, subject, html });
-        return { success: true };
+        return { success: true, message: 'E-mail de notificação enviado com sucesso.' };
     } catch (error) {
         console.error("Erro ao enviar e-mail de status:", error);
+        // Não retorna erro fatal para a UI, apenas loga.
         return { success: false, message: 'Falha ao enviar e-mail de notificação.' };
     }
 }
@@ -58,8 +61,10 @@ export async function updateProfessionalStatus(id: string, newStatus: Profession
         const professionalData = docSnap.data();
         await updateDoc(docRef, { status: newStatus });
         
-        // Envia o e-mail de notificação
-        await sendStatusEmail(professionalData.email, professionalData.fullName, newStatus);
+        // CORREÇÃO: Chama a função de envio de e-mail
+        if (newStatus === 'Aprovado' || newStatus === 'Rejeitado') {
+            await sendStatusEmail(professionalData.email, professionalData.fullName, newStatus);
+        }
         
         return { success: true, message: `Status atualizado para ${newStatus}` };
     } catch (error) {
@@ -70,13 +75,23 @@ export async function updateProfessionalStatus(id: string, newStatus: Profession
 
 export async function deleteProfessional(id: string) {
     try {
-        const docRef = doc(db, 'professionals', id);
-        await deleteDoc(docRef);
+        const adminApp = getAdminApp();
+        const adminAuth = adminApp.auth;
+
+        // Deleta do Firestore
+        const professionalDocRef = doc(db, 'professionals', id);
+        await deleteDoc(professionalDocRef);
+        
+        // Deleta da coleção de usuários (se existir)
         const userDocRef = doc(db, 'users', id);
         if ((await getDoc(userDocRef)).exists()) {
              await deleteDoc(userDocRef);
         }
-        return { success: true, message: 'Profissional deletado com sucesso.' };
+
+        // Deleta do Firebase Authentication
+        await adminAuth.deleteUser(id);
+
+        return { success: true, message: 'Profissional deletado com sucesso de todos os sistemas.' };
     } catch (error) {
         console.error("Error deleting professional:", error);
         return { success: false, message: 'Falha ao deletar o profissional.' };
