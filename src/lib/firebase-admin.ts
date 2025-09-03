@@ -1,20 +1,21 @@
 
+'use server'
+
 import * as admin from 'firebase-admin';
 
-// Esta variável de ambiente é fornecida automaticamente pelo ambiente do Firebase (Cloud Functions, App Hosting)
-const serviceAccount = process.env.FIREBASE_CONFIG ? JSON.parse(process.env.FIREBASE_CONFIG) : undefined;
+// Esta função garante que a inicialização só ocorra uma vez
+// e de forma segura no ambiente do servidor.
+function getAdminApp() {
+  if (admin.apps.length > 0) {
+    return admin.app();
+  }
 
-let adminApp: admin.app.App;
-
-if (!admin.apps.length) {
-  adminApp = admin.initializeApp({
+  const app = admin.initializeApp({
     credential: admin.credential.applicationDefault(),
   });
-} else {
-  adminApp = admin.app();
+
+  return app;
 }
 
-const adminAuth = admin.auth(adminApp);
-const adminFirestore = admin.firestore(adminApp);
-
-export { adminAuth, adminFirestore };
+export const adminAuth = admin.auth(getAdminApp());
+export const adminFirestore = admin.firestore(getAdminApp());

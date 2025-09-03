@@ -5,7 +5,6 @@ import { doc, updateDoc, deleteDoc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { adminAuth } from '@/lib/firebase-admin';
 
-
 type ProfessionalStatus = 'Aprovado' | 'Pendente' | 'Rejeitado' | 'Ativo' | 'Inativo';
 
 export async function updateProfessionalStatus(id: string, newStatus: ProfessionalStatus) {
