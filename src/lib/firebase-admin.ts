@@ -1,6 +1,10 @@
 // src/lib/firebase-admin.ts
 import admin from 'firebase-admin';
 
+// Adiciona a importação e configuração do dotenv no topo do arquivo
+require('dotenv').config();
+
+
 // Verifica se o Firebase Admin já foi inicializado
 if (!admin.apps.length) {
   try {
@@ -19,6 +23,12 @@ if (!admin.apps.length) {
       universe_domain: "googleapis.com"
     };
 
+    // Adiciona uma verificação para garantir que as variáveis de ambiente críticas existem
+    if (!serviceAccount.project_id || !serviceAccount.private_key || !serviceAccount.client_email) {
+      throw new Error('As variáveis de ambiente do Firebase Admin SDK não estão definidas. Verifique seu arquivo .env.');
+    }
+
+
     admin.initializeApp({
       credential: admin.credential.cert(serviceAccount as admin.ServiceAccount),
       databaseURL: process.env.FIREBASE_DATABASE_URL,
@@ -34,7 +44,10 @@ if (!admin.apps.length) {
 }
 
 export const initializeAdminApp = () => {
-  return admin;
+  return {
+    db: admin.firestore(),
+    auth: admin.auth(),
+  };
 };
 
 export const db = admin.firestore();
