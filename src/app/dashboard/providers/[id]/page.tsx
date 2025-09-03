@@ -148,7 +148,7 @@ export default function DetalheProfissionalAdminPage() {
             
             <div className="flex items-center gap-3">
               <StatusBadge status={professionalData.status} />
-               <Button onClick={() => router.push(`/dashboard/providers/profile?edit=true&id=${professionalData.id}`)}>
+               <Button onClick={() => router.push(`/dashboard/providers/profile?edit=true&id=${professionalData.id}`)} disabled={isUpdating}>
                   <Edit className="w-4 h-4 inline mr-1" />
                   Editar
               </Button>
