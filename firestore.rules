@@ -1,0 +1,39 @@
+
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Regra geral para desenvolvimento: permite acesso total se o usuário estiver autenticado.
+    // ATENÇÃO: Para produção, estas regras devem ser muito mais restritivas.
+    match /{document=**} {
+      allow read, write: if request.auth != null;
+    }
+
+    // Exceções e regras mais específicas podem ser adicionadas abaixo.
+    // Exemplo: Permitir que qualquer pessoa leia perfis de profissionais, mas só admin edite.
+    match /professionals/{professionalId} {
+        allow read: if true;
+        allow write: if request.auth.uid == professionalId || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    match /clients/{clientId} {
+        allow read, write: if request.auth.uid == clientId || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    match /schedules/{scheduleId} {
+        allow read, write: if request.auth != null; // Simplificado para dev.
+    }
+
+    match /notifications/{notificationId} {
+      allow read, write: if request.auth.uid == resource.data.userId;
+    }
+
+    match /chats/{chatId} {
+      allow read, write: if request.auth.uid in resource.data.members;
+    }
+     match /chats/{chatId}/messages/{messageId} {
+      allow read, write: if get(/databases/$(database)/documents/chats/$(chatId)).data.members.hasAny([request.auth.uid]);
+    }
+  }
+}
