@@ -155,7 +155,7 @@ export default function CompleteProviderProfilePage() {
         },
         location: new GeoPoint(lat, lng),
         geohash: geohash,
-        status: isEditMode ? 'Pendente' : 'Pendente', // Always set to Pending for review on submit/edit
+        status: 'Aprovado', // Ativação automática
         updatedAt: serverTimestamp(),
       };
 
@@ -166,8 +166,8 @@ export default function CompleteProviderProfilePage() {
       
       setSubmitted(true);
       toast({
-        title: isEditMode ? "Cadastro Atualizado!" : "Cadastro Enviado!",
-        description: "O perfil foi enviado para análise. Entraremos em contato em breve.",
+        title: isEditMode ? "Cadastro Atualizado!" : "Cadastro Aprovado!",
+        description: "Seu perfil foi ativado. Você já pode acessar os serviços disponíveis.",
       });
       
       router.push(isEditMode ? `/dashboard/providers/${userId}` : '/dashboard/profile');
@@ -294,7 +294,7 @@ export default function CompleteProviderProfilePage() {
                 <div className="text-center pt-4">
                     <Button type="submit" size="lg" disabled={(!agreedToContract && !isEditMode) || isLoading}>
                     {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <FileSignature className="mr-2 h-4 w-4" />}
-                    {isLoading ? 'Enviando...' : isEditMode ? 'Salvar Alterações' : 'Assinar e Enviar para Análise'}
+                    {isLoading ? 'Enviando...' : isEditMode ? 'Salvar Alterações' : 'Concluir e Ativar Cadastro'}
                     </Button>
                 </div>
                 </form>

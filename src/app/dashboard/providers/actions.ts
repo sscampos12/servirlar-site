@@ -4,7 +4,7 @@
 import { adminAuth, adminFirestore } from "@/lib/firebase-admin";
 import { revalidatePath } from "next/cache";
 
-type ProfessionalStatus = 'Aprovado' | 'Pendente' | 'Rejeitado' | 'Ativo' | 'Inativo';
+type ProfessionalStatus = 'Ativo' | 'Inativo';
 
 export async function updateProfessionalStatusAction(id: string, newStatus: ProfessionalStatus) {
     if (!id) {

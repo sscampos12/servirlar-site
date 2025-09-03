@@ -96,7 +96,7 @@ export default function DetalheProfissionalAdminPage() {
     return () => unsubscribe();
   }, [professionalId, router, toast]);
 
-  const handleUpdateStatus = async (newStatus: Professional['status']) => {
+  const handleUpdateStatus = async (newStatus: 'Ativo' | 'Inativo') => {
     startTransition(async () => {
         const result = await updateProfessionalStatusAction(professionalId, newStatus);
         if(result.success) {
@@ -129,8 +129,6 @@ export default function DetalheProfissionalAdminPage() {
   if (!professionalData) {
       return <div>Profissional não encontrado.</div>
   }
-
-  const isApprovedPhase = ['Aprovado', 'Ativo', 'Inativo'].includes(professionalData.status);
 
   return (
     <div className="min-h-screen bg-background">
@@ -275,16 +273,12 @@ export default function DetalheProfissionalAdminPage() {
 
             <Card>
               <CardHeader>
-                <CardTitle>Gerenciamento de Cadastro</CardTitle>
+                <CardTitle>Gerenciamento de Atividade</CardTitle>
                 <CardDescription>
-                  {isApprovedPhase 
-                    ? "Gerencie o status de atividade do profissional."
-                    : "Aprove ou rejeite este novo cadastro."
-                  }
+                  Gerencie o status de atividade do profissional na plataforma.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
-                {isApprovedPhase ? (
                   <>
                     <Button 
                         className="w-full" 
@@ -308,23 +302,6 @@ export default function DetalheProfissionalAdminPage() {
                         {isPending ? <Loader2 className="animate-spin mr-2 h-4 w-4" /> : <Trash2 className="mr-2 h-4 w-4" />} Deletar Cadastro
                     </Button>
                   </>
-                ) : (
-                   <>
-                    <Button 
-                        className="w-full bg-green-600 hover:bg-green-700" 
-                        onClick={() => handleUpdateStatus('Aprovado')}
-                        disabled={isPending}>
-                        {isPending ? <Loader2 className="animate-spin mr-2 h-4 w-4" /> : <CheckCircle className="mr-2 h-4 w-4" />} Aprovar Cadastro
-                    </Button>
-                    <Button 
-                        className="w-full" 
-                        variant="destructive"
-                        onClick={() => handleUpdateStatus('Rejeitado')}
-                        disabled={isPending}>
-                        {isPending ? <Loader2 className="animate-spin mr-2 h-4 w-4" /> : <BadgeAlert className="mr-2 h-4 w-4" />} Rejeitar Cadastro
-                    </Button>
-                  </>
-                )}
               </CardContent>
             </Card>
           </div>
