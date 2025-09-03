@@ -4,7 +4,7 @@ import { initializeAdminApp } from "@/lib/firebase-admin";
 import * as admin from 'firebase-admin';
 import { revalidatePath } from "next/cache";
 
-type ProfessionalStatus = 'Ativo' | 'Inativo';
+type ProfessionalStatus = 'Aprovado' | 'Rejeitado' | 'Ativo' | 'Inativo';
 
 // Garante que o app admin está inicializado
 initializeAdminApp();

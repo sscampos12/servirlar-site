@@ -18,6 +18,8 @@ import {
   XCircle,
   Loader2,
   BadgeAlert,
+  Check,
+  AlertTriangle,
 } from 'lucide-react';
 import { doc, onSnapshot, updateDoc, getDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
@@ -27,6 +29,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useToast } from '@/hooks/use-toast';
 import { useRouter, useParams } from 'next/navigation';
 import { updateProfessionalStatusAction, deleteProfessionalAction } from '@/app/dashboard/providers/actions';
+import { AdminActions } from '@/components/dashboard/provider/admin-actions';
 
 type ProfessionalStatus = 'Aprovado' | 'Pendente' | 'Rejeitado' | 'Ativo' | 'Inativo';
 
@@ -270,6 +273,22 @@ export default function DetalheProfissionalAdminPage() {
                     )}
                 </div>
             </div>
+
+            <Card>
+                <CardHeader>
+                    <CardTitle>Gerenciamento de Cadastro</CardTitle>
+                    <CardDescription>Aprove ou rejeite este novo cadastro.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <AdminActions 
+                        professionalId={professionalData.id}
+                        currentStatus={professionalData.status}
+                        phone={professionalData.phone}
+                        fullName={professionalData.fullName}
+                        updateStatusAction={updateProfessionalStatusAction}
+                    />
+                </CardContent>
+            </Card>
 
             <Card>
               <CardHeader>

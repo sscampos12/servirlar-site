@@ -1,5 +1,3 @@
-'use server'
-
 import * as admin from 'firebase-admin';
 
 // Esta função garante que a inicialização só ocorra uma vez
