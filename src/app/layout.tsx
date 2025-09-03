@@ -20,6 +20,9 @@ const poppins = Poppins({
 export const metadata: Metadata = {
   title: 'ServirLar',
   description: 'Conectando você aos melhores profissionais domésticos.',
+  icons: {
+    icon: 'https://i.postimg.cc/mD4p2yDs/logo-oficial-2.png',
+  }
 };
 
 export default function RootLayout({
