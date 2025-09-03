@@ -26,7 +26,7 @@ import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter, useParams } from 'next/navigation';
-import { updateProfessionalStatusAction, deleteProfessionalAction } from '../actions';
+import { updateProfessionalStatusAction, deleteProfessionalAction } from '@/app/dashboard/providers/actions';
 
 type ProfessionalStatus = 'Aprovado' | 'Pendente' | 'Rejeitado' | 'Ativo' | 'Inativo';
 
