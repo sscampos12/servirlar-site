@@ -5,7 +5,7 @@ import Image from "next/image";
 export function Logo({ className, ...props }: React.ImgHTMLAttributes<HTMLImageElement>) {
   return (
     <Image
-      src="https://i.postimg.cc/0j3Zz3gT/logo-oficial-4.png"
+      src="https://i.postimg.cc/dQWcQ6kF/logo-oficial-5.png"
       alt="ServirLar Logo"
       width={180}
       height={40}
