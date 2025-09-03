@@ -20,7 +20,7 @@ import {
   Loader2,
   BadgeAlert,
 } from 'lucide-react';
-import { doc, getDoc, onSnapshot } from 'firebase/firestore';
+import { doc, onSnapshot } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
