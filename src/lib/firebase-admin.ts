@@ -6,18 +6,15 @@ const serviceAccount = process.env.FIREBASE_CONFIG ? JSON.parse(process.env.FIRE
 
 let adminApp: admin.app.App;
 
-export function getAdminApp() {
-  if (!adminApp) {
-    if (admin.apps.length > 0) {
-      adminApp = admin.app();
-    } else {
-      adminApp = admin.initializeApp({
-        credential: admin.credential.applicationDefault(),
-      });
-    }
-  }
-  return {
-    auth: admin.auth(adminApp),
-    firestore: admin.firestore(adminApp),
-  };
+if (!admin.apps.length) {
+  adminApp = admin.initializeApp({
+    credential: admin.credential.applicationDefault(),
+  });
+} else {
+  adminApp = admin.app();
 }
+
+const adminAuth = admin.auth(adminApp);
+const adminFirestore = admin.firestore(adminApp);
+
+export { adminAuth, adminFirestore };

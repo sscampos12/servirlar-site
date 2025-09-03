@@ -3,7 +3,7 @@
 
 import { doc, updateDoc, deleteDoc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import { getAdminApp } from '@/lib/firebase-admin';
+import { adminAuth } from '@/lib/firebase-admin';
 
 
 type ProfessionalStatus = 'Aprovado' | 'Pendente' | 'Rejeitado' | 'Ativo' | 'Inativo';
@@ -19,8 +19,6 @@ export async function updateProfessionalStatus(id: string, newStatus: Profession
 
         await updateDoc(docRef, { status: newStatus });
         
-        // A lógica de envio de e-mail foi removida daqui.
-        
         return { success: true, message: `Status atualizado para ${newStatus}` };
     } catch (error) {
         console.error("Error updating status:", error);
@@ -30,8 +28,8 @@ export async function updateProfessionalStatus(id: string, newStatus: Profession
 
 export async function deleteProfessional(id: string) {
     try {
-        const adminApp = getAdminApp();
-        const adminAuth = adminApp.auth;
+        // Deleta do Firebase Authentication
+        await adminAuth.deleteUser(id);
 
         // Deleta do Firestore
         const professionalDocRef = doc(db, 'professionals', id);
@@ -43,12 +41,15 @@ export async function deleteProfessional(id: string) {
              await deleteDoc(userDocRef);
         }
 
-        // Deleta do Firebase Authentication
-        await adminAuth.deleteUser(id);
-
         return { success: true, message: 'Profissional deletado com sucesso de todos os sistemas.' };
-    } catch (error) {
+    } catch (error: any) {
         console.error("Error deleting professional:", error);
+        // Trata caso o usuário já tenha sido deletado da autenticação mas não do firestore
+        if (error.code === 'auth/user-not-found') {
+            const professionalDocRef = doc(db, 'professionals', id);
+            await deleteDoc(professionalDocRef);
+            return { success: true, message: 'Profissional (registro órfão) deletado com sucesso.' };
+        }
         return { success: false, message: 'Falha ao deletar o profissional.' };
     }
 }
