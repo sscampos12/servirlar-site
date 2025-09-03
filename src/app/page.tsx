@@ -156,7 +156,7 @@ const TestimonialsSection = () => {
   );
 };
 
-const HowItWorksStep = ({ number, title, description, icon, isLast = false }: { number?: number, title: string, description: string, icon?: React.ReactNode, isLast?: boolean }) => (
+const HowItWorksStep = ({ number, title, description, icon }: { number?: number, title: string, description: string, icon?: React.ReactNode }) => (
     <div className="flex flex-col items-center text-center">
         <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-4 ${number ? 'bg-primary text-primary-foreground' : 'bg-accent text-accent-foreground'}`}>
             {number ? (
@@ -182,23 +182,23 @@ const HowItWorksSection = () => {
                  <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-12 items-start">
                     <HowItWorksStep 
                         number={1}
-                        title="Escolha o Serviço"
-                        description="Selecione o tipo de serviço (casa ou empresa) e suas necessidades específicas."
+                        title="Cadastre-se e Agende"
+                        description="Crie sua conta, escolha o serviço e agende o melhor dia e horário para você."
                     />
                      <HowItWorksStep 
                         number={2}
-                        title="Agende"
-                        description="Defina a data e horário que melhor se encaixam na sua agenda."
+                        title="Aguarde a Confirmação"
+                        description="Profissionais disponíveis recebem seu pedido. Você será notificado assim que um deles aceitar o serviço."
                     />
                      <HowItWorksStep 
                         number={3}
                         title="Receba o Profissional"
-                        description="Nossos especialistas chegam prontos para transformar seu espaço."
+                        description="No dia e hora marcados, nosso especialista chegará pronto para realizar o serviço com excelência."
                     />
                      <HowItWorksStep 
-                        title="Avalie"
-                        description="Sua opinião é fundamental para mantermos a excelência em nossos serviços."
-                        icon={<Star className="w-8 h-8" />}
+                        number={4}
+                        title="Pague e Avalie"
+                        description="O pagamento é feito diretamente ao profissional após a conclusão. Depois, avalie o serviço na plataforma."
                     />
                 </div>
             </div>
