@@ -1,10 +1,8 @@
-
 import { Suspense } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { LoginForm } from '@/components/login-form';
 import { Skeleton } from '@/components/ui/skeleton';
 import Link from 'next/link';
-import { Logo } from '@/components/logo';
 import Image from 'next/image';
 
 function LoginSkeleton() {
@@ -25,35 +23,43 @@ function LoginSkeleton() {
 
 export default function LoginPage() {
   return (
-    <div className="w-full lg:grid lg:min-h-screen lg:grid-cols-2 xl:min-h-screen">
-      <div className="flex items-center justify-center py-12">
-        <div className="mx-auto grid w-[350px] gap-6">
-          <div className="grid gap-2 text-center">
-            <h1 className="text-3xl font-bold font-headline">Acesso à Plataforma</h1>
-            <p className="text-balance text-muted-foreground">
-              Insira seu e-mail e senha para acessar sua conta
-            </p>
-          </div>
-          <Suspense fallback={<LoginSkeleton />}>
-            <LoginForm />
-          </Suspense>
-          <div className="mt-4 text-center text-sm">
-            Não tem uma conta?{" "}
-            <Link href="/register" className="underline">
-              Cadastre-se
-            </Link>
-          </div>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        <div className="text-center mb-8">
+          <Link href="/" className="inline-flex items-center space-x-2 mb-6">
+              <Image 
+                src="https://i.postimg.cc/mD4p2yDs/logo-oficial-2.png"
+                alt="ServirLar Logo"
+                width={180}
+                height={40}
+              />
+          </Link>
+          <h2 className="text-2xl font-bold text-gray-800 mb-2 font-headline">Bem-vindo de volta!</h2>
+          <p className="text-gray-600">Entre na sua conta para continuar</p>
         </div>
-      </div>
-      <div className="hidden bg-muted lg:block">
-        <Image
-          src="https://i.postimg.cc/QCkrB3KC/foto-1.png"
-          alt="Image"
-          width="1920"
-          height="1080"
-          className="h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
-          data-ai-hint="office living room"
-        />
+
+        <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
+          <CardHeader className="space-y-1">
+            <CardTitle className="text-2xl text-center">Entrar</CardTitle>
+            <CardDescription className="text-center">
+              Digite suas credenciais para acessar sua conta
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Suspense fallback={<LoginSkeleton />}>
+                <LoginForm />
+            </Suspense>
+
+            <div className="text-center space-y-2 mt-4">
+              <p className="text-sm">
+                Não tem uma conta?{' '}
+                <Link href="/register" className="text-primary hover:underline font-semibold">
+                  Cadastre-se
+                </Link>
+              </p>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   )
