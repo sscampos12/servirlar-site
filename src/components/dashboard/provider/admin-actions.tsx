@@ -8,10 +8,10 @@ import { Loader2, Check, AlertTriangle, Phone } from 'lucide-react';
 
 interface AdminActionsProps {
     professionalId: string;
-    currentStatus: 'Aprovado' | 'Pendente' | 'Rejeitado';
+    currentStatus: 'Aprovado' | 'Pendente' | 'Rejeitado' | 'Ativo' | 'Inativo';
     phone: string;
     fullName: string;
-    updateStatusAction: (id: string, newStatus: 'Aprovado' | 'Rejeitado') => Promise<{ success: boolean, message: string }>;
+    updateStatusAction: (id: string, newStatus: 'Aprovado' | 'Rejeitado' | 'Ativo' | 'Inativo') => Promise<{ success: boolean, message: string }>;
 }
 
 const getWhatsAppLink = (phone: string | undefined, fullName: string | undefined) => {
@@ -46,7 +46,7 @@ export function AdminActions({ professionalId, currentStatus, phone, fullName, u
 
     return (
         <div className="space-y-3">
-            {currentStatus !== 'Aprovado' && (
+            {currentStatus !== 'Aprovado' && currentStatus !== 'Ativo' && (
                 <Button 
                 onClick={() => handleStatusChange('Aprovado')}
                 disabled={isPending}
@@ -81,3 +81,5 @@ export function AdminActions({ professionalId, currentStatus, phone, fullName, u
         </div>
     );
 }
+
+    
