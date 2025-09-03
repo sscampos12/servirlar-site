@@ -32,7 +32,8 @@ const InfoRow = ({ icon: Icon, label, value, blurred = false }: { icon: React.El
 
 function ServiceDetailPage() {
     const { user, loading: authLoading } = useAuth();
-    const { id: serviceId } = useParams();
+    const params = useParams();
+    const serviceId = params.id as string;
     const searchParams = useSearchParams();
     const router = useRouter();
     const { toast } = useToast();
@@ -70,7 +71,7 @@ function ServiceDetailPage() {
             return;
         };
 
-        const serviceRef = doc(db, "schedules", serviceId as string);
+        const serviceRef = doc(db, "schedules", serviceId);
         const unsubscribe = onSnapshot(serviceRef, (docSnapshot) => {
             if (docSnapshot.exists()) {
                 const serviceData = docSnapshot.data();
@@ -109,7 +110,7 @@ function ServiceDetailPage() {
         try {
             // Chame a Cloud Function para criar a sessão de checkout
             const createStripeCheckout = httpsCallable(functions, 'createStripeCheckout');
-            const result: any = await createStripeCheckout({ servicoId });
+            const result: any = await createStripeCheckout({ servicoId: serviceId });
             const sessionId = result.data.id;
 
             // Redirecione para o checkout do Stripe
@@ -199,7 +200,7 @@ function ServiceDetailPage() {
                     
                     <h3 className="font-headline text-lg font-semibold">Taxa de Acesso</h3>
                      <p className="text-2xl font-bold text-secondary my-1">
-                        R$ 10,00
+                        R$ 1,00
                     </p>
                     <p className="text-muted-foreground text-xs mb-4">Pagamento único para desbloquear os detalhes de contato.</p>
 
@@ -222,3 +223,5 @@ function ServiceDetailPage() {
 }
 
 export default withAuth(ServiceDetailPage, ['professional']);
+
+    
