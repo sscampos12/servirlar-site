@@ -234,7 +234,7 @@ export default function Home() {
     <MarketingLayout>
       {/* Hero Section */}
       <section className="bg-muted/30">
-        <div className="container mx-auto px-4 py-20 md:py-32">
+        <div className="container mx-auto px-4 py-16 md:py-24">
             <div className="grid md:grid-cols-2 gap-12 items-center">
                 <div className="text-center md:text-left">
                     <h1 className="font-headline text-4xl md:text-5xl lg:text-6xl font-extrabold text-foreground leading-tight">
