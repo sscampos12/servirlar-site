@@ -254,7 +254,7 @@ export default function Home() {
                 </div>
                  <div>
                     <Image 
-                        src="https://firebasestudio-hosting.web.app/projects/servirlar/assets/hero_image.png"
+                        src="/assets/hero_image.png"
                         width={600}
                         height={400}
                         alt="Divisão entre um escritório organizado e uma sala de estar aconchegante"
