@@ -1,9 +1,11 @@
 
 import { Suspense } from 'react';
-import { MarketingLayout } from "@/components/marketing-layout"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { LoginForm } from '@/components/login-form';
 import { Skeleton } from '@/components/ui/skeleton';
+import Link from 'next/link';
+import { Logo } from '@/components/logo';
+import Image from 'next/image';
 
 function LoginSkeleton() {
   return (
@@ -23,22 +25,36 @@ function LoginSkeleton() {
 
 export default function LoginPage() {
   return (
-    <MarketingLayout>
-      <div className="flex items-center justify-center py-12 px-4">
-        <Card className="w-full max-w-sm">
-          <CardHeader>
-            <CardTitle className="font-headline text-2xl">Acesso à Plataforma</CardTitle>
-            <CardDescription>
-              Selecione o seu tipo de perfil para continuar.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Suspense fallback={<LoginSkeleton />}>
-              <LoginForm />
-            </Suspense>
-          </CardContent>
-        </Card>
+    <div className="w-full lg:grid lg:min-h-screen lg:grid-cols-2 xl:min-h-screen">
+      <div className="flex items-center justify-center py-12">
+        <div className="mx-auto grid w-[350px] gap-6">
+          <div className="grid gap-2 text-center">
+            <h1 className="text-3xl font-bold font-headline">Acesso à Plataforma</h1>
+            <p className="text-balance text-muted-foreground">
+              Insira seu e-mail e senha para acessar sua conta
+            </p>
+          </div>
+          <Suspense fallback={<LoginSkeleton />}>
+            <LoginForm />
+          </Suspense>
+          <div className="mt-4 text-center text-sm">
+            Não tem uma conta?{" "}
+            <Link href="/register" className="underline">
+              Cadastre-se
+            </Link>
+          </div>
+        </div>
       </div>
-    </MarketingLayout>
+      <div className="hidden bg-muted lg:block">
+        <Image
+          src="https://i.postimg.cc/QCkrB3KC/foto-1.png"
+          alt="Image"
+          width="1920"
+          height="1080"
+          className="h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
+          data-ai-hint="office living room"
+        />
+      </div>
+    </div>
   )
 }

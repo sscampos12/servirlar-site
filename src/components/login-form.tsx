@@ -1,7 +1,6 @@
 
 "use client";
 
-import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { useSearchParams, useRouter } from "next/navigation"
 import { useToast } from "@/hooks/use-toast";
@@ -11,6 +10,7 @@ import { auth } from "@/lib/firebase";
 import { Loader2 } from "lucide-react";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
+import Link from "next/link";
 
 
 export function LoginForm() {
@@ -48,9 +48,8 @@ export function LoginForm() {
 
 
   return (
-    <div className="grid gap-4">
-      <form onSubmit={handleLogin} className="space-y-4">
-        <div className="space-y-2">
+      <form onSubmit={handleLogin} className="grid gap-4">
+        <div className="grid gap-2">
           <Label htmlFor="email">Email</Label>
           <Input 
             id="email" 
@@ -61,8 +60,13 @@ export function LoginForm() {
             onChange={(e) => setEmail(e.target.value)}
           />
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="password">Senha</Label>
+        <div className="grid gap-2">
+            <div className="flex items-center">
+                <Label htmlFor="password">Senha</Label>
+                <Link href="#" className="ml-auto inline-block text-sm underline">
+                    Esqueceu sua senha?
+                </Link>
+            </div>
           <Input 
             id="password" 
             type="password" 
@@ -75,13 +79,5 @@ export function LoginForm() {
           {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : 'Entrar'}
         </Button>
       </form>
-
-      <div className="mt-4 text-center text-sm">
-        Não tem uma conta?{" "}
-        <Link href="/register" className="underline">
-          Cadastre-se
-        </Link>
-      </div>
-    </div>
   )
 }
