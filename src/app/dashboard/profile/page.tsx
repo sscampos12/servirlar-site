@@ -49,14 +49,7 @@ const DetailItem = ({ icon: Icon, label, value }: { icon: React.ElementType, lab
 
 const StatusAlert = ({ status }: { status: ProfessionalProfile['status'] }) => {
     const statusConfig = {
-        Pendente: {
-            icon: BadgeAlert,
-            title: "Perfil em Análise",
-            description: "Seus dados foram enviados e estão sendo analisados pela nossa equipe. Entraremos em contato em breve.",
-            variant: "default",
-            className: "bg-yellow-50 border-yellow-200 text-yellow-800 [&>svg]:text-yellow-500"
-        },
-         Aprovado: {
+        Aprovado: {
             icon: BadgeCheck,
             title: "Perfil Aprovado!",
             description: "Parabéns! Seu perfil foi aprovado. Agora você já pode visualizar e aceitar serviços disponíveis.",
@@ -74,12 +67,15 @@ const StatusAlert = ({ status }: { status: ProfessionalProfile['status'] }) => {
             title: "Perfil Incompleto",
             description: "Você precisa completar seu cadastro para poder ser analisado e aprovado na plataforma.",
             variant: "destructive",
+        },
+        Pendente: {
+            // This configuration is intentionally left empty to hide the message
         }
     };
 
-    const config = statusConfig[status];
+    const config = statusConfig[status as keyof typeof statusConfig];
 
-    if (!config) return null;
+    if (!config || !config.icon) return null;
 
     return (
         <Alert className={config.className} variant={config.variant as any}>
