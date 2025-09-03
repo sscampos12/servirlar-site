@@ -1,10 +1,16 @@
-
 "use server";
 
-import { adminAuth, adminFirestore } from "@/lib/firebase-admin";
+import { initializeAdminApp } from "@/lib/firebase-admin";
+import * as admin from 'firebase-admin';
 import { revalidatePath } from "next/cache";
 
 type ProfessionalStatus = 'Ativo' | 'Inativo';
+
+// Garante que o app admin está inicializado
+initializeAdminApp();
+const adminFirestore = admin.firestore();
+const adminAuth = admin.auth();
+
 
 export async function updateProfessionalStatusAction(id: string, newStatus: ProfessionalStatus) {
     if (!id) {
