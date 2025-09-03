@@ -11,7 +11,7 @@ interface AdminActionsProps {
     currentStatus: 'Aprovado' | 'Pendente' | 'Rejeitado' | 'Ativo' | 'Inativo';
     phone: string;
     fullName: string;
-    updateStatusAction: (id: string, newStatus: 'Aprovado' | 'Rejeitado' | 'Ativo' | 'Inativo') => Promise<{ success: boolean, message: string }>;
+    updateStatusAction: (newStatus: 'Aprovado' | 'Rejeitado' | 'Ativo' | 'Inativo') => void;
 }
 
 const getWhatsAppLink = (phone: string | undefined, fullName: string | undefined) => {
@@ -33,40 +33,35 @@ export function AdminActions({ professionalId, currentStatus, phone, fullName, u
             : 'Deseja realmente rejeitar este cadastro?';
         
         if (window.confirm(confirmationText)) {
-            startTransition(async () => {
-                const result = await updateStatusAction(professionalId, newStatus);
-                 if (result.success) {
-                    toast({ title: 'Sucesso', description: `Cadastro ${newStatus.toLowerCase()} com sucesso!` });
-                } else {
-                    toast({ variant: 'destructive', title: 'Erro', description: result.message });
-                }
+            startTransition(() => {
+                updateStatusAction(newStatus);
             });
         }
     };
 
     return (
         <div className="space-y-3">
-            {currentStatus !== 'Aprovado' && currentStatus !== 'Ativo' && (
-                <Button 
-                onClick={() => handleStatusChange('Aprovado')}
-                disabled={isPending}
-                className="w-full bg-green-600 hover:bg-green-700"
-                >
-                {isPending ? <Loader2 className="w-4 h-4 animate-spin"/> : <Check className="w-4 h-4" />}
-                Aprovar Cadastro
-                </Button>
-            )}
-            
-            {currentStatus !== 'Rejeitado' && (
-                <Button 
-                onClick={() => handleStatusChange('Rejeitado')}
-                disabled={isPending}
-                variant="destructive"
-                className="w-full"
-                >
-                {isPending ? <Loader2 className="w-4 h-4 animate-spin"/> : <AlertTriangle className="w-4 h-4" />}
-                Rejeitar Cadastro
-                </Button>
+            {currentStatus === 'Pendente' && (
+                <>
+                    <Button 
+                    onClick={() => handleStatusChange('Aprovado')}
+                    disabled={isPending}
+                    className="w-full bg-green-600 hover:bg-green-700"
+                    >
+                    {isPending ? <Loader2 className="w-4 h-4 animate-spin"/> : <Check className="w-4 h-4" />}
+                    Aprovar Cadastro
+                    </Button>
+                    
+                    <Button 
+                    onClick={() => handleStatusChange('Rejeitado')}
+                    disabled={isPending}
+                    variant="destructive"
+                    className="w-full"
+                    >
+                    {isPending ? <Loader2 className="w-4 h-4 animate-spin"/> : <AlertTriangle className="w-4 h-4" />}
+                    Rejeitar Cadastro
+                    </Button>
+                </>
             )}
             
             <a 

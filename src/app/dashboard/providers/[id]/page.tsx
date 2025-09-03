@@ -28,7 +28,7 @@ import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter, useParams } from 'next/navigation';
-import { updateProfessionalStatusAction, deleteProfessionalAction } from '@/app/dashboard/providers/actions';
+import { updateProvider, deleteProvider } from '@/app/dashboard/providers/actions';
 import { AdminActions } from '@/components/dashboard/provider/admin-actions';
 
 type ProfessionalStatus = 'Aprovado' | 'Pendente' | 'Rejeitado' | 'Ativo' | 'Inativo';
@@ -99,13 +99,15 @@ export default function DetalheProfissionalAdminPage() {
     return () => unsubscribe();
   }, [professionalId, router, toast]);
 
-  const handleUpdateStatus = async (newStatus: 'Ativo' | 'Inativo') => {
+  const handleUpdateStatus = async (newStatus: 'Ativo' | 'Inativo' | 'Aprovado' | 'Rejeitado') => {
     startTransition(async () => {
-        const result = await updateProfessionalStatusAction(professionalId, newStatus);
+        const formData = new FormData();
+        formData.append('status', newStatus);
+        const result = await updateProvider(professionalId, formData);
         if(result.success) {
-            toast({ title: 'Sucesso', description: result.message });
+            toast({ title: 'Sucesso', description: 'Status do profissional atualizado.' });
         } else {
-            toast({ variant: 'destructive', title: 'Erro', description: result.message });
+            toast({ variant: 'destructive', title: 'Erro', description: result.error });
         }
     });
   }
@@ -113,12 +115,12 @@ export default function DetalheProfissionalAdminPage() {
   const handleDelete = async () => {
      if(window.confirm('Tem certeza que deseja deletar este cadastro? Esta ação não pode ser desfeita.')) {
         startTransition(async () => {
-            const result = await deleteProfessionalAction(professionalId);
+            const result = await deleteProvider(professionalId);
             if (result.success) {
-                toast({ title: 'Sucesso', description: result.message });
+                toast({ title: 'Sucesso', description: 'Profissional deletado com sucesso.' });
                 router.push('/dashboard/providers');
             } else {
-                toast({ variant: 'destructive', title: 'Erro', description: result.message });
+                toast({ variant: 'destructive', title: 'Erro', description: result.error });
             }
         });
      }
@@ -285,7 +287,7 @@ export default function DetalheProfissionalAdminPage() {
                         currentStatus={professionalData.status}
                         phone={professionalData.phone}
                         fullName={professionalData.fullName}
-                        updateStatusAction={updateProfessionalStatusAction}
+                        updateStatusAction={handleUpdateStatus}
                     />
                 </CardContent>
             </Card>
@@ -329,5 +331,3 @@ export default function DetalheProfissionalAdminPage() {
     </div>
   );
 };
-
-    
