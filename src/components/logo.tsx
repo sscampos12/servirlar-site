@@ -7,8 +7,8 @@ export function Logo({ className, ...props }: React.ImgHTMLAttributes<HTMLImageE
     <Image
       src="https://i.postimg.cc/mD4p2yDs/logo-oficial-2.png"
       alt="ServirLar Logo"
-      width={152}
-      height={32}
+      width={180}
+      height={40}
       className={cn(className)}
       {...props}
       priority
