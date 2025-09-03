@@ -254,7 +254,7 @@ export default function Home() {
                 </div>
                  <div>
                     <Image 
-                        src="/assets/hero_image.png"
+                        src="https://picsum.photos/600/400"
                         width={600}
                         height={400}
                         alt="Divisão entre um escritório organizado e uma sala de estar aconchegante"
