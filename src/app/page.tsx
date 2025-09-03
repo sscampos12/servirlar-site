@@ -197,8 +197,8 @@ const HowItWorksSection = () => {
                     />
                      <HowItWorksStep 
                         number={4}
-                        title="Pague e Avalie"
-                        description="O pagamento é feito diretamente ao profissional após a conclusão. Depois, avalie o serviço na plataforma."
+                        title="Pague pelo Serviço"
+                        description="O pagamento é feito diretamente ao profissional após a conclusão do serviço."
                     />
                 </div>
             </div>
