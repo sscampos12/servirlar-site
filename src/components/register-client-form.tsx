@@ -79,6 +79,31 @@ export function ClientRegistrationForm() {
             name: fullName,
             email: user.email,
         });
+        
+        // 3. Send welcome email
+        const emailBody = {
+            to: email,
+            subject: `Bem-vindo(a) à ServirLar, ${fullName.split(' ')[0]}!`,
+            html: `
+                <h1>Olá, ${fullName}!</h1>
+                <p>Seja muito bem-vindo(a) à nossa plataforma. Estamos felizes em ter você conosco.</p>
+                <p>Agora você pode agendar serviços de forma rápida e segura. Explore todas as funcionalidades em seu painel.</p>
+                <br>
+                <p>Atenciosamente,</p>
+                <p>Equipe ServirLar</p>
+            `
+        };
+
+        try {
+             await fetch('/api/send-email', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(emailBody),
+            });
+        } catch (emailError) {
+            console.error("Falha ao enviar e-mail de boas-vindas:", emailError);
+            // Non-blocking error, so we don't throw here, just log it.
+        }
 
 
         toast({
