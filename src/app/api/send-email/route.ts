@@ -13,7 +13,7 @@ apiInstance.setApiKey(
 // ----------------------------
 
 // --- ATENÇÃO: ALTERE O REMETENTE PARA SEU DOMÍNIO VERIFICADO ---
-const fromEmail = "contato@servirlar.com";
+const fromEmail = "contato@servirlar.com.br";
 const fromName = "ServirLar";
 // ----------------------------------------------------------------
 
