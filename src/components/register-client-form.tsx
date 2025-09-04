@@ -85,12 +85,45 @@ export function ClientRegistrationForm() {
 
         const subject = `Bem-vindo(a) à ServirLar, ${fullName}!`;
         const htmlContent = `
-            <h1>Olá, ${fullName}!</h1>
-            <p>Seu cadastro em nossa plataforma foi realizado com sucesso. Estamos muito felizes em ter você conosco.</p>
-            <p>Agora você pode agendar os melhores serviços para seu lar e sua empresa com apenas alguns cliques.</p>
-            <br>
-            <p>Atenciosamente,</p>
-            <p>Equipe ServirLar</p>
+            <!DOCTYPE html>
+            <html lang="pt-BR">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <style>
+                    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; margin: 0; padding: 0; background-color: #f4f4f7; }
+                    .container { max-width: 600px; margin: 20px auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; border: 1px solid #e2e8f0; }
+                    .header { background-color: #4A90E2; padding: 20px; text-align: center; }
+                    .header img { max-width: 150px; }
+                    .content { padding: 30px; line-height: 1.6; color: #333; }
+                    .content h1 { color: #1e293b; font-size: 24px; }
+                    .content p { font-size: 16px; margin-bottom: 20px; }
+                    .button { display: inline-block; background-color: #50E3C2; color: #1e293b; padding: 12px 25px; border-radius: 5px; text-decoration: none; font-weight: bold; }
+                    .footer { background-color: #f1f5f9; padding: 20px; text-align: center; font-size: 12px; color: #64748b; }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <div class="header">
+                        <img src="https://i.postimg.cc/dQWcQ6kF/logo-oficial-5.png" alt="ServirLar Logo">
+                    </div>
+                    <div class="content">
+                        <h1>Bem-vindo(a), ${fullName}!</h1>
+                        <p>Seu cadastro em nossa plataforma foi realizado com sucesso. Estamos muito felizes em ter você conosco.</p>
+                        <p>Agora você pode agendar os melhores serviços para seu lar e sua empresa com apenas alguns cliques. Explore a plataforma e descubra como podemos facilitar o seu dia a dia.</p>
+                        <p style="text-align: center; margin-top: 30px;">
+                            <a href="https://lar-seguro-76fan.web.app/login" class="button">Acessar minha conta</a>
+                        </p>
+                        <p>Se precisar de algo, nossa equipe está sempre à disposição.</p>
+                        <p>Atenciosamente,<br>Equipe ServirLar</p>
+                    </div>
+                    <div class="footer">
+                        <p>&copy; ${new Date().getFullYear()} ServirLar. Todos os direitos reservados.</p>
+                        <p>Se você não se cadastrou, por favor, ignore este e-mail.</p>
+                    </div>
+                </div>
+            </body>
+            </html>
         `;
 
         try {
