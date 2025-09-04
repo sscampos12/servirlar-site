@@ -1,17 +1,21 @@
+// ARQUIVO: /pages/api/send-email.ts (ou onde seu código estiver)
 
 import { NextRequest, NextResponse } from 'next/server';
-import { Resend } from 'resend';
+import * as Brevo from '@getbrevo/brevo';
 import { z } from 'zod';
 
-// A chave de API NUNCA deve ser exposta no código.
-// Ela é buscada de forma segura das variáveis de ambiente.
-const resend = new Resend(process.env.RESEND_API_KEY);
+// --- CONFIGURAÇÃO DO BREVO ---
+const apiInstance = new Brevo.TransactionalEmailsApi();
+apiInstance.setApiKey(
+    Brevo.TransactionalEmailsApiApiKeys.apiKey, 
+    process.env.BREVO_API_KEY!
+);
+// ----------------------------
 
-// --- ATENÇÃO ---
-// Para testes e desenvolvimento, o Resend permite o uso do remetente 'onboarding@resend.dev'.
-// Para produção, você DEVE trocar este valor por um e-mail de um domínio que você
-// verificou na sua conta do Resend. Ex: "nao-responda@seusite.com.br"
-const fromEmail = "ServirLar <onboarding@resend.dev>";
+// --- ATENÇÃO: ALTERE O REMETENTE PARA SEU DOMÍNIO VERIFICADO ---
+const fromEmail = "contato@servirlar.com.br";
+const fromName = "ServirLar";
+// ----------------------------------------------------------------
 
 const emailSchema = z.object({
   to: z.string().email({ message: "Endereço de e-mail do destinatário inválido." }),
@@ -34,57 +38,50 @@ export async function POST(req: NextRequest) {
     const parsed = emailSchema.safeParse(body);
 
     if (!parsed.success) {
-         return NextResponse.json({ 
-          success: false,
-          error: 'Dados inválidos ou incompletos para enviar o e-mail.',
-          details: parsed.error.flatten().fieldErrors
+        return NextResponse.json({ 
+            success: false,
+            error: 'Dados inválidos ou incompletos para enviar o e-mail.',
+            details: parsed.error.flatten().fieldErrors
         }, { status: 400 });
     }
 
     const { to, subject, html } = parsed.data;
 
-    // Se a chave não estiver presente ou estiver vazia, simula o envio.
-    if (!process.env.RESEND_API_KEY) {
-        console.warn('--- MODO DE SIMULAÇÃO (RESEND_API_KEY não configurada no arquivo .env) ---');
+    // Se a chave não estiver configurada, avisa no console (ótimo para desenvolvimento)
+    if (!process.env.BREVO_API_KEY) {
+        console.warn('--- MODO DE SIMULAÇÃO (BREVO_API_KEY não configurada no arquivo .env) ---');
         console.log(`Um e-mail teria sido enviado para: ${to}`);
-        console.log(`Assunto: ${subject}`);
-        console.log('-------------------------------------------------------------------------');
         return NextResponse.json({
             success: true,
-            message: `E-mail simulado enviado para ${to}. Configure a RESEND_API_KEY no arquivo .env para envios reais.`,
-            data: { id: `simulated_${new Date().getTime()}` },
+            message: `E-mail simulado enviado para ${to}.`,
         });
     }
 
-    try {
-        const { data, error } = await resend.emails.send({
-            from: fromEmail,
-            to: [to],
-            subject: subject,
-            html: html,
-        });
+    // --- LÓGICA DE ENVIO COM BREVO ---
+    const sendSmtpEmail = new Brevo.SendSmtpEmail();
+    sendSmtpEmail.subject = subject;
+    sendSmtpEmail.htmlContent = html;
+    sendSmtpEmail.sender = { name: fromName, email: fromEmail };
+    sendSmtpEmail.to = [{ email: to }];
+    // Para enviar cópias, ex: sendSmtpEmail.bcc = [{ email: "copia@meusite.com" }];
+    // ------------------------------------
 
-        if (error) {
-            console.error('Erro detalhado do Resend:', error);
-            return NextResponse.json({ 
-                success: false,
-                error: 'Falha no serviço de e-mail.',
-                details: error.message
-            }, { status: 500 });
-        }
+    try {
+        // A chamada de API do Brevo é um pouco diferente
+        const data = await apiInstance.sendTransacEmail(sendSmtpEmail);
 
         return NextResponse.json({
             success: true,
             message: `E-mail enviado com sucesso para ${to}.`,
-            data: data,
+            data: data.body, // O Brevo retorna o corpo da resposta aqui
         });
 
     } catch (error: any) {
-        console.error('Erro catastrófico na API de envio de e-mail:', error);
-        
+        console.error('Erro detalhado do Brevo:', error);
         return NextResponse.json({ 
             success: false,
-            error: error?.message || 'Erro interno do servidor ao tentar enviar e-mail.',
+            error: 'Falha no serviço de e-mail.',
+            details: error?.response?.body?.message || error.message,
         }, { status: 500 });
     }
 }
