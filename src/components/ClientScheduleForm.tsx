@@ -86,7 +86,9 @@ export const ClientScheduleForm = ({ user }: { user: any }) => {
             observations: formData.observations,
             value: total,
             status: "Pendente" as const,
-            paymentStatus: 'Pendente',
+            taxa: {
+                statusPagamento: 'Pendente',
+            },
             createdAt: serverTimestamp(),
             scheduledBy: 'client',
         };
@@ -97,6 +99,18 @@ export const ClientScheduleForm = ({ user }: { user: any }) => {
             description: "Seu agendamento foi criado. Notificando profissionais...",
         });
 
+        // 1. Notificar o cliente que a solicitação foi recebida
+        await fetch('/api/send-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                to: user.email,
+                subject: `Sua solicitação de agendamento foi recebida!`,
+                html: `<h1>Olá, ${user.name}!</h1><p>Recebemos sua solicitação. Em breve você receberá um novo e-mail com a confirmação e os dados do profissional.</p>`
+            }),
+        });
+
+        // 2. Notificar todos os profissionais disponíveis
         const profQuery = query(collection(db, "professionals"), where("status", "in", ["Aprovado", "Ativo"]));
         const profSnap = await getDocs(profQuery);
         const professionalsToNotify = profSnap.docs.map(doc => doc.data());

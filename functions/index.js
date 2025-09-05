@@ -108,7 +108,7 @@ exports.stripeWebhook = functions.https.onRequest(async (req, res) => {
       // ---- INÍCIO DA LÓGICA DE NOTIFICAÇÃO ----
       const servicoData = servicoSnap.data();
 
-      if (servicoData) {
+      if (servicoData && professionalData) {
         
         // 1. Criar notificação no site para o cliente
         const notificacaoCliente = {
@@ -121,33 +121,64 @@ exports.stripeWebhook = functions.https.onRequest(async (req, res) => {
         };
         await db.collection('notifications').add(notificacaoCliente);
         
-        // 2. Enviar notificação por e-mail para o cliente
+        const emailApiUrl = `https://lar-seguro-76fan.web.app/api/send-email`;
+
+        // 2. Enviar notificação por e-mail para o CLIENTE
         if (servicoData.clientEmail) {
-            const emailBody = {
+            const emailClienteBody = {
                 to: servicoData.clientEmail,
-                subject: `Um profissional aceitou seu serviço de ${servicoData.service}!`,
+                subject: `Confirmado: Um profissional aceitou seu serviço de ${servicoData.service}!`,
                 html: `
                     <h1>Olá, ${servicoData.clientName}!</h1>
                     <p>Temos uma ótima notícia! O profissional <strong>${professionalData.fullName}</strong> aceitou seu agendamento para o serviço de <strong>${servicoData.service}</strong>.</p>
                     <p>Ele(a) recebeu seus detalhes de contato e deve se comunicar em breve para confirmar tudo.</p>
+                    <p><strong>Contato do profissional:</strong> ${professionalData.phone}</p>
                     <p>Para ver os detalhes do seu agendamento, acesse sua conta em nossa plataforma.</p>
                     <br>
                     <p>Atenciosamente,</p>
                     <p>Equipe ServirLar</p>
                 `
             };
-
-            const emailApiUrl = `https://lar-seguro-76fan.web.app/api/send-email`;
             
             try {
                 await fetch(emailApiUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(emailBody),
+                    body: JSON.stringify(emailClienteBody),
                 });
-                 console.log(`E-mail de notificação enviado para ${servicoData.clientEmail}`);
+                 console.log(`E-mail de confirmação para o cliente enviado para ${servicoData.clientEmail}`);
             } catch(emailError) {
-                console.error("Erro ao enviar email de notificação:", emailError);
+                console.error("Erro ao enviar email de notificação para o cliente:", emailError);
+            }
+        }
+
+        // 3. Enviar notificação por e-mail para o PROFISSIONAL
+        if (professionalData.email) {
+            const emailProfissionalBody = {
+                to: professionalData.email,
+                subject: `Serviço confirmado: ${servicoData.service}`,
+                html: `
+                    <h1>Olá, ${professionalData.fullName}!</h1>
+                    <p>Confirmamos o pagamento da taxa para o serviço do cliente <strong>${servicoData.clientName}</strong>.</p>
+                    <p>Os detalhes completos do cliente e do serviço agora estão disponíveis no seu painel.</p>
+                    <p><strong>Cliente:</strong> ${servicoData.clientName}</p>
+                    <p><strong>Telefone:</strong> ${servicoData.clientPhone}</p>
+                    <p><strong>Endereço:</strong> ${servicoData.address}</p>
+                    <p>Por favor, entre em contato com o cliente para confirmar os detalhes.</p>
+                    <br>
+                    <p>Bom trabalho!</p>
+                    <p>Equipe ServirLar</p>
+                `
+            };
+            try {
+                await fetch(emailApiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(emailProfissionalBody),
+                });
+                console.log(`E-mail de confirmação para o profissional enviado para ${professionalData.email}`);
+            } catch (emailError) {
+                console.error("Erro ao enviar email de notificação para o profissional:", emailError);
             }
         }
       }
