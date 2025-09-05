@@ -109,7 +109,7 @@ exports.createStripeCheckout = functions.https.onCall(async (data, context) => {
     return { id: session.id };
   } catch (error) {
     console.error("Erro ao criar checkout do Stripe:", error);
-    throw new functions.httpshttps.HttpsError(
+    throw new functions.https.HttpsError(
       "internal",
       "Não foi possível criar a sessão de pagamento."
     );
