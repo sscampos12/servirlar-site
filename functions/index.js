@@ -114,7 +114,7 @@ exports.stripeWebhook = functions.https.onRequest(async (req, res) => {
         const notificacaoCliente = {
             userId: servicoData.clientId,
             title: "Seu serviço foi aceito!",
-            description: `${professionalData.fullName} pegou seu serviço de ${servicoData.service} e entrará em contato em breve.`,
+            description: `${professionalData.fullName} aceitou seu serviço de ${servicoData.service} e entrará em contato em breve.`,
             createdAt: admin.firestore.FieldValue.serverTimestamp(),
             isRead: false,
             link: `/dashboard/my-account`
@@ -156,16 +156,17 @@ exports.stripeWebhook = functions.https.onRequest(async (req, res) => {
         if (professionalData.email) {
             const emailProfissionalBody = {
                 to: professionalData.email,
-                subject: `Serviço confirmado: ${servicoData.service}`,
+                subject: `Serviço atribuído: ${servicoData.service}`,
                 html: `
                     <h1>Olá, ${professionalData.fullName}!</h1>
-                    <p>Confirmamos o pagamento da taxa para o serviço do cliente <strong>${servicoData.clientName}</strong>.</p>
-                    <p>Os detalhes completos do cliente e do serviço agora estão disponíveis no seu painel.</p>
-                    <p><strong>Cliente:</strong> ${servicoData.clientName}</p>
-                    <p><strong>Telefone:</strong> ${servicoData.clientPhone}</p>
-                    <p><strong>Endereço:</strong> ${servicoData.address}</p>
-                    <p>Por favor, entre em contato com o cliente para confirmar os detalhes.</p>
-                    <br>
+                    <p>Confirmamos o pagamento da taxa para o serviço do cliente <strong>${servicoData.clientName}</strong>. Este serviço agora é seu!</p>
+                    <p>Os detalhes completos do cliente e do serviço agora estão disponíveis no seu painel. É importante entrar em contato com o cliente para confirmar os detalhes.</p>
+                    <h3>Detalhes do Cliente:</h3>
+                    <ul>
+                        <li><strong>Nome:</strong> ${servicoData.clientName}</li>
+                        <li><strong>Telefone:</strong> ${servicoData.clientPhone}</li>
+                        <li><strong>Endereço:</strong> ${servicoData.address}</li>
+                    </ul>
                     <p>Bom trabalho!</p>
                     <p>Equipe ServirLar</p>
                 `
@@ -192,5 +193,3 @@ exports.stripeWebhook = functions.https.onRequest(async (req, res) => {
 
   res.status(200).send();
 });
-
-    

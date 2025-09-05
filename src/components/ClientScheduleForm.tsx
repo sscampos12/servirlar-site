@@ -71,6 +71,8 @@ export const ClientScheduleForm = ({ user }: { user: any }) => {
     }
     setIsSubmitting(true);
 
+    let newScheduleId = '';
+
     try {
         const scheduleData = {
             clientId: user.uid,
@@ -92,7 +94,8 @@ export const ClientScheduleForm = ({ user }: { user: any }) => {
             createdAt: serverTimestamp(),
             scheduledBy: 'client',
         };
-        await addDoc(collection(db, "schedules"), scheduleData);
+        const docRef = await addDoc(collection(db, "schedules"), scheduleData);
+        newScheduleId = docRef.id;
 
         toast({
             title: "Solicitação Enviada!",
@@ -106,7 +109,7 @@ export const ClientScheduleForm = ({ user }: { user: any }) => {
             body: JSON.stringify({
                 to: user.email,
                 subject: `Sua solicitação de agendamento foi recebida!`,
-                html: `<h1>Olá, ${user.name}!</h1><p>Recebemos sua solicitação. Em breve você receberá um novo e-mail com a confirmação e os dados do profissional.</p>`
+                html: `<h1>Olá, ${clientData.fullName}!</h1><p>Recebemos sua solicitação. Em breve você receberá um novo e-mail com a confirmação e os dados do profissional.</p>`
             }),
         });
 
@@ -117,10 +120,30 @@ export const ClientScheduleForm = ({ user }: { user: any }) => {
 
         const emailPromises = professionalsToNotify.map(prof => {
             if (!prof.email) return Promise.resolve();
+
+            const rua = scheduleData.address.split(',')[0] || 'Não informado';
+            const bairro = scheduleData.address.split(',').slice(-2, -1)[0] || 'Não informado';
+            const linkPagamento = `https://lar-seguro-76fan.web.app/dashboard/services/${newScheduleId}`;
+
             const apiRequestBody = {
                 to: prof.email,
                 subject: `Nova Oportunidade: Serviço de ${scheduleData.service} Disponível!`,
-                html: `<h1>Olá, ${prof.fullName}!</h1><p>Um novo serviço de ${scheduleData.service} foi solicitado.</p><p><strong>Endereço:</strong> ${scheduleData.address}</p><p><strong>Data:</strong> ${new Date(scheduleData.date).toLocaleDateString('pt-BR', { timeZone: 'UTC' })} às ${scheduleData.time}</p><p>Acesse a plataforma para ver mais detalhes.</p>`
+                html: `
+                    <h1>Olá, ${prof.fullName}!</h1>
+                    <p>Um novo serviço que pode te interessar está disponível na plataforma.</p>
+                    <h3>Detalhes da Oportunidade:</h3>
+                    <ul>
+                        <li><strong>Serviço:</strong> ${scheduleData.service}</li>
+                        <li><strong>Local:</strong> Rua ${rua}, Bairro ${bairro.trim()}</li>
+                        <li><strong>Horário:</strong> ${new Date(scheduleData.date).toLocaleDateString('pt-BR', { timeZone: 'UTC' })} às ${scheduleData.time}</li>
+                        <li><strong>Valor a receber:</strong> R$ ${scheduleData.value.toFixed(2).replace('.', ',')}</li>
+                    </ul>
+                    <p>Para aceitar esta solicitação, clique no link abaixo e efetue o pagamento da taxa para confirmar o aceite do serviço e receber os detalhes completos do cliente.</p>
+                    <p style="text-align: center; margin: 20px 0;">
+                         <a href="${linkPagamento}" style="background-color: #4CAF50; color: white; padding: 15px 25px; text-align: center; text-decoration: none; display: inline-block; border-radius: 5px; font-size: 16px;">Ver Detalhes e Aceitar Serviço</a>
+                    </p>
+                    <p>Atenciosamente,<br>Equipe ServirLar</p>
+                `
             };
             return fetch('/api/send-email', {
                 method: 'POST',
