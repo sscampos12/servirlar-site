@@ -26,6 +26,7 @@ export function ClientRegistrationForm() {
   const [cpf, setCpf] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [referralCode, setReferralCode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
 
@@ -64,21 +65,30 @@ export function ClientRegistrationForm() {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
 
-        // 2. Save additional user info to Firestore
-        await setDoc(doc(db, "clients", user.uid), {
+        // 2. Prepare client data object
+        const clientData: any = {
             fullName: fullName,
             email: user.email,
             phone: phone,
             address: address,
             cpf: cpf,
-        });
+        };
+        if (referralCode.trim() !== '') {
+          clientData.referredBy = referralCode.trim().toUpperCase();
+        }
+        await setDoc(doc(db, "clients", user.uid), clientData);
 
-        await setDoc(doc(db, "users", user.uid), {
+        // 3. Prepare generic user data object
+        const genericUserData: any = {
             uid: user.uid,
             role: "client",
             name: fullName,
             email: user.email,
-        });
+        };
+        if (referralCode.trim() !== '') {
+            genericUserData.referredBy = referralCode.trim().toUpperCase();
+        }
+        await setDoc(doc(db, "users", user.uid), genericUserData);
         
         // --- INÍCIO DO CÓDIGO DO E-MAIL DE BOAS-VINDAS ---
         console.log("Cadastro salvo com sucesso! Preparando para enviar e-mail de boas-vindas...");
@@ -226,6 +236,16 @@ export function ClientRegistrationForm() {
               <Input id="confirmPassword" name="confirmPassword" type="password" required value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} />
           </div>
           </div>
+           <div className="space-y-2">
+                <Label htmlFor="referralCode">Código de Indicação (Opcional)</Label>
+                <Input
+                  id="referralCode"
+                  name="referralCode"
+                  placeholder="Se alguém te indicou, insira o código aqui"
+                  value={referralCode}
+                  onChange={(e) => setReferralCode(e.target.value)}
+                />
+            </div>
           
           <div className="space-y-4 pt-4">
             <div className="flex items-start space-x-2">

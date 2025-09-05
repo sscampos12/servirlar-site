@@ -19,6 +19,7 @@ export default function ProviderInitialRegistrationPage() {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
+  const [referralCode, setReferralCode] = useState('');
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -29,6 +30,7 @@ export default function ProviderInitialRegistrationPage() {
     const password = formData.get('password') as string;
     const confirmPassword = formData.get('confirmPassword') as string;
     const fullName = formData.get('fullName') as string;
+    const refCode = formData.get('referralCode') as string;
 
     if (password !== confirmPassword) {
       toast({
@@ -56,13 +58,19 @@ export default function ProviderInitialRegistrationPage() {
       const user = userCredential.user;
 
       // 2. Create an initial professional document in Firestore
-      await setDoc(doc(db, "professionals", user.uid), {
+      const professionalData: any = {
         uid: user.uid,
         email: user.email,
         fullName: fullName,
-        status: 'Incompleto', // New status for incomplete profiles
+        status: 'Incompleto',
         createdAt: serverTimestamp(),
-      });
+      };
+
+      if (refCode.trim() !== '') {
+          professionalData.referredBy = refCode.trim().toUpperCase();
+      }
+
+      await setDoc(doc(db, "professionals", user.uid), professionalData);
 
       toast({
         title: "Conta Criada!",
@@ -125,6 +133,16 @@ export default function ProviderInitialRegistrationPage() {
                   <Label htmlFor="confirmPassword">Confirmar Senha</Label>
                   <Input id="confirmPassword" name="confirmPassword" type="password" required />
                 </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="referralCode">Código de Indicação (Opcional)</Label>
+                <Input
+                  id="referralCode"
+                  name="referralCode"
+                  placeholder="Se alguém te indicou, insira o código aqui"
+                  value={referralCode}
+                  onChange={(e) => setReferralCode(e.target.value)}
+                />
               </div>
               
               <div className="text-center pt-4">
