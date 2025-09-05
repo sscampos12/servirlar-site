@@ -8,7 +8,7 @@ admin.initializeApp();
 const db = admin.firestore();
 
 /**
- * Cria uma sessão de checkout no Stripe para o profissional pagar a taxa.
+ * Cria uma sessão de checkout no Stripe para o profissional pagar a taxa de 25%.
  * É chamada pelo frontend quando o profissional clica em "Pagar Taxa".
  */
 exports.createStripeCheckout = functions.https.onCall(async (data, context) => {
@@ -23,22 +23,43 @@ exports.createStripeCheckout = functions.https.onCall(async (data, context) => {
   const { servicoId } = data;
   const profissionalId = context.auth.uid;
 
+  // Busca os dados do serviço no Firestore para calcular a taxa
+  const servicoRef = db.collection("schedules").doc(servicoId);
+  const servicoSnap = await servicoRef.get();
+  
+  if (!servicoSnap.exists) {
+      throw new functions.https.HttpsError("not-found", "Serviço não encontrado.");
+  }
+  
+  const servicoData = servicoSnap.data();
+  const valorServico = servicoData.value;
+  const valorTaxa = valorServico * 0.25; // Calcula 25% do valor do serviço
+
+  if (valorTaxa < 0.50) { // Stripe tem um valor mínimo de transação
+       throw new functions.https.HttpsError("invalid-argument", "O valor da taxa é muito baixo para ser processado.");
+  }
+
+
   // URLs para onde o Stripe redirecionará após o pagamento
-  // SUBSTITUA 'ajudaemcasa.vercel.app' pelo seu domínio final quando tiver um.
   const successUrl = `https://lar-seguro-76fan.web.app/dashboard/services/${servicoId}?pagamento=sucesso`;
   const cancelUrl = `https://lar-seguro-76fan.web.app/dashboard/services/${servicoId}?pagamento=cancelado`;
 
   try {
     const session = await stripe.checkout.sessions.create({
-      payment_method_types: ["card", "boleto"], // Adicione 'boleto' para pagamentos no Brasil
+      payment_method_types: ["card", "boleto"], 
       mode: "payment",
       success_url: successUrl,
       cancel_url: cancelUrl,
       line_items: [
         {
-          // ID do Preço que você criou no painel do Stripe
-          // SUBSTITUA ESTE ID PELO SEU ID DE PREÇO REAL DO STRIPE (Crie um produto de R$1,00 para testes)
-          price: "price_1PjCgqDEQaroqD4wLpQdFzYq", 
+          price_data: {
+              currency: 'brl',
+              product_data: {
+                  name: `Taxa de serviço: ${servicoData.service}`,
+                  description: `Comissão da plataforma para o serviço do cliente ${servicoData.clientName}.`,
+              },
+              unit_amount: Math.round(valorTaxa * 100), // Valor em centavos
+          },
           quantity: 1,
         },
       ],
@@ -52,7 +73,7 @@ exports.createStripeCheckout = functions.https.onCall(async (data, context) => {
     });
 
     // Salva o ID da sessão no documento do serviço para referência
-    await db.collection("schedules").doc(servicoId).update({
+    await servicoRef.update({
       "taxa.checkoutSessionId": session.id,
     });
 

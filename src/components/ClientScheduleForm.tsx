@@ -90,6 +90,7 @@ export const ClientScheduleForm = ({ user }: { user: any }) => {
             status: "Pendente" as const,
             taxa: {
                 statusPagamento: 'Pendente',
+                valor: parseFloat((total * 0.25).toFixed(2))
             },
             createdAt: serverTimestamp(),
             scheduledBy: 'client',

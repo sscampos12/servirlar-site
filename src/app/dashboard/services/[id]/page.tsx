@@ -198,9 +198,9 @@ function ServiceDetailPage() {
 
                     <Separator className="my-4" />
                     
-                    <h3 className="font-headline text-lg font-semibold">Taxa de Acesso</h3>
+                    <h3 className="font-headline text-lg font-semibold">Taxa de Acesso (25%)</h3>
                      <p className="text-2xl font-bold text-secondary my-1">
-                        R$ 1,00
+                        R$ {service.taxa?.valor.toFixed(2).replace('.', ',')}
                     </p>
                     <p className="text-muted-foreground text-xs mb-4">Pagamento único para desbloquear os detalhes de contato.</p>
 
@@ -223,5 +223,3 @@ function ServiceDetailPage() {
 }
 
 export default withAuth(ServiceDetailPage, ['professional']);
-
-    
