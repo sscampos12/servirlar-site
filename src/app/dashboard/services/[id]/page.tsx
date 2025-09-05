@@ -205,7 +205,7 @@ function ServiceDetailPage() {
                     
                     <h3 className="font-headline text-lg font-semibold">Taxa de Acesso (25%)</h3>
                      <p className="text-2xl font-bold text-secondary my-1">
-                        R$ {service.taxa?.valor.toFixed(2).replace('.', ',')}
+                        R$ {(service.value * 0.25).toFixed(2).replace('.', ',')}
                     </p>
                     <p className="text-muted-foreground text-xs mb-4">Pagamento único para desbloquear os detalhes de contato.</p>
 
