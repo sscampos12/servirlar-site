@@ -7,13 +7,14 @@ import { db, auth } from '@/lib/firebase';
 import { doc, onSnapshot, DocumentData, updateDoc, getDoc, addDoc, collection } from 'firebase/firestore';
 import { useAuth } from '@/hooks/use-auth';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
-import { Loader2, Info, MapPin, Clock, User, Phone, CheckCircle, AlertCircle } from 'lucide-react';
+import { Loader2, Info, MapPin, Clock, User, Phone, CheckCircle, AlertCircle, Ticket } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { getFunctions, httpsCallable } from "firebase/functions";
 import { loadStripe } from "@stripe/stripe-js";
 import { Separator } from "@/components/ui/separator";
+import { Input } from "@/components/ui/input";
 
 // --- Configurações Iniciais ---
 const STRIPE_PUBLIC_KEY = process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY;
@@ -42,6 +43,7 @@ function ServiceDetailPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [isProcessingPayment, setIsProcessingPayment] = useState(false);
     const [hasPaid, setHasPaid] = useState(false);
+    const [couponCode, setCouponCode] = useState('');
 
     // Checa por parâmetros de sucesso/cancelamento do Stripe na URL
     useEffect(() => {
@@ -108,9 +110,12 @@ function ServiceDetailPage() {
 
         setIsProcessingPayment(true);
         try {
-            // Chame a Cloud Function para criar a sessão de checkout
+            // Chame a Cloud Function para criar a sessão de checkout, passando o cupom
             const createStripeCheckout = httpsCallable(functions, 'createStripeCheckout');
-            const result: any = await createStripeCheckout({ servicoId: serviceId });
+            const result: any = await createStripeCheckout({ 
+                servicoId: serviceId,
+                coupon: couponCode.trim() // Envia o código do cupom
+            });
             const sessionId = result.data.id;
 
             // Redirecione para o checkout do Stripe
@@ -128,7 +133,7 @@ function ServiceDetailPage() {
             toast({
                 variant: 'destructive',
                 title: 'Erro no Pagamento',
-                description: error.message || 'Não foi possível iniciar o processo de pagamento. Tente novamente.',
+                description: error.message || 'Não foi possível iniciar o processo de pagamento. Verifique se o cupom é válido.',
             });
         } finally {
             setIsProcessingPayment(false);
@@ -189,7 +194,7 @@ function ServiceDetailPage() {
                     <InfoRow icon={Phone} label="Telefone do Cliente" value={hasPaid ? service.clientPhone : 'Informação Bloqueada'} blurred={!hasPaid} />
                     <InfoRow icon={MapPin} label="Endereço Completo" value={hasPaid ? service.address : 'Informação Bloqueada'} blurred={!hasPaid} />
                 </div>
-                 <div className="bg-muted/50 p-6 rounded-lg flex flex-col justify-center items-center text-center">
+                 <div className="bg-muted/50 p-6 rounded-lg flex flex-col justify-center text-center">
                     <h3 className="font-headline text-lg font-semibold">Valor do Serviço</h3>
                     <p className="text-4xl font-bold text-primary my-2">
                         R$ {service.value.toFixed(2).replace('.', ',')}
@@ -205,10 +210,25 @@ function ServiceDetailPage() {
                     <p className="text-muted-foreground text-xs mb-4">Pagamento único para desbloquear os detalhes de contato.</p>
 
                     {!hasPaid && (
-                        <Button className="w-full" onClick={handlePagarTaxa} disabled={isProcessingPayment}>
-                            {isProcessingPayment ? <Loader2 className="animate-spin mr-2" /> : null}
-                            {isProcessingPayment ? 'Processando...' : 'Pagar Taxa e Ver Detalhes'}
-                        </Button>
+                        <>
+                            <div className="w-full space-y-2 mb-4">
+                                <label htmlFor="coupon" className="text-sm font-medium text-left block">Cupom de Desconto (Opcional)</label>
+                                <div className="flex items-center gap-2">
+                                     <Ticket className="h-5 w-5 text-muted-foreground" />
+                                    <Input 
+                                        id="coupon" 
+                                        placeholder="Ex: BEMVINDO100" 
+                                        value={couponCode}
+                                        onChange={(e) => setCouponCode(e.target.value)}
+                                        className="text-center"
+                                    />
+                                </div>
+                            </div>
+                            <Button className="w-full" onClick={handlePagarTaxa} disabled={isProcessingPayment}>
+                                {isProcessingPayment ? <Loader2 className="animate-spin mr-2" /> : null}
+                                {isProcessingPayment ? 'Processando...' : 'Pagar Taxa e Ver Detalhes'}
+                            </Button>
+                        </>
                     )}
                      {hasPaid && (
                         <div className="w-full text-center mt-4">

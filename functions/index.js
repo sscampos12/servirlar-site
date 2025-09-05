@@ -10,6 +10,7 @@ const db = admin.firestore();
 /**
  * Cria uma sessão de checkout no Stripe para o profissional pagar a taxa de 25%.
  * É chamada pelo frontend quando o profissional clica em "Pagar Taxa".
+ * Agora inclui lógica para aplicar cupons de desconto.
  */
 exports.createStripeCheckout = functions.https.onCall(async (data, context) => {
   // Verifica se o usuário está autenticado
@@ -20,7 +21,7 @@ exports.createStripeCheckout = functions.https.onCall(async (data, context) => {
     );
   }
 
-  const { servicoId } = data;
+  const { servicoId, coupon } = data; // Recebendo o ID do serviço e o código do cupom
   const profissionalId = context.auth.uid;
 
   // Busca os dados do serviço no Firestore para calcular a taxa
@@ -39,13 +40,11 @@ exports.createStripeCheckout = functions.https.onCall(async (data, context) => {
        throw new functions.https.HttpsError("invalid-argument", "O valor da taxa é muito baixo para ser processado.");
   }
 
-
   // URLs para onde o Stripe redirecionará após o pagamento
   const successUrl = `https://lar-seguro-76fan.web.app/dashboard/services/${servicoId}?pagamento=sucesso`;
   const cancelUrl = `https://lar-seguro-76fan.web.app/dashboard/services/${servicoId}?pagamento=cancelado`;
-
-  try {
-    const session = await stripe.checkout.sessions.create({
+  
+  const checkoutOptions = {
       payment_method_types: ["card", "boleto"], 
       mode: "payment",
       success_url: successUrl,
@@ -63,14 +62,44 @@ exports.createStripeCheckout = functions.https.onCall(async (data, context) => {
           quantity: 1,
         },
       ],
-      // Adiciona metadados para sabermos qual serviço está sendo pago
       metadata: {
         servicoId: servicoId,
         profissionalId: profissionalId,
       },
-       // Adiciona o email do cliente para o Stripe pré-preencher
       customer_email: context.auth.token.email,
-    });
+  };
+
+  // --- LÓGICA DO CUPOM ---
+  if (coupon) {
+      try {
+          const promotionCodes = await stripe.promotionCodes.list({
+              code: coupon.toUpperCase(),
+              active: true,
+              limit: 1,
+          });
+
+          if (promotionCodes.data.length > 0) {
+              checkoutOptions.discounts = [{
+                  promotion_code: promotionCodes.data[0].id,
+              }];
+              console.log(`Cupom '${coupon}' válido aplicado com sucesso.`);
+          } else {
+              throw new functions.https.HttpsError("not-found", "Cupom inválido ou expirado.");
+          }
+      } catch (error) {
+          console.error("Erro ao validar cupom:", error);
+          // Se o cupom for inválido, podemos optar por lançar um erro ou simplesmente ignorá-lo
+          // Lançar um erro é mais transparente para o usuário.
+          if (error.type === 'StripeInvalidRequestError') {
+             throw new functions.https.HttpsError("not-found", "Cupom inválido ou expirado.");
+          }
+          throw new functions.https.HttpsError("internal", "Não foi possível validar o cupom.");
+      }
+  }
+  // --- FIM DA LÓGICA DO CUPOM ---
+
+  try {
+    const session = await stripe.checkout.sessions.create(checkoutOptions);
 
     // Salva o ID da sessão no documento do serviço para referência
     await servicoRef.update({
@@ -80,7 +109,7 @@ exports.createStripeCheckout = functions.https.onCall(async (data, context) => {
     return { id: session.id };
   } catch (error) {
     console.error("Erro ao criar checkout do Stripe:", error);
-    throw new functions.https.HttpsError(
+    throw new functions.httpshttps.HttpsError(
       "internal",
       "Não foi possível criar a sessão de pagamento."
     );
@@ -214,6 +243,3 @@ exports.stripeWebhook = functions.https.onRequest(async (req, res) => {
 
   res.status(200).send();
 });
-
-    
-    
