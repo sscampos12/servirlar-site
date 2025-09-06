@@ -114,7 +114,7 @@ function ServiceDetailPage() {
             const createStripeCheckout = httpsCallable(functions, 'createStripeCheckout');
             const result: any = await createStripeCheckout({ 
                 servicoId: serviceId,
-                coupon: couponCode.trim() // Envia o código do cupom
+                couponCode: couponCode.trim() // Envia o código do cupom
             });
             const sessionId = result.data.id;
 

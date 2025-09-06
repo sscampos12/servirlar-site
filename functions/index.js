@@ -21,7 +21,7 @@ exports.createStripeCheckout = functions.https.onCall(async (data, context) => {
     );
   }
 
-  const { servicoId } = data; 
+  const { servicoId, couponCode } = data; 
   const profissionalId = context.auth.uid;
 
   // Busca os dados do serviço no Firestore para calcular a taxa
@@ -67,8 +67,38 @@ exports.createStripeCheckout = functions.https.onCall(async (data, context) => {
         profissionalId: profissionalId,
       },
       customer_email: context.auth.token.email,
-      allow_promotion_codes: true, // Permite que o usuário insira um código de promoção no checkout do Stripe
+      allow_promotion_codes: true,
   };
+
+  // Aplica o cupom de desconto se um código for fornecido
+  if (couponCode) {
+    try {
+      // Importante: O Stripe usa "promotion_codes" e não "coupons" diretamente aqui.
+      // Você deve criar códigos promocionais no seu Dashboard do Stripe que se referem aos seus cupons.
+      const promotionCodes = await stripe.promotionCodes.list({
+        code: couponCode.toUpperCase(),
+        active: true,
+        limit: 1,
+      });
+
+      if (promotionCodes.data.length > 0) {
+        checkoutOptions.discounts = [{
+          promotion_code: promotionCodes.data[0].id,
+        }];
+      } else {
+         // Lança um erro específico se o cupom não for encontrado ou estiver inativo
+        throw new functions.https.HttpsError("invalid-argument", "O código de cupom fornecido é inválido ou expirou.");
+      }
+    } catch(error) {
+       console.error("Erro ao buscar código promocional no Stripe:", error);
+       // Re-lança o erro para o frontend com uma mensagem amigável
+        if (error instanceof functions.https.HttpsError) {
+          throw error;
+        }
+       throw new functions.https.HttpsError("internal", "Não foi possível validar o cupom de desconto.");
+    }
+  }
+
 
   try {
     const session = await stripe.checkout.sessions.create(checkoutOptions);
@@ -81,13 +111,9 @@ exports.createStripeCheckout = functions.https.onCall(async (data, context) => {
     return { id: session.id };
   } catch (error) {
     console.error("Erro ao criar checkout do Stripe:", error);
-    // Retorna um erro mais informativo para o front-end
-    if (error.code === 'stripe_invalid_request_error' && error.message.includes('promotion_code')) {
-        throw new functions.https.HttpsError("invalid-argument", "O código de cupom fornecido é inválido ou expirou.");
-    }
     throw new functions.https.HttpsError(
       "internal",
-      "Não foi possível criar a sessão de pagamento."
+      error.message || "Não foi possível criar a sessão de pagamento."
     );
   }
 });
