@@ -72,6 +72,7 @@ export function ClientRegistrationForm() {
             phone: phone,
             address: address,
             cpf: cpf,
+            status: 'Ativo'
         };
         if (referralCode.trim() !== '') {
           clientData.referredBy = referralCode.trim().toUpperCase();
@@ -265,3 +266,5 @@ export function ClientRegistrationForm() {
     </div>
   );
 }
+
+    
