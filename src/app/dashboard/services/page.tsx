@@ -1,3 +1,4 @@
+
 "use client"
 
 import withAuth from "@/components/auth/with-auth";
@@ -105,8 +106,7 @@ function ServicesPage() {
 
         setIsLoading(true);
         
-        // CORREÇÃO: Removido o 'where' para evitar o erro de índice. 
-        // A filtragem visual será feita no card.
+        // Consulta para serviços disponíveis, ordenada por mais recente
         const availableQuery = query(collection(db, "schedules"), orderBy("createdAt", "desc"));
         const unsubscribeAvailable = onSnapshot(availableQuery, (snapshot) => {
             const availableData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Service));
@@ -122,11 +122,11 @@ function ServicesPage() {
             setIsLoading(false);
         });
 
-        // Esta consulta pode precisar de um índice no futuro também.
+        // Consulta para "Meus Serviços", filtrando pelo ID do profissional.
+        // A ordenação foi removida para evitar o erro de índice.
         const myServicesQuery = query(
             collection(db, "schedules"), 
-            where("professionalId", "==", user.uid),
-            orderBy("date", "desc")
+            where("professionalId", "==", user.uid)
         );
         const unsubscribeMyServices = onSnapshot(myServicesQuery, (snapshot) => {
             const myServicesData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Service));
