@@ -21,7 +21,7 @@ exports.createStripeCheckout = functions.https.onCall(async (data, context) => {
     );
   }
 
-  const { servicoId, coupon } = data; // Recebendo o ID do serviço e o código do cupom
+  const { servicoId } = data; 
   const profissionalId = context.auth.uid;
 
   // Busca os dados do serviço no Firestore para calcular a taxa
@@ -67,36 +67,8 @@ exports.createStripeCheckout = functions.https.onCall(async (data, context) => {
         profissionalId: profissionalId,
       },
       customer_email: context.auth.token.email,
+      allow_promotion_codes: true, // Permite que o usuário insira um código de promoção no checkout do Stripe
   };
-
-  // --- LÓGICA DO CUPOM ---
-  if (coupon) {
-      try {
-          const promotionCodes = await stripe.promotionCodes.list({
-              code: coupon.toUpperCase(),
-              active: true,
-              limit: 1,
-          });
-
-          if (promotionCodes.data.length > 0) {
-              checkoutOptions.discounts = [{
-                  promotion_code: promotionCodes.data[0].id,
-              }];
-              console.log(`Cupom '${coupon}' válido aplicado com sucesso.`);
-          } else {
-              throw new functions.https.HttpsError("not-found", "Cupom inválido ou expirado.");
-          }
-      } catch (error) {
-          console.error("Erro ao validar cupom:", error);
-          // Se o cupom for inválido, podemos optar por lançar um erro ou simplesmente ignorá-lo
-          // Lançar um erro é mais transparente para o usuário.
-          if (error.type === 'StripeInvalidRequestError') {
-             throw new functions.https.HttpsError("not-found", "Cupom inválido ou expirado.");
-          }
-          throw new functions.https.HttpsError("internal", "Não foi possível validar o cupom.");
-      }
-  }
-  // --- FIM DA LÓGICA DO CUPOM ---
 
   try {
     const session = await stripe.checkout.sessions.create(checkoutOptions);
@@ -109,6 +81,10 @@ exports.createStripeCheckout = functions.https.onCall(async (data, context) => {
     return { id: session.id };
   } catch (error) {
     console.error("Erro ao criar checkout do Stripe:", error);
+    // Retorna um erro mais informativo para o front-end
+    if (error.code === 'stripe_invalid_request_error' && error.message.includes('promotion_code')) {
+        throw new functions.https.HttpsError("invalid-argument", "O código de cupom fornecido é inválido ou expirou.");
+    }
     throw new functions.https.HttpsError(
       "internal",
       "Não foi possível criar a sessão de pagamento."
@@ -143,6 +119,11 @@ exports.stripeWebhook = functions.https.onRequest(async (req, res) => {
       const professionalDocRef = db.collection("professionals").doc(profissionalId);
 
       const [servicoSnap, professionalSnap] = await Promise.all([servicoRef.get(), professionalDocRef.get()]);
+      
+      if (!professionalSnap.exists()) {
+          console.error(`Webhook: Documento do profissional com ID ${profissionalId} não foi encontrado.`);
+          return res.status(404).send("Documento do profissional não encontrado.");
+      }
       const professionalData = professionalSnap.data();
       
       // Atualiza o documento do serviço no Firestore para liberar o acesso
@@ -243,5 +224,3 @@ exports.stripeWebhook = functions.https.onRequest(async (req, res) => {
 
   res.status(200).send();
 });
-
-    
