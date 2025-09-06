@@ -3,23 +3,25 @@
 
 import withAuth from "@/components/auth/with-auth";
 import { useState, useEffect } from 'react';
-import { db, auth } from '@/lib/firebase';
-import { doc, onSnapshot, DocumentData, updateDoc, getDoc, addDoc, collection } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+import { doc, onSnapshot, DocumentData } from 'firebase/firestore';
 import { useAuth } from '@/hooks/use-auth';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { Loader2, Info, MapPin, Clock, User, Phone, CheckCircle, AlertCircle, Ticket } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { getFunctions, httpsCallable } from "firebase/functions";
 import { loadStripe } from "@stripe/stripe-js";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 
 // --- Configurações Iniciais ---
 const STRIPE_PUBLIC_KEY = process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY;
+if (!STRIPE_PUBLIC_KEY) {
+    console.error("Chave publicável do Stripe não está configurada. Pagamentos não funcionarão.");
+}
 const stripePromise = STRIPE_PUBLIC_KEY ? loadStripe(STRIPE_PUBLIC_KEY) : Promise.resolve(null);
-const functions = getFunctions();
+const CLOUD_FUNCTION_URL = 'https://us-central1-lar-seguro-76fan.cloudfunctions.net/createStripeCheckout';
 
 const InfoRow = ({ icon: Icon, label, value, blurred = false }: { icon: React.ElementType, label: string, value: string | React.ReactNode, blurred?: boolean }) => (
     <div className={`flex items-start gap-3 transition-all duration-300 ${blurred ? 'blur-sm' : ''}`}>
@@ -45,7 +47,6 @@ function ServiceDetailPage() {
     const [hasPaid, setHasPaid] = useState(false);
     const [couponCode, setCouponCode] = useState('');
 
-    // Checa por parâmetros de sucesso/cancelamento do Stripe na URL
     useEffect(() => {
         const paymentStatus = searchParams.get('pagamento');
         if (paymentStatus === 'sucesso') {
@@ -54,7 +55,6 @@ function ServiceDetailPage() {
                 description: 'As informações do serviço foram liberadas.',
                 className: "bg-green-100 border-green-500 text-green-700",
             });
-            // O onSnapshot vai atualizar a UI, mas podemos forçar um estado visual aqui se quisermos
             setHasPaid(true);
         }
         if (paymentStatus === 'cancelado') {
@@ -65,7 +65,6 @@ function ServiceDetailPage() {
             });
         }
     }, [searchParams, toast]);
-
 
     useEffect(() => {
         if (!serviceId || !user) {
@@ -78,16 +77,9 @@ function ServiceDetailPage() {
             if (docSnapshot.exists()) {
                 const serviceData = docSnapshot.data();
                 setService(serviceData);
-
-                // Verifica o status do pagamento
                 const statusPagamento = serviceData.taxa?.statusPagamento;
                 const profissionalResponsavel = serviceData.taxa?.profissionalId;
-                if (statusPagamento === "PAGO" && profissionalResponsavel === user.uid) {
-                    setHasPaid(true);
-                } else {
-                    setHasPaid(false);
-                }
-
+                setHasPaid(statusPagamento === "PAGO" && profissionalResponsavel === user.uid);
             } else {
                 toast({ variant: 'destructive', title: 'Erro', description: 'Serviço não encontrado.' });
                 router.push('/dashboard/services');
@@ -104,21 +96,33 @@ function ServiceDetailPage() {
 
     const handlePagarTaxa = async () => {
         if (!user || !serviceId || !stripePromise) {
-            toast({ variant: 'destructive', title: 'Erro', description: 'O sistema de pagamento não está configurado corretamente.' });
+            toast({ variant: 'destructive', title: 'Erro de Configuração', description: 'O sistema de pagamento não está configurado. Verifique a chave do Stripe.' });
             return;
         }
 
         setIsProcessingPayment(true);
         try {
-            // Chame a Cloud Function para criar a sessão de checkout, passando o cupom
-            const createStripeCheckout = httpsCallable(functions, 'createStripeCheckout');
-            const result: any = await createStripeCheckout({ 
-                servicoId: serviceId,
-                couponCode: couponCode.trim() // Envia o código do cupom
+            const response = await fetch(CLOUD_FUNCTION_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    servicoId: serviceId,
+                    couponCode: couponCode.trim(),
+                    uid: user.uid, // Enviar UID do usuário
+                    email: user.email // Enviar email do usuário
+                }),
             });
-            const sessionId = result.data.id;
 
-            // Redirecione para o checkout do Stripe
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error?.message || 'Falha na comunicação com o servidor.');
+            }
+
+            const session = await response.json();
+            const sessionId = session.id;
+
             const stripe = await stripePromise;
             if (stripe) {
                 const { error } = await stripe.redirectToCheckout({ sessionId });
@@ -139,7 +143,6 @@ function ServiceDetailPage() {
             setIsProcessingPayment(false);
         }
     };
-
 
     if (isLoading || authLoading) {
         return (
