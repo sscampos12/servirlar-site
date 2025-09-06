@@ -25,15 +25,22 @@ import {
   XCircle,
   MessageSquare,
   Eye,
+  Calendar as CalendarIcon,
 } from "lucide-react"
 import { Separator } from "@/components/ui/separator"
 import { useToast } from "@/hooks/use-toast"
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { db } from '@/lib/firebase';
-import { collection, query, where, getDocs, doc, updateDoc, onSnapshot, getDoc, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc, updateDoc, onSnapshot, getDoc, addDoc, serverTimestamp, orderBy } from 'firebase/firestore';
 import { useAuth } from '@/hooks/use-auth';
 import Link from 'next/link';
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+
 
 interface Service {
     id: string;
@@ -51,6 +58,7 @@ interface Service {
     professionalId?: string;
     professionalName?: string;
     chatId?: string;
+    createdAt: any;
 }
 
 
@@ -97,6 +105,7 @@ function ServicesPage() {
     const [availableServices, setAvailableServices] = useState<Service[]>([]);
     const [myServices, setMyServices] = useState<Service[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [selectedDate, setSelectedDate] = useState<Date | undefined>();
 
     useEffect(() => {
         if (!user) {
@@ -106,7 +115,7 @@ function ServicesPage() {
 
         setIsLoading(true);
 
-        const availableQuery = query(collection(db, "schedules"), where("status", "==", "Pendente"));
+        const availableQuery = query(collection(db, "schedules"), where("status", "==", "Pendente"), orderBy("createdAt", "desc"));
         const unsubscribeAvailable = onSnapshot(availableQuery, (snapshot) => {
             const availableData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Service));
             setAvailableServices(availableData);
@@ -124,7 +133,8 @@ function ServicesPage() {
         const myServicesQuery = query(
             collection(db, "schedules"), 
             where("professionalId", "==", user.uid),
-            where("status", "in", ["Confirmado", "Finalizado"])
+            where("status", "in", ["Confirmado", "Finalizado"]),
+            orderBy("date", "desc")
         );
         const unsubscribeMyServices = onSnapshot(myServicesQuery, (snapshot) => {
             const myServicesData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Service));
@@ -153,6 +163,11 @@ function ServicesPage() {
         }
     }
 
+    const filteredAvailableServices = availableServices.filter(service => {
+        if (!selectedDate) return true; // Se nenhuma data for selecionada, mostra todos
+        return service.date === format(selectedDate, 'yyyy-MM-dd');
+    });
+
   return (
     <div className="flex flex-col gap-6">
         <h1 className="font-headline text-lg font-semibold md:text-2xl">
@@ -168,16 +183,40 @@ function ServicesPage() {
                     <CardHeader>
                         <CardTitle className="font-headline">Marketplace de Serviços</CardTitle>
                         <CardDescription>
-                            Visualize os serviços disponíveis. Pague a taxa para ver os detalhes e contatar o cliente.
+                            Visualize os serviços disponíveis, ordedenados dos mais recentes para os mais antigos. Use o filtro para ver os serviços de uma data específica.
                         </CardDescription>
+                         <div className="pt-4">
+                            <Popover>
+                                <PopoverTrigger asChild>
+                                <Button
+                                    variant={"outline"}
+                                    className={cn(
+                                    "w-[280px] justify-start text-left font-normal",
+                                    !selectedDate && "text-muted-foreground"
+                                    )}
+                                >
+                                    <CalendarIcon className="mr-2 h-4 w-4" />
+                                    {selectedDate ? format(selectedDate, "PPP", { locale: ptBR }) : <span>Filtrar por data...</span>}
+                                </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-auto p-0">
+                                <Calendar
+                                    mode="single"
+                                    selected={selectedDate}
+                                    onSelect={setSelectedDate}
+                                    initialFocus
+                                />
+                                </PopoverContent>
+                            </Popover>
+                         </div>
                     </CardHeader>
                     <CardContent className="space-y-6">
                         {isLoading ? (
                              <div className="flex justify-center items-center h-48">
                                 <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
                             </div>
-                        ) : availableServices.length > 0 ? (
-                            availableServices
+                        ) : filteredAvailableServices.length > 0 ? (
+                            filteredAvailableServices
                             .map(service => (
                                 <ServiceCard 
                                     key={service.id} 
@@ -186,7 +225,7 @@ function ServicesPage() {
                             ))
                         ) : (
                             <div className="text-center text-muted-foreground p-8">
-                                Nenhum serviço disponível no momento. Volte em breve!
+                                Nenhum serviço disponível para a data selecionada.
                             </div>
                         )}
                     </CardContent>
