@@ -169,14 +169,44 @@ exports.stripeWebhook = functions.https.onRequest(async (req, res) => {
                 to: servicoData.clientEmail,
                 subject: `Confirmado: Um profissional aceitou seu serviço de ${servicoData.service}!`,
                 html: `
-                    <h1>Olá, ${servicoData.clientName}!</h1>
-                    <p>Temos uma ótima notícia! O profissional <strong>${professionalData.fullName}</strong> aceitou seu agendamento para o serviço de <strong>${servicoData.service}</strong>.</p>
-                    <p>Ele(a) recebeu seus detalhes de contato e deve se comunicar em breve para confirmar tudo.</p>
-                    <p><strong>Contato do profissional:</strong> ${professionalData.phone}</p>
-                    <p>Para ver os detalhes do seu agendamento, acesse sua conta em nossa plataforma.</p>
-                    <br>
-                    <p>Atenciosamente,</p>
-                    <p>Equipe ServirLar</p>
+                    <!DOCTYPE html>
+                    <html lang="pt-BR">
+                    <head>
+                        <meta charset="UTF-8">
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                        <style>
+                            body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; margin: 0; padding: 0; background-color: #f4f4f7; }
+                            .container { max-width: 600px; margin: 20px auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; border: 1px solid #e2e8f0; }
+                            .header { background-color: #4A90E2; padding: 20px; text-align: center; }
+                            .header img { max-width: 150px; }
+                            .content { padding: 30px; line-height: 1.6; color: #333; }
+                            .content h1 { color: #1e293b; font-size: 24px; }
+                            .content p { font-size: 16px; margin-bottom: 20px; }
+                            .button { display: inline-block; background-color: #50E3C2; color: #1e293b; padding: 12px 25px; border-radius: 5px; text-decoration: none; font-weight: bold; }
+                            .footer { background-color: #f1f5f9; padding: 20px; text-align: center; font-size: 12px; color: #64748b; }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="container">
+                            <div class="header">
+                                <img src="https://i.postimg.cc/dQWcQ6kF/logo-oficial-5.png" alt="ServirLar Logo">
+                            </div>
+                            <div class="content">
+                                <h1>Olá, ${servicoData.clientName}!</h1>
+                                <p>Temos uma ótima notícia! O profissional <strong>${professionalData.fullName}</strong> aceitou seu agendamento para o serviço de <strong>${servicoData.service}</strong>.</p>
+                                <p>Ele(a) recebeu seus detalhes de contato e deve se comunicar em breve para confirmar tudo.</p>
+                                <p><strong>Contato do profissional:</strong> ${professionalData.phone}</p>
+                                <p style="text-align: center; margin-top: 30px;">
+                                    <a href="https://lar-seguro-76fan.web.app/dashboard/my-account" class="button">Ver meu Agendamento</a>
+                                </p>
+                                <p>Atenciosamente,<br>Equipe ServirLar</p>
+                            </div>
+                            <div class="footer">
+                                <p>&copy; ${new Date().getFullYear()} ServirLar. Todos os direitos reservados.</p>
+                            </div>
+                        </div>
+                    </body>
+                    </html>
                 `
             };
             
@@ -198,17 +228,51 @@ exports.stripeWebhook = functions.https.onRequest(async (req, res) => {
                 to: professionalData.email,
                 subject: `Serviço atribuído: ${servicoData.service}`,
                 html: `
-                    <h1>Olá, ${professionalData.fullName}!</h1>
-                    <p>Confirmamos o pagamento da taxa para o serviço do cliente <strong>${servicoData.clientName}</strong>. Este serviço agora é seu!</p>
-                    <p>Os detalhes completos do cliente e do serviço agora estão disponíveis no seu painel. É importante entrar em contato com o cliente para confirmar os detalhes.</p>
-                    <h3>Detalhes do Cliente:</h3>
-                    <ul>
-                        <li><strong>Nome:</strong> ${servicoData.clientName}</li>
-                        <li><strong>Telefone:</strong> ${servicoData.clientPhone}</li>
-                        <li><strong>Endereço:</strong> ${servicoData.address}</li>
-                    </ul>
-                    <p>Bom trabalho!</p>
-                    <p>Equipe ServirLar</p>
+                    <!DOCTYPE html>
+                    <html lang="pt-BR">
+                    <head>
+                        <meta charset="UTF-8">
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                        <style>
+                            body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; margin: 0; padding: 0; background-color: #f4f4f7; }
+                            .container { max-width: 600px; margin: 20px auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; border: 1px solid #e2e8f0; }
+                            .header { background-color: #4A90E2; padding: 20px; text-align: center; }
+                            .header img { max-width: 150px; }
+                            .content { padding: 30px; line-height: 1.6; color: #333; }
+                            .content h1 { color: #1e293b; font-size: 24px; }
+                            .content p { font-size: 16px; margin-bottom: 20px; }
+                            .content ul { list-style-type: none; padding: 0; margin-bottom: 20px; border-left: 3px solid #50E3C2; padding-left: 20px;}
+                            .content li { margin-bottom: 10px; }
+                            .button { display: inline-block; background-color: #50E3C2; color: #1e293b; padding: 12px 25px; border-radius: 5px; text-decoration: none; font-weight: bold; }
+                            .footer { background-color: #f1f5f9; padding: 20px; text-align: center; font-size: 12px; color: #64748b; }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="container">
+                            <div class="header">
+                                <img src="https://i.postimg.cc/dQWcQ6kF/logo-oficial-5.png" alt="ServirLar Logo">
+                            </div>
+                            <div class="content">
+                                <h1>Olá, ${professionalData.fullName}!</h1>
+                                <p>Confirmamos o pagamento da taxa para o serviço do cliente <strong>${servicoData.clientName}</strong>. Este serviço agora é seu!</p>
+                                <p>Os detalhes completos do cliente e do serviço agora estão disponíveis no seu painel. É importante entrar em contato com o cliente para confirmar os detalhes.</p>
+                                <h3>Detalhes do Cliente:</h3>
+                                <ul>
+                                    <li><strong>Nome:</strong> ${servicoData.clientName}</li>
+                                    <li><strong>Telefone:</strong> ${servicoData.clientPhone}</li>
+                                    <li><strong>Endereço:</strong> ${servicoData.address}</li>
+                                </ul>
+                                <p style="text-align: center; margin-top: 30px;">
+                                    <a href="https://lar-seguro-76fan.web.app/dashboard/services" class="button">Ver Meus Serviços</a>
+                                </p>
+                                <p>Bom trabalho!<br>Equipe ServirLar</p>
+                            </div>
+                            <div class="footer">
+                                <p>&copy; ${new Date().getFullYear()} ServirLar. Todos os direitos reservados.</p>
+                            </div>
+                        </div>
+                    </body>
+                    </html>
                 `
             };
             try {
@@ -234,4 +298,5 @@ exports.stripeWebhook = functions.https.onRequest(async (req, res) => {
   res.status(200).send();
 });
 
+    
     
