@@ -72,6 +72,19 @@ export default function ProviderInitialRegistrationPage() {
 
       await setDoc(doc(db, "professionals", user.uid), professionalData);
 
+      // Create a document in the general 'users' collection as well
+      const genericUserData: any = {
+        uid: user.uid,
+        email: user.email,
+        name: fullName,
+        role: 'professional'
+      };
+       if (refCode.trim() !== '') {
+          genericUserData.referredBy = refCode.trim().toUpperCase();
+      }
+      await setDoc(doc(db, "users", user.uid), genericUserData);
+
+
       toast({
         title: "Conta Criada!",
         description: "Agora complete seu perfil para começar a receber propostas.",
