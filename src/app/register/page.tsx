@@ -38,7 +38,7 @@ export default function RegisterTypePage() {
                 <span className="text-xs font-normal text-primary-foreground/80">Quero contratar serviços.</span>
               </Link>
             </Button>
-            <Button asChild size="lg" variant="secondary" className="h-28 text-base flex-col gap-2">
+            <Button asChild size="lg" variant="secondary" className="h-28 text-base flex-col gap-2 bg-accent text-accent-foreground hover:bg-accent/90">
               <Link href="/register/provider">
                 <Briefcase className="h-6 w-6" />
                 <span>Sou Profissional</span>
