@@ -5,14 +5,11 @@ const stripe = require("stripe")(functions.config().stripe.secret);
 const fetch = require("node-fetch");
 const cors = require("cors")({ origin: true });
 
-admin.initializeApp();
+if (!admin.apps.length) {
+    admin.initializeApp();
+}
 const db = admin.firestore();
 
-/**
- * Cria uma sessão de checkout no Stripe para o profissional pagar a taxa de 25%.
- * É chamada pelo frontend quando o profissional clica em "Pagar Taxa".
- * Agora inclui lógica para aplicar cupons de desconto.
- */
 exports.createStripeCheckout = functions.https.onRequest((req, res) => {
   cors(req, res, async () => {
     if (req.method !== 'POST') {
@@ -69,7 +66,6 @@ exports.createStripeCheckout = functions.https.onRequest((req, res) => {
               profissionalId: profissionalId,
             },
             customer_email: email,
-            allow_promotion_codes: true,
         };
 
         if (couponCode) {
@@ -86,6 +82,8 @@ exports.createStripeCheckout = functions.https.onRequest((req, res) => {
             } else {
                 return res.status(400).json({ error: { message: "O código de cupom fornecido é inválido ou expirou." } });
             }
+        } else {
+            checkoutOptions.allow_promotion_codes = true;
         }
 
         const session = await stripe.checkout.sessions.create(checkoutOptions);
@@ -235,3 +233,5 @@ exports.stripeWebhook = functions.https.onRequest(async (req, res) => {
 
   res.status(200).send();
 });
+
+    
