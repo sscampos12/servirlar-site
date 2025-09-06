@@ -1,4 +1,3 @@
-
 "use client"
 
 import withAuth from "@/components/auth/with-auth";
@@ -21,6 +20,7 @@ import {
   Loader2,
   MessageSquare,
   Eye,
+  User,
 } from "lucide-react"
 import { Separator } from "@/components/ui/separator"
 import { useToast } from "@/hooks/use-toast"
@@ -130,6 +130,7 @@ function ServicesPage() {
         );
         const unsubscribeMyServices = onSnapshot(myServicesQuery, (snapshot) => {
             const myServicesData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Service));
+            myServicesData.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
             setMyServices(myServicesData);
         }, (error) => {
             console.error("Error fetching my services:", error);
@@ -249,5 +250,3 @@ function ServicesPage() {
 
 
 export default withAuth(ServicesPage, ['professional']);
-
-    
