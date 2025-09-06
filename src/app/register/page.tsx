@@ -4,15 +4,29 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { MarketingLayout } from '@/components/marketing-layout';
 import { User, Briefcase } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function RegisterTypePage() {
   return (
-    <MarketingLayout>
-      <div className="container mx-auto py-20 px-4 flex items-center justify-center min-h-[calc(100vh-8rem)]">
-        <Card className="max-w-md w-full text-center">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        <div className="text-center mb-8">
+          <Link href="/" className="inline-flex items-center space-x-2 mb-6">
+              <Image 
+                src="https://i.postimg.cc/mD4p2yDs/logo-oficial-2.png"
+                alt="ServirLar Logo"
+                width={180}
+                height={40}
+              />
+          </Link>
+          <h2 className="text-2xl font-bold text-gray-800 mb-2 font-headline">Crie sua Conta</h2>
+          <p className="text-gray-600">Junte-se à nossa comunidade</p>
+        </div>
+
+        <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
           <CardHeader>
-            <CardTitle className="font-headline text-3xl">Como você quer se cadastrar?</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-2xl text-center">Como você quer se cadastrar?</CardTitle>
+            <CardDescription className="text-center">
               Escolha o tipo de perfil que melhor descreve você.
             </CardDescription>
           </CardHeader>
@@ -34,6 +48,6 @@ export default function RegisterTypePage() {
           </CardContent>
         </Card>
       </div>
-    </MarketingLayout>
+    </div>
   );
 }
