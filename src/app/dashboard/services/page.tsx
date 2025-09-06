@@ -1,4 +1,3 @@
-
 "use client"
 
 import withAuth from "@/components/auth/with-auth";
@@ -64,9 +63,12 @@ const InfoRow = ({ icon: Icon, label, value }: { icon: React.ElementType, label:
 
 const ServiceCard = ({ service }: { service: Service }) => {
   return (
-    <Card className={`transition-all duration-300`}>
+    <Card className={`transition-all duration-300 ${service.status !== 'Pendente' ? 'opacity-50 bg-muted/50' : ''}`}>
       <CardHeader>
-        <CardTitle className="font-headline text-lg">{service.service}</CardTitle>
+        <div className="flex justify-between items-start">
+            <CardTitle className="font-headline text-lg">{service.service}</CardTitle>
+            <Badge variant={service.status === 'Pendente' ? 'secondary' : 'outline'}>{service.status}</Badge>
+        </div>
         <CardDescription>{new Date(service.date).toLocaleDateString('pt-BR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' })}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -77,10 +79,10 @@ const ServiceCard = ({ service }: { service: Service }) => {
         <InfoRow icon={DollarSign} label="Valor do Serviço" value={<span className="text-lg font-bold text-primary">R$ {service.value.toFixed(2).replace('.', ',')}</span>} />
       </CardContent>
       <CardFooter className="flex justify-end gap-2">
-            <Button asChild size="sm">
+            <Button asChild size="sm" disabled={service.status !== 'Pendente'}>
                 <Link href={`/dashboard/services/${service.id}`}>
                     <Eye className="h-4 w-4 mr-2" />
-                    Ver Detalhes e Pagar Taxa
+                    {service.status === 'Pendente' ? 'Ver Detalhes e Pagar Taxa' : 'Detalhes Indisponíveis'}
                 </Link>
             </Button>
       </CardFooter>
@@ -102,8 +104,10 @@ function ServicesPage() {
         }
 
         setIsLoading(true);
-
-        const availableQuery = query(collection(db, "schedules"), where("status", "==", "Pendente"), orderBy("createdAt", "desc"));
+        
+        // CORREÇÃO: Removido o 'where' para evitar o erro de índice. 
+        // A filtragem visual será feita no card.
+        const availableQuery = query(collection(db, "schedules"), orderBy("createdAt", "desc"));
         const unsubscribeAvailable = onSnapshot(availableQuery, (snapshot) => {
             const availableData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Service));
             setAvailableServices(availableData);
@@ -118,10 +122,10 @@ function ServicesPage() {
             setIsLoading(false);
         });
 
+        // Esta consulta pode precisar de um índice no futuro também.
         const myServicesQuery = query(
             collection(db, "schedules"), 
             where("professionalId", "==", user.uid),
-            where("status", "in", ["Confirmado", "Finalizado"]),
             orderBy("date", "desc")
         );
         const unsubscribeMyServices = onSnapshot(myServicesQuery, (snapshot) => {
@@ -245,3 +249,5 @@ function ServicesPage() {
 
 
 export default withAuth(ServicesPage, ['professional']);
+
+    
