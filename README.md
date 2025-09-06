@@ -10,14 +10,15 @@ Siga os passos abaixo no seu computador local.
 
 ### Passo 1: Tenha o Código no seu Computador
 
-Certifique-se de que você tem a versão mais recente do código do seu projeto salva em uma pasta no seu computador.
+Certifique-se de que você tem a versão mais recente do código do seu projeto salva em uma pasta no seu computador. Se você ainda não tem o código localmente, procure a opção de **Download** ou **Exportar como ZIP** na interface do Firebase Studio e descompacte o projeto em um local de sua preferência.
 
 ### Passo 2: Abra o Terminal na Pasta do Projeto
 
-Use o comando `cd` para navegar até a pasta onde você salvou o projeto.
+Use o comando `cd` para navegar até a pasta onde você salvou e descompactou o projeto.
 
 **Exemplo (Windows PowerShell):**
 ```powershell
+# Substitua "C:\caminho\para\seu\projeto\servirlar" pelo caminho real da pasta
 cd C:\caminho\para\seu\projeto\servirlar
 ```
 
