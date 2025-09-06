@@ -17,22 +17,17 @@ import {
   Clock,
   MapPin,
   DollarSign,
-  User,
   Info,
-  ThumbsUp,
   Loader2,
-  CheckCircle,
-  XCircle,
   MessageSquare,
   Eye,
-  Calendar as CalendarIcon,
 } from "lucide-react"
 import { Separator } from "@/components/ui/separator"
 import { useToast } from "@/hooks/use-toast"
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { db } from '@/lib/firebase';
-import { collection, query, where, getDocs, doc, updateDoc, onSnapshot, getDoc, addDoc, serverTimestamp, orderBy } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, orderBy } from 'firebase/firestore';
 import { useAuth } from '@/hooks/use-auth';
 import Link from 'next/link';
 
